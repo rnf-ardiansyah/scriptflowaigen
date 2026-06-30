@@ -1,27 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
   ArrowLeft,
   Sparkles,
   Loader2,
   Play,
-  Save,
   RotateCcw,
   Pencil,
+  AlertTriangle,
+  Crown,
 } from "lucide-react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
 import { NICHES } from "@/lib/niches";
-import {
-  profileQuery,
-  createScript,
-  computeReadingTime,
-  buildFullScript,
-} from "@/lib/scripts";
+import { profileQuery, computeReadingTime } from "@/lib/scripts";
+import { generateScript } from "@/lib/ai.functions";
 
 export const Route = createFileRoute("/_authenticated/generator")({
   head: () => ({
@@ -40,79 +38,21 @@ const STYLES = ["Hook style", "Story style", "Listicle"] as const;
 type Style = (typeof STYLES)[number];
 
 type Sections = { hook: string; retain: string; reward: string; cta: string };
-type Phase = "idle" | "generating" | "done";
+type Phase = "idle" | "generating" | "done" | "limit_reached" | "error";
 
-// ---------- Dummy generator ----------
-function buildDummyScript({
-  idea,
-  niche,
-  duration,
-  style,
-}: {
-  idea: string;
-  niche: string;
-  duration: Duration;
-  style: Style;
-}): Sections {
-  const i = idea.trim().replace(/[.?!]+$/, "");
-  const longer = duration >= 60;
-  const longest = duration >= 90;
-
-  if (style === "Listicle") {
-    return {
-      hook: `Stop scroll! Ini ${longest ? "5" : longer ? "4" : "3"} hal tentang "${i}" yang jarang dibahas creator ${niche.toLowerCase()}.`,
-      retain: [
-        `Pertama, kebanyakan orang langsung loncat ke teknis, padahal hal paling penting soal "${i}" justru ada di mindset awal.`,
-        longer
-          ? `Kedua, ada pola yang berulang — dan kalau kamu sadar polanya, kamu bisa hindari kesalahan yang bikin progress kamu stuck berbulan-bulan.`
-          : "",
-        longest
-          ? `Ketiga, ada satu trik kecil yang sering diabaikan tapi efeknya gede banget — aku jelasin di bagian akhir.`
-          : "",
-      ]
-        .filter(Boolean)
-        .join(" "),
-      reward: `Intinya: kalau kamu konsisten apply tiga hal ini ke "${i}", hasilnya bakal kelihatan dalam 2–3 minggu. Banyak yang udah buktiin di niche ${niche.toLowerCase()}.`,
-      cta: `Save video ini biar nggak lupa, dan follow buat tips ${niche.toLowerCase()} tiap minggu. Mana yang paling kamu butuhin? Tulis di komen.`,
-    };
+function classifyError(err: unknown): {
+  kind: "rate_limited" | "script_limit_reached" | "other";
+  message: string;
+} {
+  const raw = err instanceof Error ? err.message : String(err ?? "");
+  const code = (err as { lovable?: { code?: string } } | null)?.lovable?.code;
+  if (code === "rate_limited" || /kuota harian/i.test(raw)) {
+    return { kind: "rate_limited", message: raw };
   }
-
-  if (style === "Story style") {
-    return {
-      hook: `Dulu aku juga mikir "${i}" itu ribet — sampai akhirnya satu kejadian ngubah cara pandang aku 180 derajat.`,
-      retain: [
-        `Waktu itu aku coba semua tutorial random di internet. Hasilnya? Nol. Sampai aku nemu satu pendekatan sederhana yang ternyata dipakai banyak creator ${niche.toLowerCase()} sukses.`,
-        longer
-          ? `Yang bikin beda bukan tool-nya, bukan budget-nya — tapi cara mereka mikirin audiens dari detik pertama video.`
-          : "",
-        longest
-          ? `Aku tes pendekatan ini selama sebulan, dan reach video aku naik konsisten tanpa harus posting tiap hari.`
-          : "",
-      ]
-        .filter(Boolean)
-        .join(" "),
-      reward: `Jadi pelajarannya: "${i}" bukan soal seberapa keras kamu kerja, tapi seberapa tepat kamu eksekusi prinsip dasarnya.`,
-      cta: `Kalau kamu pernah ngalamin hal yang sama, share di komen. Follow buat cerita ${niche.toLowerCase()} lainnya setiap Selasa & Jumat.`,
-    };
+  if (code === "script_limit_reached" || /batas 20 script/i.test(raw)) {
+    return { kind: "script_limit_reached", message: raw };
   }
-
-  // Hook style (default)
-  return {
-    hook: `Stop scroll dulu — kalau kamu pernah mikirin "${i}", video ini wajib kamu tonton sampai habis.`,
-    retain: [
-      `Karena 90% orang yang ngebahas "${i}" cuma nyentuh permukaannya doang. Aku bakal kasih kamu kerangka berpikir yang langsung bisa kamu pakai hari ini di konten ${niche.toLowerCase()} kamu.`,
-      longer
-        ? `Dan ini bukan teori — ini hal yang udah aku tes berkali-kali di akun aku sendiri dan akun temen-temen creator.`
-        : "",
-      longest
-        ? `Aku juga bakal kasih tau satu kesalahan paling umum yang bikin video kamu gagal nge-hook, biar kamu nggak ulangin lagi.`
-        : "",
-    ]
-      .filter(Boolean)
-      .join(" "),
-    reward: `Kuncinya simpel: fokus di 3 detik pertama, kasih alasan kuat buat stay, lalu kasih payoff yang bikin penonton mau share. Itu rumus dasar yang works buat "${i}".`,
-    cta: `Like kalau ini membantu, dan follow buat breakdown ${niche.toLowerCase()} lainnya. Komen "next" biar aku tau topik mana yang mau kamu bahas berikutnya.`,
-  };
+  return { kind: "other", message: raw || "Terjadi kesalahan tak terduga." };
 }
 
 function GeneratorPage() {
@@ -129,110 +69,95 @@ function GeneratorPage() {
   const [filled, setFilled] = useState<Set<keyof Sections>>(new Set());
   const [elapsed, setElapsed] = useState(0);
   const [scriptId, setScriptId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const timerRef = useRef<number | null>(null);
-  const fillTimeouts = useRef<number[]>([]);
+  const generate = useServerFn(generateScript);
 
   useEffect(() => {
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
-      fillTimeouts.current.forEach((t) => window.clearTimeout(t));
     };
   }, []);
 
+  function stopTimer() {
+    if (timerRef.current) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }
+
   function reset() {
-    if (timerRef.current) window.clearInterval(timerRef.current);
-    fillTimeouts.current.forEach((t) => window.clearTimeout(t));
-    fillTimeouts.current = [];
+    stopTimer();
     setPhase("idle");
     setResult(null);
     setFilled(new Set());
     setElapsed(0);
     setScriptId(null);
+    setErrorMessage("");
   }
 
-  function handleGenerate() {
-    if (idea.trim().length < 3) {
+  async function handleGenerate() {
+    const trimmedIdea = idea.trim();
+    if (trimmedIdea.length < 3) {
       toast.error("Tulis ide kontennya dulu (minimal 3 karakter).");
       return;
     }
+
     // reset previous run
-    fillTimeouts.current.forEach((t) => window.clearTimeout(t));
-    fillTimeouts.current = [];
+    stopTimer();
     setScriptId(null);
+    setResult(null);
     setFilled(new Set());
     setElapsed(0);
+    setErrorMessage("");
     setPhase("generating");
-
-    const final = buildDummyScript({ idea: idea.trim(), niche, duration, style });
-    setResult(final);
 
     const start = performance.now();
     timerRef.current = window.setInterval(() => {
       setElapsed((performance.now() - start) / 1000);
     }, 100);
 
-    const order: (keyof Sections)[] = ["hook", "retain", "reward", "cta"];
-    order.forEach((key, idx) => {
-      const t = window.setTimeout(
-        () => {
-          setFilled((prev) => {
-            const next = new Set(prev);
-            next.add(key);
-            return next;
-          });
-          if (idx === order.length - 1) {
-            if (timerRef.current) {
-              window.clearInterval(timerRef.current);
-              timerRef.current = null;
-            }
-            setPhase("done");
-          }
-        },
-        700 + idx * 750,
-      );
-      fillTimeouts.current.push(t);
-    });
-  }
-
-  async function handleSave() {
-    if (!result) return;
-    setSaving(true);
     try {
-      const trimmedIdea = idea.trim();
-      const title =
-        trimmedIdea.length > 60 ? `${trimmedIdea.slice(0, 60)}…` : trimmedIdea;
-      const full_script = buildFullScript(result);
-      const reading_time = computeReadingTime(result);
-      const created = await createScript({
-        title,
-        idea: trimmedIdea,
-        niche,
-        tone: style,
-        hook: result.hook,
-        retain: result.retain,
-        reward: result.reward,
-        cta: result.cta,
-        full_script,
-        reading_time,
+      const res = await generate({
+        data: { idea: trimmedIdea, niche, tone: style },
       });
-      setScriptId(created.id);
+      stopTimer();
+      setResult({
+        hook: res.hook,
+        retain: res.retain,
+        reward: res.reward,
+        cta: res.cta,
+      });
+      setFilled(new Set(["hook", "retain", "reward", "cta"]));
+      setScriptId(res.scriptId);
+      setPhase("done");
       qc.invalidateQueries({ queryKey: ["scripts"] });
-      toast.success("Script disimpan ke Library ✨");
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Gagal menyimpan";
-      if (msg.includes("free_plan_script_limit_reached")) {
-        toast.error("Library penuh — upgrade ke Premium untuk menyimpan lebih banyak.");
+      qc.invalidateQueries({ queryKey: ["quota"] });
+      qc.invalidateQueries({ queryKey: ["generations"] });
+      if (res.cached) {
+        toast.success("Pakai hasil tersimpan (cache) — kuota tidak terpotong.");
       } else {
-        toast.error(msg);
+        toast.success("Script berhasil dibuat ✨");
       }
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      stopTimer();
+      const classified = classifyError(err);
+      if (
+        classified.kind === "rate_limited" ||
+        classified.kind === "script_limit_reached"
+      ) {
+        setPhase("limit_reached");
+        setErrorMessage(classified.message);
+      } else {
+        setPhase("error");
+        setErrorMessage(classified.message);
+      }
     }
   }
 
   const totalReadSec = result ? computeReadingTime(result) : 0;
+
 
   return (
     <AppLayout>
@@ -356,7 +281,7 @@ function GeneratorPage() {
         </Card>
 
         {/* Result / Skeleton */}
-        {phase !== "idle" && result && (
+        {(phase === "generating" || phase === "done") && (
           <Card className="mt-6 space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -385,72 +310,106 @@ function GeneratorPage() {
 
             <SectionBlock
               label="Hook"
-              text={result.hook}
+              text={result?.hook ?? ""}
               ready={filled.has("hook")}
               lines={2}
             />
             <SectionBlock
               label="Retain"
-              text={result.retain}
+              text={result?.retain ?? ""}
               ready={filled.has("retain")}
               lines={4}
             />
             <SectionBlock
               label="Reward"
-              text={result.reward}
+              text={result?.reward ?? ""}
               ready={filled.has("reward")}
               lines={3}
             />
             <SectionBlock
               label="CTA"
-              text={result.cta}
+              text={result?.cta ?? ""}
               ready={filled.has("cta")}
               lines={2}
             />
 
-            {phase === "done" && (
+            {phase === "done" && scriptId && (
               <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-muted-foreground">
                   Estimasi durasi:{" "}
                   <span className="font-medium text-foreground">~{totalReadSec} detik</span>
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {scriptId ? (
-                    <Button asChild variant="secondary">
-                      <Link to="/editor/$scriptId" params={{ scriptId }}>
-                        <Pencil className="h-4 w-4" /> Buka di Editor
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button onClick={handleSave} disabled={saving}>
-                      {saving ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                      Save to Library
-                    </Button>
-                  )}
-                  {scriptId ? (
-                    <Button asChild>
-                      <Link to="/teleprompter/$scriptId" params={{ scriptId }}>
-                        <Play className="h-4 w-4" /> Open Teleprompter
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button
-                      disabled
-                      title="Simpan dulu untuk membuka Teleprompter"
-                      className="cursor-not-allowed opacity-50"
-                    >
+                  <Button asChild variant="secondary">
+                    <Link to="/editor/$scriptId" params={{ scriptId }}>
+                      <Pencil className="h-4 w-4" /> Buka di Editor
+                    </Link>
+                  </Button>
+                  <Button asChild>
+                    <Link to="/teleprompter/$scriptId" params={{ scriptId }}>
                       <Play className="h-4 w-4" /> Open Teleprompter
-                    </Button>
-                  )}
+                    </Link>
+                  </Button>
                 </div>
               </div>
             )}
           </Card>
         )}
+
+        {phase === "limit_reached" && (
+          <Card className="mt-6 space-y-4 border-amber-500/30 bg-amber-500/5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-500">
+                <Crown className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold">Limit harian tercapai</h3>
+                <p className="text-sm text-muted-foreground">
+                  {errorMessage ||
+                    "Kamu sudah mencapai batas generate hari ini."}{" "}
+                  Upgrade ke Premium untuk lanjut bikin script tanpa batas harian
+                  yang ketat.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild>
+                <Link to="/upgrade">
+                  <Crown className="h-4 w-4" /> Upgrade ke Premium
+                </Link>
+              </Button>
+              <Button variant="ghost" onClick={reset}>
+                Tutup
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {phase === "error" && (
+          <Card className="mt-6 space-y-4 border-destructive/30 bg-destructive/5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold">Gagal membuat script</h3>
+                <p className="text-sm text-muted-foreground">
+                  {errorMessage ||
+                    "Terjadi kesalahan saat menghubungi AI. Coba lagi sebentar."}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handleGenerate}>
+                <RotateCcw className="h-4 w-4" /> Coba Lagi
+              </Button>
+              <Button variant="ghost" onClick={reset}>
+                Tutup
+              </Button>
+            </div>
+          </Card>
+        )}
+
       </div>
     </AppLayout>
   );
