@@ -1,22 +1,16 @@
 ## Goal
-Ganti logo ScriptFlow di Navbar (landing + AppLayout) pakai 2 gambar yang diupload, dengan background dihapus jadi transparan.
+Recolor logo ikon + wordmark agar selaras dengan palet brand ScriptFlow (electric blue/navy), bukan gradient biru→ungu seperti versi asli.
+
+## Approach
+Pakai `imagegen--edit_image` untuk re-color kedua aset, menjaga bentuk persis sama, hanya ganti palet warnanya ke gradient **electric blue → deep navy blue** (mengikuti token `--electric` di `src/styles.css`, sekitar `#3B82F6` → `#1E40AF`). Tidak ada ungu/violet lagi.
 
 ## Steps
-
-1. **Proses background removal** untuk kedua gambar pakai `imagegen--edit_image` dengan `transparent_background: true`:
-   - `ChatGPT_Image_Jun_30_2026_08_53_10_PM.png` (ikon SF) → `src/assets/logo-icon.png`
-   - `ChatGPT_Image_Jun_30_2026_08_51_45_PM.png` (wordmark ScriptFlow) → `src/assets/logo-wordmark.png`
-
-2. **Upload ke Lovable Assets CDN** via `lovable-assets create` → simpan pointer `.asset.json` di `src/assets/`, lalu hapus PNG mentahnya.
-
-3. **Update `src/components/landing/Logo.tsx`**:
-   - Hapus SVG ikon & teks "ScriptFlow" hardcoded.
-   - Render `<img>` ikon SF (h-8 w-8) + `<img>` wordmark ScriptFlow (h-6 auto width).
-   - Tetap pakai props `className` agar bisa override sizing.
-   - Tambahkan `alt="ScriptFlow"` untuk aksesibilitas.
-
-4. **Verifikasi** Logo dipakai di `Navbar.tsx` (landing), `AppLayout.tsx` (header dashboard), `AuthLayout.tsx` (kalau ada) — semua otomatis ikut update karena pakai komponen `Logo` yang sama. Tidak perlu ubah file lain.
+1. Edit `/tmp/logo-icon.png` (versi transparan yang sudah ada) dengan prompt recolor: pertahankan bentuk SF persis, ganti gradient jadi electric blue (#3B82F6) ke deep blue (#1E40AF), background transparan.
+2. Sama untuk `/tmp/logo-wordmark.png`: recolor wordmark "ScriptFlow" ke gradient electric blue → deep blue.
+3. Crop ke bounding box, upload ulang ke Lovable Assets CDN, dan **timpa** pointer `src/assets/logo-icon.png.asset.json` & `src/assets/logo-wordmark.png.asset.json` (URL berubah karena asset ID baru).
+4. Hapus pointer lama dulu via `lovable-assets delete` agar tidak meninggalkan asset yatim.
+5. Tidak perlu sentuh `Logo.tsx` — pointer di-import dengan path yang sama.
 
 ## Catatan
-- Karena wordmark adalah gambar gradient biru-ungu, tampilan akan sama di dark & light mode (kontras tetap oke di kedua mode karena warna logo cukup vivid). Tidak diperlukan variant per-tema.
-- Tinggi ikon ~32px dan wordmark ~24px supaya pas dengan navbar h-16.
+- Gradient electric blue cocok di dark mode (background navy) dan tetap kontras cukup di light mode.
+- Kalau hasil recolor kurang pas (mis. bentuk berubah), saya iterasi sekali lagi sebelum upload.
