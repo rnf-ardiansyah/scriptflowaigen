@@ -130,8 +130,10 @@ function LibraryPage() {
               Cari, atur, dan buka ulang script yang sudah kamu buat.
             </p>
           </div>
-          <Button size="lg" onClick={handleCreate}>
-            <FilePlus className="h-4 w-4" /> Buat Script Baru
+          <Button asChild size="lg">
+            <Link to="/new-script">
+              <FilePlus className="h-4 w-4" /> Buat Script Baru
+            </Link>
           </Button>
         </div>
 
