@@ -1,16 +1,31 @@
 ## Goal
-Recolor logo ikon + wordmark agar selaras dengan palet brand ScriptFlow (electric blue/navy), bukan gradient biru→ungu seperti versi asli.
+Audit & rapikan responsiveness landing page + sisa app pages supaya nyaman di semua breakpoint: small phone (360px), large phone (414px), tablet (768px), iPad (1024px), laptop (1280px+), dan ultra-wide.
 
-## Approach
-Pakai `imagegen--edit_image` untuk re-color kedua aset, menjaga bentuk persis sama, hanya ganti palet warnanya ke gradient **electric blue → deep navy blue** (mengikuti token `--electric` di `src/styles.css`, sekitar `#3B82F6` → `#1E40AF`). Tidak ada ungu/violet lagi.
+## Findings dari audit cepat
+- Landing pakai `px-6` di mana-mana → terlalu rapat di phone <380px. Standarkan ke `px-4 sm:px-6 lg:px-8`.
+- `Hero.tsx` headline `text-5xl md:text-6xl lg:text-[68px]` → 48px masih besar untuk 360px screen. Turunkan jadi `text-4xl sm:text-5xl md:text-6xl lg:text-[68px]`.
+- `Hero` CTA buttons: pastikan tombol "Start Free" + secondary stack vertikal full-width di mobile.
+- `FinalCTA.tsx` padding `p-12 md:p-16` → terlalu jumbo di phone. Jadikan `p-6 sm:p-10 md:p-16`. Heading `text-4xl md:text-5xl` → `text-3xl sm:text-4xl md:text-5xl`.
+- `Pricing.tsx` harga `text-5xl` → `text-4xl sm:text-5xl`. Grid sudah `md:grid-cols-2` (OK).
+- `Benefits.tsx` angka stat `text-5xl` → `text-4xl sm:text-5xl`.
+- `FeaturesBento.tsx` `auto-rows-[220px]` di mobile bisa terlalu pendek untuk konten panjang. Pakai `auto-rows-auto` di mobile, `md:auto-rows-[220px]`.
+- `SectionHeader.tsx` heading `text-3xl md:text-5xl` → OK, biarkan.
+- `Footer.tsx` grid `md:grid-cols-[1.4fr_repeat(3,1fr)]` OK. Tambah `gap-y-8` agar rapi saat stack.
+- `Navbar.tsx` (landing) hide link "Login" sudah `sm:inline-flex`. Padding `px-6` → `px-4 sm:px-6`.
+- `DashboardMock.tsx` (di hero) review: kalau ada lebar fixed, tambahkan `overflow-hidden` + `max-w-full` ke wrapper supaya tidak overflow di phone.
+- `ProductShowcase.tsx`, `ProblemSection.tsx`, `SolutionSection.tsx`, `HowItWorks.tsx`, `FAQ.tsx`: hanya update padding container ke `px-4 sm:px-6`.
+- App pages (`dashboard`, `library`, `editor`, `profile`, `upgrade`, `new-script`, `teleprompter`): sudah pakai `px-4 sm:px-6` dari polish sebelumnya — spot-check saja, perbaiki kalau ada heading/grid yang terlalu besar di mobile.
 
 ## Steps
-1. Edit `/tmp/logo-icon.png` (versi transparan yang sudah ada) dengan prompt recolor: pertahankan bentuk SF persis, ganti gradient jadi electric blue (#3B82F6) ke deep blue (#1E40AF), background transparan.
-2. Sama untuk `/tmp/logo-wordmark.png`: recolor wordmark "ScriptFlow" ke gradient electric blue → deep blue.
-3. Crop ke bounding box, upload ulang ke Lovable Assets CDN, dan **timpa** pointer `src/assets/logo-icon.png.asset.json` & `src/assets/logo-wordmark.png.asset.json` (URL berubah karena asset ID baru).
-4. Hapus pointer lama dulu via `lovable-assets delete` agar tidak meninggalkan asset yatim.
-5. Tidak perlu sentuh `Logo.tsx` — pointer di-import dengan path yang sama.
+1. **Landing containers**: cari-replace `mx-auto max-w-7xl px-6` → `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8` di semua section landing (Hero, Problem, Solution, Bento, Showcase, HowItWorks, Benefits, Pricing, FAQ, FinalCTA, Footer, Navbar).
+2. **Hero**: turunkan ukuran heading + buat CTA row `flex flex-col sm:flex-row` dengan tombol `w-full sm:w-auto`. Wrap `DashboardMock` dengan `overflow-hidden` + horizontal scroll fallback.
+3. **FinalCTA**: padding & heading scale down. Pastikan tombol stack vertikal di phone.
+4. **Pricing & Benefits**: scale down angka besar (`text-5xl` → `text-4xl sm:text-5xl`).
+5. **FeaturesBento**: `auto-rows-auto md:auto-rows-[220px]` agar card tidak terpotong/over-tall di phone.
+6. **App pages spot-fix**: scan `text-[3-5]xl` di app routes, turunkan 1 step untuk mobile. Pastikan tabel/grid yang punya banyak kolom punya `overflow-x-auto`.
+7. **QA via Playwright** di 3 viewport (375×812, 768×1024, 1440×900) — screenshot landing top + dashboard, verifikasi tidak ada overflow horizontal.
 
 ## Catatan
-- Gradient electric blue cocok di dark mode (background navy) dan tetap kontras cukup di light mode.
-- Kalau hasil recolor kurang pas (mis. bentuk berubah), saya iterasi sekali lagi sebelum upload.
+- Tidak mengubah desain visual, hanya scaling & layout-fluidity.
+- Tidak menambah dependency.
+- Dark/light theme tidak terpengaruh.
