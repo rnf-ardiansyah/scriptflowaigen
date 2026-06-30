@@ -80,8 +80,10 @@ function DashboardPage() {
                 Mulai dengan membuat script pertamamu — isi manual atau lanjutkan lewat AI nanti.
               </CardDescription>
             </CardHeader>
-            <Button onClick={handleCreate}>
-              <FilePlus className="h-4 w-4" /> Buat Script Pertama
+            <Button asChild>
+              <Link to="/new-script">
+                <FilePlus className="h-4 w-4" /> Buat Script Pertama
+              </Link>
             </Button>
           </Card>
         ) : (
