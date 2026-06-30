@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -33,14 +33,17 @@ function ProfilePage() {
   const [name, setName] = useState(profile?.name ?? "");
   const [signingOut, setSigningOut] = useState(false);
 
-  const email = profile?.user_id ? undefined : undefined;
-  // Email comes from auth.user, not profile — fetched once lazily.
   const [authEmail, setAuthEmail] = useState<string>("");
-  if (!authEmail) {
+
+  useEffect(() => {
+    let cancelled = false;
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email) setAuthEmail(data.user.email);
+      if (!cancelled && data.user?.email) setAuthEmail(data.user.email);
     });
-  }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const saveMut = useMutation({
     mutationFn: async (newName: string) => {
