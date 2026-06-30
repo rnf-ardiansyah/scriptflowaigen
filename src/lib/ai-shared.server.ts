@@ -87,19 +87,8 @@ export async function callGemini(prompt: string): Promise<{
   return { text: result.text, tokens: result.usage?.totalTokens ?? null };
 }
 
-type SupabaseLike = {
-  from: (table: string) => {
-    select: (cols: string, opts?: { count?: "exact"; head?: boolean }) => {
-      eq: (col: string, val: unknown) => {
-        eq: (col: string, val: unknown) => {
-          gte: (col: string, val: unknown) => Promise<{ count: number | null }>;
-        };
-        maybeSingle: () => Promise<{ data: { plan?: string | null } | null }>;
-      };
-    };
-    insert: (row: Record<string, unknown>) => Promise<unknown>;
-  };
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SupabaseLike = any;
 
 /**
  * Ensure caller has remaining daily quota. Throws rate_limited on exhaustion.
