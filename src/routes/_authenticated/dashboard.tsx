@@ -59,7 +59,7 @@ function DashboardPage() {
             </p>
           </div>
           <Button asChild size="lg">
-            <Link to="/new-script">
+            <Link to="/generator">
               <FilePlus className="h-4 w-4" /> Buat Script Baru
             </Link>
           </Button>
@@ -93,7 +93,7 @@ function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <Button asChild>
-              <Link to="/new-script">
+              <Link to="/generator">
                 <FilePlus className="h-4 w-4" /> Buat Script Pertama
               </Link>
             </Button>

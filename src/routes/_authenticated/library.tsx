@@ -224,7 +224,7 @@ function LibraryPage() {
             </p>
           </div>
           <Button asChild size="lg" className="shrink-0">
-            <Link to="/new-script">
+            <Link to="/generator">
               <FilePlus className="h-4 w-4" />
               <span className="hidden sm:inline">Buat Script Baru</span>
               <span className="sm:hidden">Baru</span>
@@ -347,7 +347,7 @@ function LibraryPage() {
                   tinggal pakai AI generate.
                 </p>
                 <Button asChild className="mt-2">
-                  <Link to="/new-script">
+                  <Link to="/generator">
                     <FilePlus className="h-4 w-4" /> Buat Script Pertama
                   </Link>
                 </Button>
