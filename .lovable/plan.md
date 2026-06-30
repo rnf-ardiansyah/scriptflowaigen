@@ -1,67 +1,29 @@
+## 1. Hapus social proof bar di Hero
+File: `src/components/landing/Hero.tsx` — hapus blok `<div className="mt-10 flex flex-wrap...">` (baris 52–68) yang berisi avatar AKMTJ + teks "10,000+ creators · 1.2M scripts generated".
 
-## 1. Samakan Pricing di Landing dengan halaman /upgrade (Rupiah)
+## 2. Perbaiki Light Mode
 
-Edit `src/components/landing/Pricing.tsx` supaya konsisten dengan `/upgrade`:
+Penyebab utama tulisan tidak terbaca di light mode: beberapa utility CSS di `src/styles.css` memakai warna hardcoded yang dibuat untuk dark mode (teks putih, grid putih, glass border putih). Saat background berubah jadi putih, elemen-elemen ini jadi tak terlihat / kontras buruk.
 
-- **Free**: harga `Rp0` / bulan, fitur disamakan:
-  - 5 AI generate per hari
-  - Script Library maksimal 20 script
-  - Akses Teleprompter
-  - Basic niche template
-- **Premium**: harga `Rp29.000` / bulan, label "Recommended", fitur:
-  - 100 AI generate per hari
-  - Unlimited Script Library
-  - Akses Teleprompter
-  - Semua niche template
-  - Favorite, AI Rewrite, AI Hook Generator
-  - Priority generation speed
-- Copy section & tombol diterjemahkan ke Bahasa Indonesia singkat ("Mulai Gratis" → `/register`, "Upgrade ke Premium" → `/upgrade`). Catatan "Cancel anytime" → "Bisa cancel kapan saja."
-- Tidak mengubah struktur/komponen lain di landing.
+### Perubahan di `src/styles.css`
 
-## 2. Tambah Light Mode (toggle Dark/Light)
+- **`text-gradient`** (saat ini gradient putih→abu-abu, hilang di light): ubah jadi memakai token `--foreground` / `--muted-foreground` agar otomatis adaptif antar tema.
+- **`text-gradient-accent`**: turunkan lightness saat light mode (gradient biru lebih gelap) supaya headline besar tetap kontras di background putih. Pakai variant via `.light` override.
+- **`glass-panel`**: border `white 8%` tidak terlihat di light mode → ganti pakai `var(--border)` dan background pakai `color-mix(var(--surface)...)`.
+- **`grid-bg`**: garis grid putih hilang di background putih → pakai `var(--foreground)` dengan opacity rendah agar terlihat di kedua mode.
+- **`hero-glow`**: pertahankan tapi turunkan intensitas di light mode (opsional via `.light .hero-glow`).
+- **`::selection`**: sudah pakai token, OK.
 
-Saat ini app dipaksa dark (class `dark` di root). Kita tambahkan tema terang dengan toggle yang persisten.
+### Perubahan token di `.light` (tuning kontras)
+- Naikkan kontras `--muted-foreground` (saat ini 0.45 → turunkan ke ~0.38) supaya teks sekunder lebih jelas di atas putih.
+- Pastikan `--surface` sedikit berbeda dari `--background` untuk batas card terlihat.
 
-### a. Token warna light di `src/styles.css`
-Tambahkan blok `.light { … }` berisi varian token (background putih lembut, surface, border, foreground gelap, electric tetap biru tapi disesuaikan kontrasnya). Token `--electric` tetap, hanya `--electric-foreground` dan surface/foreground/border yang diganti. `@custom-variant dark` sudah ada — tidak diubah. Hero-glow & grid-bg dibiarkan; di light mode tampak lebih halus karena warna dasarnya terang.
+### Spot-check komponen
+Setelah token diperbaiki, cek cepat komponen yang sering bermasalah di light mode dan pastikan mereka pakai token semantic (bukan `text-white`, `bg-black`, atau warna hardcoded):
+- `Navbar`, `Hero`, `Pricing`, `FAQ`, `FinalCTA`, `FeaturesBento`, `ProblemSection`, `DashboardMock`.
+Jika ditemukan class hardcoded (`text-white`, `bg-slate-900`, dll.) pada elemen yang masih harus terbaca di light mode, ganti ke token (`text-foreground`, `bg-surface`, dst.). Tidak mengubah layout/struktur — hanya class warna.
 
-### b. Theme provider ringan
-Buat `src/components/theme/ThemeProvider.tsx`:
-- Simpan tema (`"dark" | "light"`) di `localStorage` (`scriptflow-theme`), default `dark`.
-- Saat mount, set class `dark` atau `light` di `document.documentElement` (hapus yang lain).
-- Expose `useTheme()` hook (`theme`, `toggleTheme`, `setTheme`).
-- SSR-safe: tidak akses `window` saat render awal; sinkron via `useEffect`.
-
-### c. Pasang provider
-- `src/routes/__root.tsx`: bungkus konten dengan `<ThemeProvider>`. Inline script kecil di `<head>` untuk set class lebih awal supaya tidak ada flash:
-  ```html
-  <script>
-    try { const t = localStorage.getItem('scriptflow-theme') || 'dark';
-      document.documentElement.classList.add(t); } catch {}
-  </script>
-  ```
-  Hapus pemaksaan `className="dark"` lama.
-
-### d. Tombol toggle
-Buat `src/components/theme/ThemeToggle.tsx`: tombol ikon `Sun`/`Moon` (lucide) memakai `Button variant="ghost" size="sm"`, aria-label dinamis.
-
-Pasang toggle di:
-- `src/components/landing/Navbar.tsx` — sebelah CTA login/register.
-- `src/components/app/AppLayout.tsx` — di header desktop, kiri tombol Sign out.
-
-### e. Audit cepat warna hardcoded
-Sapu `text-white`, `bg-black`, `bg-white`, hex literal di komponen landing & app. Ganti ke token (`text-foreground`, `bg-background`, `bg-surface`, dll.) hanya kalau memang merusak di light mode. Tidak refactor besar — hanya fix yang tampak rusak.
-
-## Out of scope
-- Tidak mengubah halaman `/upgrade` (sudah Rupiah).
-- Tidak menambah toggle per-halaman teleprompter (sudah punya dark mode independennya sendiri).
-- Tidak mengubah skema DB atau auth.
-
-## File yang akan diedit/dibuat
-- edit: `src/components/landing/Pricing.tsx`
-- edit: `src/styles.css` (tambah token `.light`)
-- new: `src/components/theme/ThemeProvider.tsx`
-- new: `src/components/theme/ThemeToggle.tsx`
-- edit: `src/routes/__root.tsx` (provider + anti-flash script, hapus paksa dark)
-- edit: `src/components/landing/Navbar.tsx` (toggle)
-- edit: `src/components/app/AppLayout.tsx` (toggle)
+## Verifikasi
+- Buka `/` di light mode → headline, subheadline, badge "Built for…", tombol sekunder, grid background, dan glass panel harus terbaca jelas.
+- Toggle ke dark mode → tampilan tetap sama seperti sebelumnya (tidak ada regresi).
+- Hero tidak lagi menampilkan baris avatar + "10,000+ creators".
