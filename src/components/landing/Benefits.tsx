@@ -25,7 +25,7 @@ const stats = [
 export function Benefits() {
   return (
     <section className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Benefits"
           title="Built for creators. Loved by businesses."

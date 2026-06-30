@@ -5,7 +5,7 @@ import { Mic, History, Sparkles } from "lucide-react";
 export function ProductShowcase() {
   return (
     <section id="showcase" className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Product"
           title="A real workspace, not a chat box."

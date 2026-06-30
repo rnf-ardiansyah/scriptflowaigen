@@ -8,7 +8,7 @@ export function Hero() {
       <div className="hero-glow absolute inset-0 -z-10" />
       <div className="grid-bg absolute inset-0 -z-10" />
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div className="animate-fade-up">
             <a
