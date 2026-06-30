@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { AppLoadingState } from "@/components/app/AppLoadingState";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -10,5 +11,7 @@ export const Route = createFileRoute("/_authenticated")({
     }
     return { user: data.user };
   },
+  pendingMs: 200,
+  pendingComponent: AppLoadingState,
   component: () => <Outlet />,
 });

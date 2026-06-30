@@ -6,6 +6,7 @@ import { Input, Label } from "@/components/app/Input";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { routeAfterAuth } from "@/lib/profile-helpers";
+import { mapAuthError } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -46,7 +47,7 @@ function RegisterPage() {
       },
     });
     if (signUpError) {
-      setError(signUpError.message);
+      setError(mapAuthError(signUpError.message));
       setLoading(false);
       return;
     }
@@ -68,7 +69,7 @@ function RegisterPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      setError(result.error.message ?? "Google sign-in failed");
+      setError(mapAuthError(result.error.message ?? "Google sign-in failed"));
       setGoogleLoading(false);
       return;
     }
