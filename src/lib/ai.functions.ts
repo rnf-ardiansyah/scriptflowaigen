@@ -164,7 +164,7 @@ export const generateScript = createServerFn({ method: "POST" })
       try {
         const result = await callModel(apiKey, idea, niche, tone, attempt === 1);
         tokens = result.usage?.totalTokens ?? null;
-        const out = result.experimental_output;
+        const out = result.output;
         const check = OutputSchema.safeParse(out);
         if (check.success && check.data.hook.trim() && check.data.retain.trim() && check.data.reward.trim() && check.data.cta.trim()) {
           parsed = check.data;
