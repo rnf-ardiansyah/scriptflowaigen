@@ -3,9 +3,10 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Logo } from "@/components/landing/Logo";
 import { Button } from "./Button";
-import { Bell, LayoutDashboard, Library, User, Crown, LogOut } from "lucide-react";
+import { LayoutDashboard, Library, User, Crown, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -19,6 +20,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     let raf = 0;
@@ -32,10 +34,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }, []);
 
   async function handleSignOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/login", replace: true });
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await supabase.auth.signOut();
+      toast.success("Sampai jumpa lagi 👋");
+      navigate({ to: "/login", replace: true });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Gagal sign out");
+      setSigningOut(false);
+    }
   }
 
   return (
@@ -48,8 +58,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             : "border-b border-transparent bg-transparent",
         )}
       >
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link to="/" className="shrink-0">
+        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
+          <Link to="/" className="min-w-0 shrink-0">
             <Logo />
           </Link>
           <div className="hidden items-center gap-1 md:flex">
@@ -72,27 +82,53 @@ export function AppLayout({ children }: { children: ReactNode }) {
               );
             })}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              aria-label="Notifications"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-surface/60 text-muted-foreground hover:text-foreground"
-            >
-              <Bell className="h-4 w-4" />
-            </button>
+          <div className="flex shrink-0 items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleSignOut}
               aria-label="Sign out"
+              disabled={signingOut}
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign out</span>
+              <span className="hidden sm:inline">
+                {signingOut ? "Signing out…" : "Sign out"}
+              </span>
             </Button>
           </div>
         </nav>
       </header>
 
-      <main className="pt-24 pb-20">{children}</main>
+      <main className="pt-20 pb-28 sm:pt-24 md:pb-20">{children}</main>
+
+      {/* Mobile bottom nav */}
+      <nav
+        aria-label="Primary"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/80 backdrop-blur-xl md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <ul className="mx-auto grid max-w-7xl grid-cols-4">
+          {nav.map((n) => {
+            const active = pathname.startsWith(n.to);
+            return (
+              <li key={n.to}>
+                <Link
+                  to={n.to}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-0.5 px-2 py-2.5 text-[10px] font-medium transition-colors",
+                    active
+                      ? "text-electric"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <n.icon className="h-5 w-5" />
+                  <span>{n.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
     </div>
   );
 }

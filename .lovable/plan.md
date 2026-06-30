@@ -1,112 +1,110 @@
-## 1. Database migration
 
-**New table `folders`** (with grants + RLS scoped to `auth.uid()`):
-- `id uuid pk`, `user_id uuid not null`, `name text not null`, `created_at timestamptz default now()`.
-- Policies: owner-only ALL.
-- Index on `(user_id, created_at desc)`.
+# Polish & Deploy-Prep Plan
 
-**Add `folder_id uuid` to `scripts`** with `references public.folders(id) on delete set null` — so deleting a folder leaves its scripts intact with `folder_id = null` (no data loss, matches spec).
+Tujuan: stabilkan semua yang sudah dibangun. Tidak ada fitur baru, tidak ada perubahan skema DB.
 
-**Server-side free-plan script cap (hard enforcement)** via a `BEFORE INSERT` trigger on `scripts`:
-- Reads caller's plan from `profiles`.
-- If `plan = 'free'` and `count(*) where user_id = NEW.user_id >= 20`, `RAISE EXCEPTION` with a recognizable message like `free_plan_script_limit_reached`.
-- `SECURITY DEFINER`, `search_path = public`.
+## 1. Responsiveness (mobile-first)
 
-This guarantees the 20-script cap holds even if a client bypasses the UI/server function — Supabase REST inserts hit the trigger too.
+**Masalah utama yang ditemukan:**
+- `AppLayout` hanya punya nav `hidden md:flex` — user mobile **tidak bisa berpindah** antar Dashboard/Library/Upgrade/Profile setelah login. Ini blocker untuk target user yang mayoritas dari HP.
+- Library sidebar folder fixed `md:grid-cols-[240px_1fr]` → di mobile sidebar memakan layar penuh sebelum grid script.
+- Editor toolbar (back, save indicator, AI actions, teleprompter) padat di lebar HP.
+- Beberapa header pakai `flex flex-wrap` tanpa `min-w-0` / `truncate` (Dashboard greeting, Profile).
+- Teleprompter floating controls perlu cek di lebar ≤360px.
 
-## 2. Server function quota changes
+**Yang akan dilakukan:**
+- Tambahkan **bottom tab bar mobile** di `AppLayout` (Dashboard / Library / Upgrade / Profile) yang muncul hanya di `<md`, dengan ikon + label kecil. Sign-out tetap di header (icon-only di mobile).
+- Library: di mobile, ganti sidebar jadi **horizontal scrollable chip strip** untuk folder; tetap pakai sidebar vertikal di `md+`.
+- Editor: bungkus toolbar dengan grid 2-baris di mobile (back di atas, action group di bawah, full-width AIActions).
+- Audit setiap halaman dengan pola `grid-cols-[minmax(0,1fr)_auto] + min-w-0 + shrink-0 + truncate` sesuai standar responsive proyek.
+- Verifikasi visual via Playwright pada viewport 375 (mobile), 768 (tablet), 1280 (desktop) untuk: Landing, Login, Register, Onboarding, Dashboard, Library, Editor, Teleprompter, Profile, Upgrade, New-Script.
 
-**`src/lib/ai.functions.ts` — `generateScript`:**
-- Before the existing AI rate-limit check, count user's scripts. If `plan = 'free'` and `count >= 20`, throw `makeError({ code: "script_limit_reached", limit: 20, message: "..." })`. Cache hits still allowed (no new row).
-- Catch the trigger's exception on the final insert and re-throw as the same `script_limit_reached` lovable error (defense in depth).
+## 2. Loading & Empty States
 
-**`src/lib/ai-shared.server.ts`:** extend `GenerationErrorCode` with `"script_limit_reached"`.
+**Masalah:**
+- `_authenticated/route.tsx` tidak punya `pendingComponent`. Saat `useSuspenseQuery` belum terisi (mis. invalidate), user lihat blank.
+- `profile.tsx` masih pakai `useEffect + useState` manual (bukan React Query), tanpa skeleton, tanpa toast.
+- Onboarding tidak punya skeleton saat profile awal di-fetch.
 
-**New `src/lib/folders.functions.ts`** (auth-gated `createServerFn`s):
-- `listFolders()` → `{ id, name, created_at, script_count }[]`.
-- `createFolder({ name })`.
-- `renameFolder({ id, name })`.
-- `deleteFolder({ id })` — relies on `on delete set null` to detach scripts.
-- `assignScriptToFolder({ scriptId, folderId | null })`.
+**Yang akan dilakukan:**
+- Buat `<AppLoadingState />` skeleton (header + 2 card placeholder) dan pasang sebagai `pendingComponent` di `_authenticated/route.tsx` dan `pendingMs: 200`.
+- Refactor `profile.tsx` jadi pakai `profileQuery()` (sudah ada di `lib/scripts.ts`) + mutation, jadi konsisten dengan dashboard & dapat skeleton dari pending state.
+- Pastikan semua empty state sudah ada (Library, Dashboard sudah OK — verifikasi saja).
 
-These wrap `context.supabase` so RLS still applies; no admin client needed.
+## 3. Error Handling & Toast Feedback
 
-**New quota-summary server function** `src/lib/quota.functions.ts → getQuotaSummary()` returning `{ plan, generationsToday, generationLimit, scriptsUsed, scriptLimit | null }`. Dashboard reads this via TanStack Query.
+**Masalah:**
+- `login.tsx` / `register.tsx` menampilkan pesan Supabase mentah (mis. "Invalid login credentials" OK, tapi "AuthApiError: …" jelek).
+- `profile.tsx` save tidak punya feedback sukses/gagal.
+- Editor auto-save toast hanya muncul saat gagal — sudah OK, tapi error pesan masih mentah.
+- AI errors di hook regen / rewrite belum semua dipetakan ke pesan ramah.
 
-## 3. Frontend changes
+**Yang akan dilakukan:**
+- Buat util kecil `mapAuthError(message)` untuk login/register (invalid creds, email exists, weak password, network).
+- Profile save: bungkus dengan try/catch + `toast.success` / `toast.error`, invalidate `["profile","me"]`.
+- Audit `AIActions.tsx` dan `HookRegenButton`: tangkap `lovable.code === "rate_limited" | "parse_failed"` dan map ke pesan ramah + arahkan ke /upgrade jika rate_limited.
+- Pastikan semua mutasi (toggle favorite, duplicate, delete, create/delete folder, move folder) sudah pakai toast — sudah OK; tambahkan yang belum.
 
-**`/upgrade` (`src/routes/_authenticated/upgrade.tsx`)** — rewrite as a side-by-side Free vs Premium comparison per spec:
-- Free: 5 AI/hari, max 20 script, Teleprompter, basic niche template.
-- Premium **Rp 29.000/bulan**: unlimited library, 100 AI/hari, semua niche, Favorite, AI Rewrite, AI Hook Generator, priority speed.
-- "Upgrade ke Premium" button → `toast.info("Pembayaran segera hadir")` placeholder (no payment gateway).
+## 4. UI Consistency Audit
 
-**Dashboard (`src/routes/_authenticated/dashboard.tsx`)** — add a Quota card row using `getQuotaSummary`:
-- "X dari 5 generate hari ini" (free) / "X dari 100 generate hari ini" (premium).
-- "X dari 20 script tersimpan" (free) / "X script tersimpan" (premium, no cap).
-- Subtle progress bar; when free quota at limit, show inline "Upgrade" link to `/upgrade`.
+- Pastikan semua tombol pakai `Button` primitive (no raw `<button>` untuk action utama). Ada beberapa raw `<button>` (favorite toggle, folder add) yang sengaja icon-only — biarkan, tapi standarkan ukuran 36px, focus ring `ring-electric/40`.
+- Audit warna: tidak ada hardcoded `text-white` / `bg-black` / hex literal di komponen aplikasi (gunakan token `text-foreground`, `bg-background`, `text-electric`).
+- Spacing: padding card konsisten (sudah `Card` primitive), pastikan section utama pakai `mx-auto max-w-7xl px-6` (Editor: `max-w-5xl`, Auth: lebih sempit — biarkan).
+- Tipografi: heading utama `text-3xl md:text-4xl font-bold tracking-tight text-gradient`, subheading `text-xl font-semibold tracking-tight`.
 
-**`/new-script` error handling** — already routes `lovable.code` errors to friendly UI; add a `"script_limit_reached"` branch with copy + CTA to `/upgrade`.
+## 5. Performance Check
 
-**Library (`src/routes/_authenticated/library.tsx`)** — add folder UI:
-- Left sidebar (collapses into top tab strip on mobile) listing `Semua Script` (default) + each folder with script counts, plus a "+ Folder baru" inline form.
-- Selecting a folder filters the grid (`folder_id = selected` or `IS NULL` for "Tanpa folder"). Search/niche/favorite filters compose with folder filter.
-- Per-card "Move to…" action via existing dropdown menu — lists folders + "Tanpa folder" option, calls `assignScriptToFolder`.
-- Per-folder kebab → Rename / Delete (confirm dialog: "Script di folder ini tidak akan terhapus, hanya dipindah keluar folder").
-- "Buat Script Baru" CTA: still navigates to `/new-script`. If quota summary shows free user already at 20 scripts, show a banner above the grid with upgrade link (still allow click — generate flow surfaces the hard error).
+**Temuan:**
+- Editor auto-save memanggil `qc.invalidateQueries({ queryKey: ["scripts"] })` setiap simpan → refetch list, recent, counts, **dan detail saat ini** (yang baru saja disimpan, jadi mubazir dan bisa bikin flicker).
+- `useRouter` di `EditorPage` di-import tapi tidak dipakai.
+- AppLayout scroll listener sudah pakai `requestAnimationFrame` — OK.
+- Dashboard quota query: 3 round-trip (profile, generations count, scripts count) — fine, satu request paralel.
 
-**Types** — extend `ScriptRow` in `src/lib/scripts.ts` with `folder_id: string | null`; add it to select projections.
+**Yang akan dilakukan:**
+- Setelah `updateScript` berhasil di Editor: panggil `qc.setQueryData(["scripts","detail",id], updated)` dan invalidate hanya `["scripts","list"]`, `["scripts","recent"]`, `["scripts","counts"]` — bukan seluruh `["scripts"]` tree.
+- Hapus unused import `useRouter` di `EditorPage` (ambient `router` masih dipakai di `EditorLoaded`).
+- Pastikan `defaultPreloadStaleTime: 0` di router config tidak menyebabkan double-fetch saat hover Link — sudah default TanStack, biarkan.
 
-## 4. Out of scope (per user instructions)
+## 6. Full Flow QA (Playwright)
 
-- Real payments / Stripe wiring.
-- Premium-only gating of AI Rewrite / Hook Generator features (spec only lists them as premium *marketing* differentiators; current build keeps them quota-gated). Mention this trade-off after build so user can decide whether to enforce later.
+Jalankan satu skrip Playwright end-to-end menggunakan session injection yang sudah disiapkan sandbox (`LOVABLE_BROWSER_AUTH_STATUS`):
 
-## Technical details
-
-- Trigger SQL (single migration with table + grants + RLS + trigger):
-
-```sql
-create table public.folders (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null,
-  name text not null,
-  created_at timestamptz not null default now()
-);
-grant select, insert, update, delete on public.folders to authenticated;
-grant all on public.folders to service_role;
-alter table public.folders enable row level security;
-create policy folders_all_own on public.folders for all to authenticated
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create index folders_user_idx on public.folders (user_id, created_at desc);
-
-alter table public.scripts
-  add column folder_id uuid references public.folders(id) on delete set null;
-create index scripts_folder_idx on public.scripts (folder_id);
-
-create or replace function public.enforce_free_script_limit()
-returns trigger language plpgsql security definer set search_path = public as $$
-declare v_plan text; v_count int;
-begin
-  select plan into v_plan from public.profiles where user_id = new.user_id;
-  if coalesce(v_plan,'free') = 'free' then
-    select count(*) into v_count from public.scripts where user_id = new.user_id;
-    if v_count >= 20 then
-      raise exception 'free_plan_script_limit_reached' using errcode = 'P0001';
-    end if;
-  end if;
-  return new;
-end $$;
-create trigger scripts_free_limit
-  before insert on public.scripts
-  for each row execute function public.enforce_free_script_limit();
+```text
+1. /register → email+password → /onboarding (jika status=signed_out, skip auto-test & laporkan ke user)
+2. Onboarding 3 step → /dashboard
+3. Dashboard → "Buat Script Baru" → /new-script → submit ide → /editor/:id
+4. Edit field manual → tunggu indicator "Tersimpan"
+5. Klik AI Rewrite (Santai) → preview dialog → Accept
+6. Klik "Buka di Teleprompter" → Start/Pause/Speed/Fullscreen
+7. Kembali ke /library → favorite, duplicate, create folder, move to folder, search
+8. Cek panel kuota di /dashboard (counter naik 1)
+9. Logout → cek redirect ke /login
 ```
 
-- Server function maps Postgres error message `free_plan_script_limit_reached` → lovable `{ code: "script_limit_reached", limit: 20 }`.
-- Folders sidebar uses existing `Card`/`Button`/dropdown primitives — no new shadcn components needed.
-- All folder mutations invalidate `["folders"]` and `["scripts"]` query keys for instant UI refresh.
+Google OAuth tidak bisa diuji otomatis (popup eksternal). Akan diverifikasi manual oleh user; akan dipastikan flow `routeAfterAuth()` tetap jalan setelah session muncul.
 
-## Verification
+Setiap kegagalan akan dilaporkan dengan screenshot & langkah reproduksi sebelum dianggap selesai.
 
-- After migration: `tsgo --noEmit`.
-- Manual: log in as free user (set `profiles.plan='free'`), insert 20 scripts, confirm 21st insert errors and `/new-script` shows upgrade CTA.
-- Folder create/assign/filter/delete round-trip in `/library`; deleted folder leaves scripts visible under "Tanpa folder".
+## 7. Deploy Prep
+
+**Catatan penting tentang target deploy:**
+Project ini berjalan di TanStack Start dengan target Cloudflare Worker (default Lovable). Lovable sudah punya hosting sendiri (preview & published URL aktif di `scriptflowaigen.lovable.app`). Deploy ke **Vercel** memerlukan self-hosting setup tambahan (mengubah Vite SSR adapter ke `@tanstack/start-server-adapter-vercel` & konfigurasi env vars di Vercel dashboard).
+
+Sebelum mulai, akan **mengkonfirmasi** ke user:
+> "Mau tetap pakai hosting Lovable (siap pakai, tinggal Publish), atau wajib pindah ke Vercel? Pindah Vercel = perubahan build target + setup manual env vars di Vercel."
+
+**Apapun targetnya, akan diverifikasi:**
+- Env vars yang client-safe: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (publishable, aman).
+- Env vars server-only (TIDAK ter-expose ke client): `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `LOVABLE_API_KEY`. Sudah di-access via `process.env.*` di dalam `.handler()` server functions — tidak akan terbundle ke client.
+- Audit cepat: `rg "LOVABLE_API_KEY|SERVICE_ROLE" src --glob '!*.functions.ts' --glob '!*.server.ts'` harus 0 hit di client code.
+- Production build (`bun run build`) bersih dari error & critical warning.
+- `security--run_security_scan` → 0 critical findings sebelum publish.
+
+## Pelaporan
+
+Setelah eksekusi, akan kirim ringkasan:
+- ✅ Lulus: daftar yang OK
+- ⚠️ Catatan: hal kecil yang masih bisa di-polish nanti
+- ❌ Blocker: kalau ada flow yang gagal — disertai langkah reproduksi & screenshot
+
+Hanya akan minta tombol Publish ditekan kalau semua di atas hijau.

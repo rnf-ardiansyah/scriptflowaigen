@@ -212,58 +212,59 @@ function LibraryPage() {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 sm:flex sm:flex-wrap sm:justify-between sm:gap-4">
+          <div className="min-w-0">
             <Badge variant="muted">Library</Badge>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-gradient md:text-4xl">
+            <h1 className="mt-3 truncate text-2xl font-bold tracking-tight text-gradient sm:text-3xl md:text-4xl">
               Script kamu
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Cari, atur, dan buka ulang script yang sudah kamu buat.
             </p>
           </div>
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="shrink-0">
             <Link to="/new-script">
-              <FilePlus className="h-4 w-4" /> Buat Script Baru
+              <FilePlus className="h-4 w-4" />
+              <span className="hidden sm:inline">Buat Script Baru</span>
+              <span className="sm:hidden">Baru</span>
             </Link>
           </Button>
         </div>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-[240px_1fr]">
-          {/* SIDEBAR */}
-          <aside className="space-y-1">
+        <div className="mt-6 md:mt-8 md:grid md:gap-6 md:grid-cols-[240px_1fr]">
+          {/* SIDEBAR / mobile chip strip */}
+          <aside className="md:space-y-1">
             <div className="mb-2 flex items-center justify-between px-1">
               <p className="text-xs uppercase tracking-wider text-muted-foreground">
                 Folder
               </p>
               <button
                 onClick={() => setNewFolderOpen(true)}
-                className="text-muted-foreground hover:text-electric"
+                className="rounded-md p-1 text-muted-foreground hover:text-electric"
                 aria-label="Buat folder baru"
               >
                 <FolderPlus className="h-4 w-4" />
               </button>
             </div>
 
-            <FolderTab
-              active={folderFilter === "all"}
-              onClick={() => setFolderFilter("all")}
-              icon={Inbox}
-              label="Semua Script"
-              count={scripts.length}
-            />
-            <FolderTab
-              active={folderFilter === "uncategorized"}
-              onClick={() => setFolderFilter("uncategorized")}
-              icon={Inbox}
-              label="Tanpa folder"
-              count={uncategorizedCount}
-            />
-
-            <div className="mt-3 space-y-1">
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:px-0 md:pb-0">
+              <FolderTab
+                active={folderFilter === "all"}
+                onClick={() => setFolderFilter("all")}
+                icon={Inbox}
+                label="Semua"
+                count={scripts.length}
+              />
+              <FolderTab
+                active={folderFilter === "uncategorized"}
+                onClick={() => setFolderFilter("uncategorized")}
+                icon={Inbox}
+                label="Tanpa folder"
+                count={uncategorizedCount}
+              />
               {folders.length === 0 ? (
-                <p className="px-2 py-3 text-xs text-muted-foreground">
+                <p className="hidden px-2 py-3 text-xs text-muted-foreground md:block">
                   Belum ada folder. Klik <FolderPlus className="inline h-3 w-3" />{" "}
                   untuk membuat.
                 </p>
@@ -282,6 +283,7 @@ function LibraryPage() {
               )}
             </div>
           </aside>
+
 
           {/* MAIN */}
           <div>
@@ -606,10 +608,10 @@ function FolderTab({
   return (
     <div
       className={
-        "group flex items-center gap-1 rounded-xl border transition-colors " +
+        "group flex shrink-0 items-center gap-1 rounded-xl border transition-colors md:shrink " +
         (active
           ? "border-electric/40 bg-electric/10"
-          : "border-transparent hover:bg-surface")
+          : "border-border/40 bg-surface/40 hover:bg-surface md:border-transparent md:bg-transparent")
       }
     >
       <button
@@ -629,7 +631,7 @@ function FolderTab({
         <button
           onClick={onDelete}
           aria-label={`Hapus folder ${label}`}
-          className="mr-1 hidden rounded-md p-1 text-muted-foreground hover:bg-background hover:text-destructive group-hover:block"
+          className="mr-1 rounded-md p-1 text-muted-foreground opacity-70 hover:bg-background hover:text-destructive md:opacity-0 md:group-hover:opacity-100"
         >
           <MoreHorizontal className="h-3.5 w-3.5" />
         </button>
