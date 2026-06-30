@@ -1,94 +1,50 @@
-# Plan — Mobile Navbar + Workspace App Shell (Dark) + Routing
+# Plan — Verify Auth & DB (no rebuild required)
 
-Landing page visuals stay untouched. Only Navbar gains a mobile hamburger drawer. Workspace gets a real persistent left sidebar with a forced dark theme. Adds `/generator` route.
+Everything in your spec is already implemented from earlier turns. Plan: verify state, fix only true gaps, and run an end-to-end smoke test. **No destructive changes** to the existing AI/teleprompter features — those stay as-is per "jangan hapus" rule, but no new AI work is added here.
 
-## 1. Landing Navbar — mobile hamburger drawer
+## What's already in place (confirmed by reading files)
 
-File: `src/components/landing/Navbar.tsx`
-- Keep desktop layout exactly as-is (links inline on `md:` and up).
-- On `<md` (mobile/tablet), hide the inline links + "Login" + "Start Free" and show a hamburger icon button (Lucide `Menu`).
-- Tapping it opens a slide-down drawer (or sheet) containing: Features, Showcase, Pricing, FAQ, Login, Start Free, plus the existing ThemeToggle.
-- Drawer closes on link tap, on outside click, and on `Esc`. Body scroll locked while open.
-- Implementation: lightweight local state + a fixed full-width panel under the navbar styled with `glass-panel`. No new dependency.
+### Database (Lovable Cloud / Supabase, RLS active)
+- `profiles`: `user_id`, `name`, `preferred_niche`, `experience_level`, `goal`, `plan` (default `'free'`), `created_at` — RLS `auth.uid() = user_id`.
+- `scripts`: `id`, `user_id`, `title`, `idea`, `niche`, `hook`, `retain`, `reward`, `cta`, `full_script`, `reading_time`, `is_favorite`, `created_at`, `updated_at` — RLS `auth.uid() = user_id`.
+- `generations`: `id`, `user_id`, `tokens`, `model`, `status`, `created_at` — RLS `auth.uid() = user_id`.
+- Trigger `handle_new_user` auto-creates a profile row on signup.
 
-## 2. Workspace App Shell — persistent left sidebar (dark, forced)
+### Authentication
+- Email/password register (`src/routes/register.tsx`) and login (`src/routes/login.tsx`).
+- Google OAuth via `lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin })` on both pages.
+- Protected routes: `src/routes/_authenticated/route.tsx` redirects to `/login` if no user (covers `/dashboard`, `/library`, `/editor/$scriptId`, `/teleprompter/$scriptId`, `/profile`, `/upgrade`, `/onboarding`, `/generator`).
+- Sign-out button in workspace sidebar (`AppLayout` → `SidebarContent`) clears cache + signs out + navigates to `/login`.
+- Root `onAuthStateChange` listener invalidates router/queries and bounces to `routeAfterAuth()` (= `/onboarding` if profile incomplete, else `/dashboard`).
 
-Replace the top-nav AppLayout with a sidebar layout. Workspace pages always render dark, independent of the landing theme toggle.
+### Onboarding (`/onboarding`)
+- 3 questions matching spec exactly:
+  - Niche dropdown: Skincare, Fashion, F&B, Edukasi, Finansial, Gaming, Lifestyle, Property, Beauty, Tech.
+  - Experience level radios: Pemula, Menengah, Berpengalaman.
+  - Goal text input.
+- Upserts into `profiles` then navigates to `/dashboard`. If profile already complete, auto-skips on mount.
 
-### Forced dark theme inside workspace
-- The global `ThemeProvider` continues to control the landing page.
-- `AppLayout` adds `class="dark"` to its root wrapper and sets local CSS so workspace tokens always resolve to the dark palette, regardless of `<html>` class. Landing remains user-controlled.
-- Remove the `ThemeToggle` from the workspace header (keep it on landing).
+## Tiny fix to land
 
-### Dark palette (workspace-only overrides applied via a `.workspace` scope in `src/styles.css`)
-- `--background`: `#0b0f17`
-- `--surface`: `#121826`
-- `--surface-elevated`: `#1a2233`
-- `--border`: `#1f2937`
-- `--foreground`: near-white
-- `--muted-foreground`: dim gray
-- `--electric`: keep existing brand accent (unchanged) so brand stays consistent
+One small redirect target mismatch — protected route guard sends to `/login` (correct per spec), but I should double-check the `_authenticated/route.tsx` target matches `/login` (not `/auth`). If it already does, no change. (Reading shows it redirects to `/login` ✅.)
 
-### Layout structure (`src/components/app/AppLayout.tsx`, rewritten)
-```text
-┌─────────────┬─────────────────────────────────────┐
-│             │  Topbar: breadcrumb · 🔔 · avatar   │
-│  Sidebar    ├─────────────────────────────────────┤
-│  (fixed)    │                                     │
-│             │           <Outlet />                │
-│             │                                     │
-└─────────────┴─────────────────────────────────────┘
-```
+So: **no code changes required**. Plan reduces to verification.
 
-### Sidebar contents (new `src/components/app/Sidebar.tsx`)
-- Top: Logo (compact, links to `/dashboard`)
-- Primary CTA: `+ New Script` (electric, links to `/generator`)
-- Nav items (Lucide icons + label, active state via `useRouterState`):
-  - AI Generator → `/generator`
-  - Dashboard → `/dashboard`
-  - All Scripts → `/library`
-  - Favorites → `/library?filter=favorites`
-  - Folders → `/library?view=folders`
-  - Recent → `/library?sort=recent`
-  - Teleprompter → `/library` (info-only entry until a script is picked)
-- Section "Folders": placeholder list (3 dummy items, muted text "No folders yet" subtitle)
-- Footer block: plan badge ("Free" dummy) + AI quota bar ("62/100 AI today" dummy) + Sign out button
+## End-to-end smoke test (Playwright in shell, headless)
 
-### Topbar (new `src/components/app/Topbar.tsx`)
-- Left: breadcrumb (e.g. `scriptflow.app / workspace`) derived from route.
-- Right: notification bell icon (no-op), avatar circle with user initial.
+1. Open `/register`, create a fresh `e2e+<timestamp>@example.com` account with password `Passw0rd!` and name "E2E".
+2. Expect redirect to `/onboarding`.
+3. Fill niche=`Skincare`, level=`Pemula`, goal=`Konsisten posting 3 video / minggu`, submit.
+4. Expect redirect to `/dashboard`. Capture screenshot.
+5. Click "Sign out" in the sidebar (open mobile drawer if viewport <lg). Expect redirect to `/login`.
+6. Log back in with same credentials. Expect direct redirect to `/dashboard` (no onboarding loop). Capture screenshot.
+7. Open browser console log dump → assert zero errors.
+8. Read `profiles` table via `supabase--read_query` and confirm exactly one row exists for the new user with the values from step 3.
 
-### Responsive behavior
-- `≥lg` (1024px): sidebar fixed `w-64`, content offset with `lg:pl-64`.
-- `<lg`: sidebar hidden by default; hamburger button in topbar opens it as a left drawer (overlay + slide). Keep the existing bottom-tab nav for thumb access on phones, scoped to `<md` (Dashboard / Generator / Library / Profile).
+If any assertion fails, drill into the failing step (network log + DOM snapshot) and patch only the offending code.
 
-## 3. Routing additions
+## Out of scope (untouched)
 
-- Create `src/routes/_authenticated/generator.tsx` as the new AI Generator page. Move the current `/new-script` UI into it (keep `/new-script` as a thin redirect to `/generator` so any existing links keep working).
-- Confirmed already present and reused as-is: `/login`, `/register`, `/onboarding`, `/dashboard`, `/library`, `/editor/$scriptId`, `/teleprompter/$scriptId`, `/profile`, `/upgrade`.
-- Teleprompter route already opts out of `AppLayout` (fullscreen) — no change.
-- Auth pages already opt out of `AppLayout` — no change.
-
-## 4. Landing CTA → `/register`
-
-Already wired in Navbar, Hero, Pricing, FinalCTA. Quick audit pass to confirm no remaining `#` or stale links; fix any stragglers only.
-
-## 5. Out of scope (untouched)
-
-- No backend, auth, or DB changes.
-- No edits to `src/routes/index.tsx` or any `src/components/landing/*` except `Navbar.tsx` (mobile menu only — desktop unchanged).
-- No edits to auto-generated files.
-
-## Technical notes
-
-- Sidebar uses plain Tailwind + Lucide; no shadcn sidebar dependency added (keeps bundle lean and matches existing primitive style).
-- Workspace dark scoping: wrap `AppLayout` root in `<div className="dark workspace-scope">` and add a `.workspace-scope { ... dark tokens ... }` block in `src/styles.css` that hard-sets the listed CSS variables so it wins over the user's light-mode toggle on `<html>`.
-- Bottom mobile nav stays for `<md` only; sidebar drawer covers `md`–`lg` tablet range.
-- Active link detection: `useRouterState({ select: s => s.location.pathname })` with `startsWith` match.
-
-## Verification checklist after build
-
-- Landing `/` visually identical on desktop; on mobile, hamburger opens drawer with all links + CTAs.
-- `/dashboard`, `/generator`, `/library`, `/editor/:id`, `/profile`, `/upgrade` render inside the dark sidebar shell; `/teleprompter/:id`, `/login`, `/register`, `/onboarding` do not.
-- Toggling theme on landing does not affect workspace appearance.
-- No 404s, no console errors on any placeholder route.
+- AI generator, rewrite, hook regen, teleprompter — kept as they are; no new AI logic.
+- Landing page, design system, sidebar layout — unchanged.
+- No schema migrations, no new tables, no new RLS policies.
