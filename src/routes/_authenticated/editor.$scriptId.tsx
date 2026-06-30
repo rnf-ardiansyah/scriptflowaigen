@@ -321,7 +321,7 @@ function ScriptPart({
   hint: string;
   value: string;
   onChange: (v: string) => void;
-  accessory?: React.ReactNode;
+  accessory?: ReactNode;
 }) {
   return (
     <Card>
