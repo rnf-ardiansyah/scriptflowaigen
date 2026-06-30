@@ -155,6 +155,23 @@ export const generateScript = createServerFn({ method: "POST" })
     const plan = profile?.plan === "premium" ? "premium" : "free";
     const limit = plan === "premium" ? 100 : 5;
 
+    // 2b. Script library cap for free users (defense in depth — DB trigger also enforces).
+    if (plan === "free") {
+      const { count: scriptCount } = await supabase
+        .from("scripts")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+      if ((scriptCount ?? 0) >= 20) {
+        throw makeError({
+          code: "script_limit_reached",
+          plan,
+          limit: 20,
+          message:
+            "Script Library kamu sudah mencapai batas 20 script untuk plan Free. Upgrade ke Premium untuk menyimpan lebih banyak.",
+        });
+      }
+    }
+
     // 3. Rate-limit
     const { count } = await supabase
       .from("generations")
@@ -245,9 +262,19 @@ export const generateScript = createServerFn({ method: "POST" })
       .single();
 
     if (insertError || !inserted) {
+      const msg = insertError?.message ?? "";
+      if (msg.includes("free_plan_script_limit_reached")) {
+        throw makeError({
+          code: "script_limit_reached",
+          plan,
+          limit: 20,
+          message:
+            "Script Library kamu sudah mencapai batas 20 script untuk plan Free. Upgrade ke Premium untuk menyimpan lebih banyak.",
+        });
+      }
       throw makeError({
         code: "ai_unavailable",
-        message: "Gagal menyimpan script: " + (insertError?.message ?? "unknown"),
+        message: "Gagal menyimpan script: " + (msg || "unknown"),
       });
     }
 
