@@ -14,7 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      generations: {
+        Row: {
+          created_at: string
+          id: string
+          model: string | null
+          status: string | null
+          tokens: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          model?: string | null
+          status?: string | null
+          tokens?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          model?: string | null
+          status?: string | null
+          tokens?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          experience_level: string | null
+          goal: string | null
+          name: string | null
+          plan: string
+          preferred_niche: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          experience_level?: string | null
+          goal?: string | null
+          name?: string | null
+          plan?: string
+          preferred_niche?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          experience_level?: string | null
+          goal?: string | null
+          name?: string | null
+          plan?: string
+          preferred_niche?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scripts: {
+        Row: {
+          created_at: string
+          cta: string | null
+          full_script: string | null
+          hook: string | null
+          id: string
+          idea: string | null
+          is_favorite: boolean
+          niche: string | null
+          reading_time: number | null
+          retain: string | null
+          reward: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cta?: string | null
+          full_script?: string | null
+          hook?: string | null
+          id?: string
+          idea?: string | null
+          is_favorite?: boolean
+          niche?: string | null
+          reading_time?: number | null
+          retain?: string | null
+          reward?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cta?: string | null
+          full_script?: string | null
+          hook?: string | null
+          id?: string
+          idea?: string | null
+          is_favorite?: boolean
+          niche?: string | null
+          reading_time?: number | null
+          retain?: string | null
+          reward?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
