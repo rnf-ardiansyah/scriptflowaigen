@@ -1,13 +1,11 @@
-import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
 import { FilePlus, Library, Star, Clock, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
 import {
-  createScript,
   profileQuery,
   scriptsCountsQuery,
   scriptsRecentQuery,
