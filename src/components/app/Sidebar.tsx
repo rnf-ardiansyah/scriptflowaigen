@@ -19,9 +19,9 @@ const primary = [
   { to: "/generator", label: "AI Generator", icon: Sparkles },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/library", label: "All Scripts", icon: Library },
-  { to: "/library", search: { filter: "favorites" }, label: "Favorites", icon: Star },
-  { to: "/library", search: { view: "folders" }, label: "Folders", icon: FolderClosed },
-  { to: "/library", search: { sort: "recent" }, label: "Recent", icon: Clock },
+  { to: "/library", label: "Favorites", icon: Star },
+  { to: "/library", label: "Folders", icon: FolderClosed },
+  { to: "/library", label: "Recent", icon: Clock },
   { to: "/library", label: "Teleprompter", icon: MonitorPlay },
 ] as const;
 
