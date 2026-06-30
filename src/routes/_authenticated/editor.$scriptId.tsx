@@ -282,6 +282,9 @@ function EditorLoaded({ scriptId }: { scriptId: string }) {
             hint="3 detik pertama — bikin orang berhenti scroll."
             value={form.hook}
             onChange={(v) => update("hook", v)}
+            accessory={
+              <HookRegenButton scriptId={scriptId} onPick={(h) => update("hook", h)} />
+            }
           />
           <ScriptPart
             label="Retain"
