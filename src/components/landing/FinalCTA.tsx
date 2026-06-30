@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 export function FinalCTA() {
   return (
     <section className="relative px-6 py-24 md:py-32">
-      <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-electric/30 bg-gradient-to-br from-[oklch(0.22_0.06_260)] via-[oklch(0.18_0.04_260)] to-[oklch(0.16_0.03_260)] p-12 shadow-elevated md:p-16">
+      <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-electric/30 bg-gradient-to-br from-surface-elevated via-surface to-background p-12 shadow-elevated md:p-16">
         <div className="absolute inset-0 -z-10 hero-glow" />
         <div className="absolute -right-20 -top-20 -z-10 h-72 w-72 rounded-full bg-electric/30 blur-3xl" />
 
