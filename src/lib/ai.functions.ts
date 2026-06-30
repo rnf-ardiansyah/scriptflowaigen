@@ -86,10 +86,32 @@ async function callModel(
   const gateway = createLovableAiGatewayProvider(apiKey);
   const result = await generateText({
     model: gateway("google/gemini-3-flash-preview"),
-    output: Output.object({ schema: OutputSchema }),
     prompt: buildPrompt(idea, niche, tone, strict),
+    temperature: 0.8,
   });
   return result;
+}
+
+function extractJson(text: string): unknown {
+  const trimmed = text.trim();
+  // Strip code fences if present
+  const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const candidate = fenceMatch ? fenceMatch[1] : trimmed;
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    // Find first { ... last }
+    const first = candidate.indexOf("{");
+    const last = candidate.lastIndexOf("}");
+    if (first !== -1 && last > first) {
+      try {
+        return JSON.parse(candidate.slice(first, last + 1));
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
 }
 
 export const generateScript = createServerFn({ method: "POST" })
