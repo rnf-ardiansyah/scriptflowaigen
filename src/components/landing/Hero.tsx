@@ -49,23 +49,6 @@ export function Hero() {
               </a>
             </div>
 
-            <div className="mt-10 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex -space-x-2">
-                {["#5B8DEF", "#9B72CF", "#3DD3A8", "#F39C5C", "#E85D8F"].map((c, i) => (
-                  <div
-                    key={i}
-                    className="grid h-8 w-8 place-items-center rounded-full border-2 border-background text-[10px] font-semibold text-white"
-                    style={{ background: c }}
-                  >
-                    {"AKMTJ"[i]}
-                  </div>
-                ))}
-              </div>
-              <span>
-                <span className="font-semibold text-foreground">10,000+</span> creators ·{" "}
-                <span className="font-semibold text-foreground">1.2M</span> scripts generated
-              </span>
-            </div>
           </div>
 
           {/* Dashboard with floating cards */}
