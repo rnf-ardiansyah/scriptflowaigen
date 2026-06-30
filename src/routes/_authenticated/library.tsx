@@ -78,10 +78,8 @@ function LibraryPage() {
     });
   }, [scripts, search, nicheFilter, favoritesOnly]);
 
-  async function handleDelete() {
-    if (!toDelete) return;
-  }
-  // (createScript path removed; "Buat Script Baru" now routes to /new-script)
+  // "Buat Script Baru" routes to /new-script (AI generator).
+
 
 
   async function handleDuplicate(s: ScriptRow) {
