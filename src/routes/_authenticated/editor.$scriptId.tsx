@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createFileRoute, Link, useNavigate, useRouter, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
@@ -16,6 +16,7 @@ import {
   updateScript,
 } from "@/lib/scripts";
 import { NICHES } from "@/lib/niches";
+import { AIActions, HookRegenButton } from "@/components/app/AIActions";
 
 export const Route = createFileRoute("/_authenticated/editor/$scriptId")({
   head: ({ params }) => ({
@@ -190,8 +191,23 @@ function EditorLoaded({ scriptId }: { scriptId: string }) {
               <ArrowLeft className="h-4 w-4" /> Kembali ke Library
             </Link>
           </Button>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <SaveIndicator status={status} />
+            <AIActions
+              scriptId={scriptId}
+              current={{
+                hook: form.hook,
+                retain: form.retain,
+                reward: form.reward,
+                cta: form.cta,
+              }}
+              onApplyFull={(p) => {
+                dirtyRef.current = true;
+                setForm((prev) => ({ ...prev, ...p }));
+                setStatus("typing");
+              }}
+              onApplyHook={(h) => update("hook", h)}
+            />
             <Button
               variant="secondary"
               onClick={() =>
@@ -266,6 +282,9 @@ function EditorLoaded({ scriptId }: { scriptId: string }) {
             hint="3 detik pertama — bikin orang berhenti scroll."
             value={form.hook}
             onChange={(v) => update("hook", v)}
+            accessory={
+              <HookRegenButton scriptId={scriptId} onPick={(h) => update("hook", h)} />
+            }
           />
           <ScriptPart
             label="Retain"
@@ -296,15 +315,20 @@ function ScriptPart({
   hint,
   value,
   onChange,
+  accessory,
 }: {
   label: string;
   hint: string;
   value: string;
   onChange: (v: string) => void;
+  accessory?: ReactNode;
 }) {
   return (
     <Card>
-      <Label htmlFor={label}>{label}</Label>
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor={label}>{label}</Label>
+        {accessory}
+      </div>
       <p className="-mt-1 mb-2 text-[11px] text-muted-foreground">{hint}</p>
       <Textarea
         id={label}

@@ -1,61 +1,69 @@
-## AI Script Generator — Plan
+## Goal
+Tambahkan 3 fitur AI tambahan di Script Editor (`/editor/:scriptId`) yang memanfaatkan Gemini via Lovable AI Gateway, mengikuti pola loading + error handling yang sama dengan AI Script Generator, dan tetap menghormati rate-limit harian (free 5 / premium 100) serta logging ke tabel `generations`.
 
-Pakai **Lovable AI Gateway** (model default `google/gemini-3-flash-preview`). Tidak perlu API key Gemini dari user — `LOVABLE_API_KEY` sudah tersedia di server. Stack-nya TanStack Start, jadi panggil model lewat `createServerFn` (bukan Supabase Edge Function), tapi semua spesifikasi bisnis (prompt, retry, rate-limit, caching, logging) dijalankan persis seperti brief.
+## Fitur
 
-### 1. AI gateway helper
-- `src/lib/ai-gateway.server.ts` — helper standar `createLovableAiGatewayProvider(LOVABLE_API_KEY)` mengikuti pola `ai-sdk-lovable-gateway`. File `.server.ts` jadi import-protected dari client.
+### 1. AI Rewrite
+- Tombol **"Rewrite"** di header editor → dropdown 3 gaya: *Lebih Santai*, *Lebih Formal*, *Lebih Lucu*.
+- Kirim `full_script` (gabungan hook/retain/reward/cta saat ini) + niche + idea + gaya ke Gemini.
+- Prompt menginstruksikan Gemini menulis ulang **dengan tetap mempertahankan struktur 4 bagian** dan inti pesan. Respons WAJIB JSON `{hook, retain, reward, cta}`. Retry 1× kalau parse gagal (mirroring `generateScript`).
+- Hasil tidak langsung menimpa: muncul **Diff Preview Dialog** (side-by-side / stacked: "Sebelum" vs "Sesudah" per bagian) dengan tombol **Terima** (replace form + trigger auto-save) atau **Tolak** (tutup dialog, form tidak berubah).
 
-### 2. Server function `generateScript`
-File: `src/lib/ai.functions.ts` (client-safe path, dipanggil via `useServerFn`).
+### 2. AI Shorten
+- Tombol **"Persingkat Script"** → dropdown target durasi: **30 detik** / **15 detik**.
+- Hitung `target_words = target_detik × 2.5` dan kirim ke Gemini sebagai constraint keras ("jumlah kata total ≤ N, jangan melebihi"). Tetap minta output JSON 4 bagian, intinya tetap utuh.
+- Preview dialog yang sama (re-use) dengan badge tambahan "Estimasi durasi baru: XX detik". Terima/Tolak persis seperti Rewrite.
 
-`generateScript = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).inputValidator(zod({ idea, niche, tone })).handler(...)`
+### 3. AI Hook Regenerator
+- Tombol ikon kecil (✨) di samping label field **Hook**.
+- Kirim `idea` + `niche` + hook saat ini sebagai konteks; minta **3 variasi hook berbeda** dalam JSON `{variants: [string, string, string]}`. Retry 1× jika gagal.
+- Dialog menampilkan ketiga kandidat sebagai cards yang bisa diklik. Klik salah satu → set field hook + tutup dialog (auto-save jalan otomatis lewat mekanisme debounce existing). Sisanya dibuang. Ada tombol "Batal".
 
-Alur di dalam handler:
-1. **Cache check** — query `scripts` milik `context.userId` dengan `idea`, `niche`, dan `metadata->tone` yang sama persis (lihat catatan schema di bawah). Kalau ada hit terbaru, return `{ scriptId, hook, retain, reward, cta, cached: true }` tanpa panggil model dan tanpa nambah `generations`.
-2. **Profile lookup** — ambil `profiles.plan` (`free` atau `premium`). Default `free`.
-3. **Rate-limit** — hitung `generations` user dengan `status='success'` dan `created_at >= start of today (UTC)`. Limit: free 5, premium 100. Kalau lewat → throw error terstruktur `{ code: 'rate_limited', limit, plan }` yang frontend tangani.
-4. **Build prompt** — system prompt: "script writer profesional untuk short-form video Indonesia", hormati `niche` (gaya bahasa & referensi sesuai niche), tone sesuai input. Larangan eksplisit: jangan kalimat generik "Halo teman-teman" di hook. Wajib output JSON `{hook, retain, reward, cta}` saja.
-5. **Call model** dengan `generateText({ model: gateway('google/gemini-3-flash-preview'), output: Output.object({ schema: z.object({hook, retain, reward, cta}) }) })`.
-6. **Retry parsing** — kalau hasilnya invalid (Output throw / field kosong), retry 1× dengan instruksi tambahan yang lebih tegas ("HANYA JSON, tanpa markdown, tanpa code fence"). Kalau masih gagal → insert `generations` `status='failed'` lalu throw `{ code: 'parse_failed' }`.
-7. **Log success ke `generations`** — `model='gemini-flash'`, `status='success'`, `tokens = result.usage?.totalTokens ?? null`.
-8. **Compute reading time & full_script** pakai `buildFullScript` + `computeReadingTime` yang sudah ada.
-9. **Insert script baru** ke `scripts` (title default dari idea, niche, hook, retain, reward, cta, full_script, reading_time, tone disimpan supaya cache match — lihat schema note).
-10. **Return** `{ scriptId, cached: false, ...sections }`.
+## Backend (server functions)
 
-### 3. Database — perlu kolom `tone` di `scripts`
-Schema saat ini belum punya `tone`. Brief minta cache "idea + niche + tone persis sama" — butuh kolom dedicated supaya bisa indexed. Migration: tambah `scripts.tone text` (nullable, untuk script lama). Tidak nyentuh tabel/policy lain. RLS sudah scope ke user.
+Buat file baru `src/lib/ai-edits.functions.ts` agar `ai.functions.ts` (generator dari nol) tidak makin besar. Tiga server function, masing-masing pakai `requireSupabaseAuth` middleware:
 
-(`generations` sudah punya `tokens`, `model`, `status`, `user_id`, `created_at` — cukup.)
+- `rewriteScript({ scriptId, style })` → style: `"santai" | "formal" | "lucu"`.
+- `shortenScript({ scriptId, targetSeconds })` → 15 atau 30.
+- `regenerateHook({ scriptId })` → returns `{ variants: string[] }`.
 
-### 4. Frontend — flow "Buat Script Baru"
-**Route baru:** `src/routes/_authenticated/new-script.tsx` (`/new-script`).
-- Form: textarea `idea`, select `niche` (dari `src/lib/niches.ts`), select `tone` (`Santai`, `Formal`, `Persuasif`, `Edukatif`, `Storytelling`).
-- Tombol "Generate dengan AI" → memanggil `useServerFn(generateScript)`.
-- Loading state: panel besar dengan spinner + teks "Menyusun script kamu…" + sub-teks "Biasanya butuh 5–15 detik."
-- Sukses → `navigate({ to: '/editor/$scriptId', params: { scriptId } })`. Cache hit ditandai toast "Pakai hasil sebelumnya yang persis sama".
-- Error handling:
-  - `rate_limited` → card ramah: "Kuota harian (5/free, 100/premium) sudah habis", tombol "Upgrade ke Premium" (`Link to="/upgrade"`) + "Coba besok".
-  - `parse_failed` / network → card error + tombol "Coba Lagi" (re-run mutation, state form tetap utuh).
-- Tombol "Kembali" ke `/dashboard`.
+Semua tiga melakukan urutan ini (sama dengan `generateScript`, di-extract ke helper):
+1. Load script milik user (verify `user_id`); kalau `full_script` kosong → return error `empty_script` dengan pesan "Isi dulu script-nya sebelum pakai AI rewrite/shorten/regen."
+2. Cek plan + rate-limit harian (`generations` `status='success'`, hari ini, ≥ limit → error `rate_limited`). **Tidak ada cache** untuk fitur-fitur ini (rewrite/shorten/regen by-design menghasilkan varian baru tiap kali).
+3. Panggil Gemini (`google/gemini-3-flash-preview`) via `createLovableAiGatewayProvider`, dengan retry 1× pada parse failure. Pakai helper `extractJson` yang sudah ada (export-kan dari `ai.functions.ts` atau pindahkan ke `src/lib/ai-shared.server.ts`).
+4. Log ke `generations` (`model: "gemini-flash"`, status success/failed, tokens).
+5. **Tidak menulis ke tabel `scripts`** — server fn hanya mengembalikan hasil. Penulisan terjadi di client setelah user menekan "Terima" (Rewrite/Shorten) atau pilih variant (Hook). Penulisan memakai mekanisme `update()` + debounce auto-save yang sudah ada di editor — TIDAK butuh perubahan logika save.
 
-**Update CTA yang sudah ada:**
-- `dashboard.tsx`: dua tombol "Buat Script Baru" / "Buat Script Pertama" → `Link to="/new-script"`.
-- `library.tsx`: tombol yang sama → `Link to="/new-script"`.
-- Hapus alur lama "buka editor dengan id 'new'" hanya jika ada referensi — biarkan editor.$scriptId tetap support id eksisting (sudah berfungsi).
+Error shape konsisten dengan `generateScript`: `Error & { lovable: { code: "rate_limited" | "parse_failed" | "ai_unavailable" | "empty_script", message, plan?, limit? } }`.
 
-### 5. Editor tidak berubah
-Karena server function langsung create row dengan section terisi, lalu redirect ke `/editor/:id`, auto-save & reading_time existing langsung jalan untuk review/edit manual.
+## Frontend (editor)
 
-### 6. Test
-Setelah build:
-1. Hit `generateScript` lewat preview: idea baru → script masuk editor, reading_time auto, ada di library.
-2. Generate idea identik → toast cache hit, `generations` tidak bertambah.
-3. Simulasi limit dengan insert manual ke `generations` (5 row hari ini) → cek pesan rate-limit + tombol upgrade.
-4. Cek `ai_gateway_logs--list_ai_gateway_requests` untuk verifikasi panggilan model.
+`src/routes/_authenticated/editor.$scriptId.tsx`:
+- Tambahkan header action group di sebelah "Buka di Teleprompter":
+  - `RewriteMenu` (DropdownMenu shadcn — sudah ada di `src/components/ui/dropdown-menu.tsx`? cek; jika tidak, pakai `<details>`/popover sederhana berbasis komponen yang sudah ada agar konsisten).
+  - `ShortenMenu` dengan 2 opsi durasi.
+- Pada label Hook tambah tombol icon ✨ kecil yang membuka `HookVariantsDialog`.
+- Komponen baru `src/components/app/PreviewDiffDialog.tsx`: dialog membandingkan 4 bagian (kiri "Sebelum" abu-abu, kanan "Sesudah" highlight electric), tombol Terima/Tolak. Reusable untuk Rewrite & Shorten.
+- Komponen baru `src/components/app/HookVariantsDialog.tsx`: list 3 card, klik untuk pilih.
+- Loading state: tombol berubah jadi `<Loader2 spin/>` + label "Memproses…" + disabled. Setelah selesai, buka dialog.
+- Error handling konsisten (pola yang sama dengan `/new-script`):
+  - `rate_limited` → `toast` ramah + tombol "Upgrade" yang link ke `/upgrade`.
+  - `parse_failed` / generic → `toast.error` dengan pesan + tombol implicit "coba lagi" (user klik tombol lagi).
+  - `empty_script` → toast info.
+- Saat user "Terima":
+  - Rewrite/Shorten: panggil `update("hook"|"retain"|"reward"|"cta", …)` untuk keempat field → mekanisme debounce 2s yang sudah ada menyimpan otomatis ke DB; SaveIndicator existing menampilkan progress.
+  - Hook regen: panggil `update("hook", chosen)`.
+- Invalidate `["scripts"]` setelah save selesai (sudah ditangani auto-save existing).
 
-### Files
-- New: `src/lib/ai-gateway.server.ts`, `src/lib/ai.functions.ts`, `src/routes/_authenticated/new-script.tsx`
-- Migration: tambah `scripts.tone`
-- Edit: `src/routes/_authenticated/dashboard.tsx`, `src/routes/_authenticated/library.tsx`, `src/lib/scripts.ts` (extend `ScriptRow` + `createScript` agar terima `tone`)
+## Rate-limit & logging
+- Tiga server fn baru ikut akumulasi `generations` yang sama → otomatis terhitung ke kuota harian user bersama generator dari nol. Tidak butuh kolom baru.
 
-Tidak ada Edge Function yang dibuat. `LOVABLE_API_KEY` sudah ada — tidak perlu secret tambahan.
+## Files
+- **New**: `src/lib/ai-edits.functions.ts`, `src/lib/ai-shared.server.ts` (extract helper `buildLimitCheck`, `callGemini`, `extractJson`), `src/components/app/PreviewDiffDialog.tsx`, `src/components/app/HookVariantsDialog.tsx`.
+- **Modified**: `src/lib/ai.functions.ts` (re-export helpers dari `ai-shared.server.ts` agar tetap satu sumber), `src/routes/_authenticated/editor.$scriptId.tsx` (tombol + dialogs + mutation calls).
+- **No DB migration needed.**
+
+## Out of scope
+- Tidak menyentuh teleprompter, generator dari nol, atau struktur tabel.
+- Tidak menambah caching untuk rewrite/shorten/regen (sengaja, variasi adalah fitur).
+- Tidak membuat versi history / undo permanen — hanya konfirmasi Terima/Tolak sebelum overwrite.
