@@ -78,15 +78,11 @@ function LibraryPage() {
     });
   }, [scripts, search, nicheFilter, favoritesOnly]);
 
-  async function handleCreate() {
-    try {
-      const s = await createScript({ niche: profile?.preferred_niche ?? null });
-      invalidate();
-      navigate({ to: "/editor/$scriptId", params: { scriptId: s.id } });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Gagal membuat script");
-    }
+  async function handleDelete() {
+    if (!toDelete) return;
   }
+  // (createScript path removed; "Buat Script Baru" now routes to /new-script)
+
 
   async function handleDuplicate(s: ScriptRow) {
     try {
