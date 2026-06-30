@@ -119,7 +119,7 @@ const themeInitScript = `(function(){try{var t=localStorage.getItem('scriptflow-
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
