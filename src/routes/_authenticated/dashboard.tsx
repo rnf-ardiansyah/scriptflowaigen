@@ -32,20 +32,6 @@ function DashboardPage() {
   const { data: profile } = useSuspenseQuery(profileQuery());
   const { data: counts } = useSuspenseQuery(scriptsCountsQuery());
   const { data: recent } = useSuspenseQuery(scriptsRecentQuery(5));
-  const navigate = useNavigate();
-  const router = useRouter();
-  const qc = useQueryClient();
-
-  async function handleCreate() {
-    try {
-      const s = await createScript({ niche: profile?.preferred_niche ?? null });
-      qc.invalidateQueries({ queryKey: ["scripts"] });
-      navigate({ to: "/editor/$scriptId", params: { scriptId: s.id } });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Gagal membuat script";
-      toast.error(msg);
-    }
-  }
 
   const displayName = profile?.name?.trim() || "Creator";
 
@@ -62,8 +48,10 @@ function DashboardPage() {
               Niche: <span className="text-foreground">{profile?.preferred_niche ?? "—"}</span>
             </p>
           </div>
-          <Button size="lg" onClick={handleCreate}>
-            <FilePlus className="h-4 w-4" /> Buat Script Baru
+          <Button asChild size="lg">
+            <Link to="/new-script">
+              <FilePlus className="h-4 w-4" /> Buat Script Baru
+            </Link>
           </Button>
         </div>
 
