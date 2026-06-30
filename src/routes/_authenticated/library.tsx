@@ -608,10 +608,10 @@ function FolderTab({
   return (
     <div
       className={
-        "group flex items-center gap-1 rounded-xl border transition-colors " +
+        "group flex shrink-0 items-center gap-1 rounded-xl border transition-colors md:shrink " +
         (active
           ? "border-electric/40 bg-electric/10"
-          : "border-transparent hover:bg-surface")
+          : "border-border/40 bg-surface/40 hover:bg-surface md:border-transparent md:bg-transparent")
       }
     >
       <button
