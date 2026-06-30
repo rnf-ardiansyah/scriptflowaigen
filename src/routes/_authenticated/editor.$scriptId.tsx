@@ -16,6 +16,7 @@ import {
   updateScript,
 } from "@/lib/scripts";
 import { NICHES } from "@/lib/niches";
+import { AIActions, HookRegenButton } from "@/components/app/AIActions";
 
 export const Route = createFileRoute("/_authenticated/editor/$scriptId")({
   head: ({ params }) => ({
