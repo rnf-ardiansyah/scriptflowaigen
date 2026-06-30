@@ -1,84 +1,74 @@
-… (Plan)
+## Goal
 
-## What I'll build
+Extract the visual language already shipped on `/` (Landing Page) into a reusable design system, then scaffold placeholder routes for the rest of the app — without touching the Landing Page itself.
 
-A single production-quality landing page for **ScriptFlow** at `/` (replacing the placeholder in `src/routes/index.tsx`), styled as a Linear/Vercel-class dark SaaS site. All UI is hand-built React + Tailwind v4 using semantic tokens — no stock illustrations, no emoji, Lucide icons only.
+## 1. Design system extraction (no visual change to `/`)
 
-## Design system (src/styles.css)
+Source of truth: tokens already defined in `src/styles.css` plus patterns used across `src/components/landing/*`.
 
-- Force dark by default: add `dark` class to `<html>` in `__root.tsx` (and set body bg).
-- Token overhaul in `src/styles.css` `:root` + `.dark`:
-  - `--background`: very dark navy (~oklch 0.16 0.03 260)
-  - `--surface` / `--card`: slightly lighter navy panels
-  - `--primary` (navy blue) and `--accent` (electric blue ~oklch 0.7 0.2 250)
-  - `--foreground` near-white, `--muted-foreground` cool gray
-  - `--border`: subtle white/8%
-  - Custom: `--gradient-hero` (radial electric-blue glow), `--shadow-glow`, `--shadow-elevated`
-- Typography: load **Inter** via `<link>` in `__root.tsx` head (Google Fonts), register `--font-sans` in `@theme`.
-- Radius scale tuned to XL (cards 20px, buttons rounded-xl).
-- Custom utilities: `.glass-panel` (used only on floating dashboard cards / nav), `.text-gradient`, scroll fade-in animation.
+**Already in place — keep as-is, just document:**
+- Color tokens (oklch) in `:root`: `--background`, `--foreground`, `--surface`, `--surface-elevated`, `--card`, `--primary`, `--secondary`, `--muted`, `--muted-foreground`, `--electric` (accent), `--electric-foreground`, `--border`, `--input`, `--ring`, `--destructive`.
+- Font: Inter loaded via `<link>` in `__root.tsx`, exposed as `--font-sans` in `@theme`.
+- Radius scale (`--radius: 0.75rem`) with sm/md/lg/xl/2xl/3xl derivatives.
+- Shadows: `--shadow-glow`, `--shadow-elevated`, `--shadow-soft`.
+- Utilities: `glass-panel`, `text-gradient`, `text-gradient-accent`, `hero-glow`, `grid-bg`, plus `animate-fade-up / float / caret`.
 
-## File structure
+**New shared primitives** (so future pages don't re-implement landing patterns):
+- `src/components/app/Button.tsx` — variants `primary` (electric, shadow-glow, rounded-xl), `secondary` (surface + border), `ghost` (transparent → hover surface-elevated), sizes sm/md/lg. Mirrors the CTA styling used in Hero/Navbar/Pricing.
+- `src/components/app/Card.tsx` — `rounded-2xl border border-border bg-surface` with optional `glow` and `glass` variants; matches Bento + Pricing cards.
+- `src/components/app/Input.tsx` — `rounded-xl border border-border bg-background/60 px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 ring-electric/40`.
+- `src/components/app/Badge.tsx` — pill style used by "Recommended" / "New" chips (electric + muted variants).
+- `src/components/app/Dialog.tsx` — thin wrapper around existing `components/ui/dialog.tsx` re-styled with `glass-panel`, rounded-2xl, shadow-elevated to match landing visuals.
+- `src/components/app/SectionShell.tsx` — page chrome (max-w-7xl, px-6, dark bg + optional `hero-glow` backdrop) so internal pages feel like the landing.
+
+**Layout used by all non-landing routes:**
+- `src/components/app/AppLayout.tsx` — sticky blurred top bar (reuses landing `Logo`, same scroll-blur treatment as `Navbar`) + main area. No sidebar yet (kept minimal; routes are placeholders).
+- `src/components/app/AuthLayout.tsx` — centered card variant for `/login`, `/register`, `/onboarding`, with `hero-glow` + `grid-bg` backdrop matching Hero.
+
+**Docs file:** `src/components/app/README.md` — short table of tokens + which primitive to use where. Pure documentation, no runtime impact.
+
+## 2. Routes (file-based, TanStack Start)
+
+All under `src/routes/` so the router plugin regenerates `routeTree.gen.ts` automatically. Each route declares its own `head()` with a unique title + description.
 
 ```
-src/routes/index.tsx                 # composes all sections + SEO head()
-src/components/landing/
-  Navbar.tsx                         # sticky, blurs on scroll
-  Hero.tsx                           # headline, CTAs, mock dashboard
-  DashboardMock.tsx                  # reusable realistic SaaS dashboard UI
-  ProblemSection.tsx                 # 4 pain cards + broken-vs-scriptflow flow
-  SolutionSection.tsx                # one workspace narrative + illustration
-  FeaturesBento.tsx                  # bento grid w/ mini UI previews
-  ProductShowcase.tsx                # multi-screen floating glass panels
-  HowItWorks.tsx                     # 5-step timeline
-  Benefits.tsx                       # 2-column + stat cards
-  Pricing.tsx                        # Free vs Premium (recommended)
-  FAQ.tsx                            # shadcn Accordion
-  FinalCTA.tsx                       # gradient emotional CTA
-  Footer.tsx
-  primitives/                        # small shared bits: SectionHeader, GradientOrb, GlowCard
+src/routes/
+  login.tsx                 -> /login           (AuthLayout, placeholder form)
+  register.tsx              -> /register        (AuthLayout, placeholder form)
+  onboarding.tsx            -> /onboarding      (AuthLayout, 3-step stub)
+  dashboard.tsx             -> /dashboard       (AppLayout, empty-state card)
+  library.tsx               -> /library         (AppLayout, grid stub of script cards)
+  editor.$scriptId.tsx      -> /editor/$scriptId   (AppLayout, two-pane stub)
+  teleprompter.$scriptId.tsx -> /teleprompter/$scriptId (AppLayout, prompter preview stub)
+  profile.tsx               -> /profile         (AppLayout, profile card stub)
+  upgrade.tsx               -> /upgrade         (AppLayout, pricing recap)
 ```
 
-Each section is self-contained, lazy-friendly, and uses only semantic tokens.
+Each placeholder page:
+- Uses the new design-system primitives (Button, Card, Badge).
+- Has a clear heading + "Coming soon" / placeholder body — no business logic, no fetch, no forms wired up.
+- Includes `errorComponent` / `notFoundComponent` only if it has a loader (none do at this stage, so not required).
 
-## Section build notes
+Dynamic routes (`editor.$scriptId`, `teleprompter.$scriptId`) read `Route.useParams()` to display the id and prove the route resolves.
 
-- **Navbar**: transparent → adds `bg-background/70 backdrop-blur-xl border-b` after 8px scroll (scroll listener with rAF). Logo = inline SVG mark + wordmark.
-- **Hero**: radial accent glow background, big bold H1, two CTAs (primary electric, secondary outline), small social-proof row (avatar stack with initials, "10k+ creators", live "1,284 scripts generated today" with count-up). Right side: `DashboardMock` with 2 floating glass cards (AI generation typing effect, teleprompter preview).
-- **DashboardMock**: realistic sidebar (Workspace, Recent, Folders, Favorites), top bar (search, notification, avatar, Premium badge, usage meter), main panel switching between AI generator and script editor. Used in Hero + Showcase at different crops.
-- **Problem**: 4 pain cards (Lucide icons: VideoOff, Zap, LayoutGrid, FileX). Below: two parallel vertical flow diagrams — chaotic "ChatGPT → Notes → Edit → Teleprompter → Record → Repeat" vs clean ScriptFlow flow, connected by arrows.
-- **Solution**: large statement + small workspace illustration (reuses DashboardMock at reduced scale).
-- **FeaturesBento**: 6–8 bento cells of varying sizes; each cell shows icon + title + one-liner + a tiny inline mock (e.g. AI Generator card shows a faux prompt input + generating dots; Teleprompter card shows scrolling text lines; Library card shows script list rows). Covers all listed features (smaller features grouped in one "And more" cell with chips).
-- **ProductShowcase**: stacked overlapping glass panels rotated subtly (AI Generator, Editor, Teleprompter, History) on a soft accent glow.
-- **HowItWorks**: 5 numbered steps with connecting line; each step has Lucide icon + title + 1-line description.
-- **Benefits**: two columns of bullet cards; below, 3 stat cards (e.g. "10× faster", "50k scripts", "2 min average").
-- **Pricing**: 2 cards, Premium with "Recommended" badge + accent border glow.
-- **FAQ**: shadcn `<Accordion>` (already installed via shadcn presumably; if missing, install or build minimal).
-- **FinalCTA**: full-bleed dark gradient panel with floating mini dashboard tile.
-- **Footer**: 4 columns + socials (Lucide icons).
+## 3. Landing CTAs → `/register`
 
-## Animations
+Update CTA `href="#pricing"` / `href="#"` to TanStack `<Link to="/register">` in:
+- `Navbar.tsx` — "Start Free" button (the "Login" link → `/login`).
+- `Hero.tsx` — primary "Start Free" CTA. ("Watch Demo" stays as `#showcase` anchor.)
+- `Pricing.tsx` — Free plan "Start Free" → `/register`, Premium "Get Premium" → `/upgrade`.
+- `FinalCTA.tsx` — "Start Free Today" → `/register`, "Book a Demo" stays `#`.
 
-- `fade-in` + `slide-up` keyframes triggered by an `IntersectionObserver` hook (`useInView`) on each section.
-- Hero AI typing effect: `useEffect` interval revealing characters.
-- Number count-up hook for social proof + stat cards.
-- Hover: scale-[1.02] + glow shadow on cards and buttons; transition-all 200ms.
-- No heavy libs — pure CSS + small hooks.
+No structural / visual changes to Landing sections — only `href`/component swap from `<a>` to `<Link>` where the destination is now an internal route. All other anchor links (`#features`, `#pricing`, etc.) remain as smooth-scroll anchors so the Landing Page renders exactly as it does today.
 
-## SEO (head() in index.tsx)
+## Out of scope (this stage)
 
-- title: "ScriptFlow — AI Script Workspace for Short Video Creators"
-- meta description (<160 chars), og:title/description/type=website, twitter:card=summary_large_image
-- canonical "/" via `links`
-- JSON-LD SoftwareApplication script via `scripts`
-- Single H1 in Hero, semantic `<section>` / `<nav>` / `<footer>`.
-
-## Out of scope
-
-- No backend, no auth, no Lovable Cloud — the CTAs are visual (link to "#" / scroll to pricing).
-- No generated raster images; dashboard mockups are pure HTML/CSS/SVG so they stay crisp and on-brand.
-- No additional routes (Features/Pricing/FAQ are anchors on this single landing page, per the brief's nav structure).
+- No backend, no Lovable Cloud, no auth, no DB.
+- No real forms validation, no state persistence.
+- No restyling of any Landing section's content or layout.
 
 ## Verification
 
-After build: read the page in the preview, check that dark mode is active, sections render, no console errors, and the layout holds at 1280 / 768 / 375 widths.
+- Visit `/` → identical to current screenshot (only difference: CTAs now navigate via client router to `/register` / `/login`).
+- Visit each new route directly → renders placeholder page with consistent dark theme, no 404, no console error.
+- `routeTree.gen.ts` regenerates with the new routes (do not hand-edit).
