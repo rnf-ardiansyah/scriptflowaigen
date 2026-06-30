@@ -27,7 +27,7 @@ export type GenerateScriptResult = {
 };
 
 export type GenerateScriptError = {
-  code: "rate_limited" | "parse_failed" | "ai_unavailable";
+  code: "rate_limited" | "parse_failed" | "ai_unavailable" | "script_limit_reached";
   message: string;
   limit?: number;
   plan?: string;
