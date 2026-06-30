@@ -1,50 +1,51 @@
-# Plan — Verify Auth & DB (no rebuild required)
 
-Everything in your spec is already implemented from earlier turns. Plan: verify state, fix only true gaps, and run an end-to-end smoke test. **No destructive changes** to the existing AI/teleprompter features — those stay as-is per "jangan hapus" rule, but no new AI work is added here.
+## Tujuan tahap ini
 
-## What's already in place (confirmed by reading files)
+Bangun ulang **AI Generator** sesuai alur baru (preview hasil di tempat, skeleton loading, dummy output, lalu save/teleprompter), sambil memastikan Dashboard, Library, dan Editor sudah cocok dengan spec. Tahap ini **tidak** menyentuh integrasi Gemini sungguhan — kode `generateScript` server fn dibiarkan utuh agar bisa dihidupkan kembali di prompt berikutnya, tapi tombol Generate di UI memakai jalur dummy lokal.
 
-### Database (Lovable Cloud / Supabase, RLS active)
-- `profiles`: `user_id`, `name`, `preferred_niche`, `experience_level`, `goal`, `plan` (default `'free'`), `created_at` — RLS `auth.uid() = user_id`.
-- `scripts`: `id`, `user_id`, `title`, `idea`, `niche`, `hook`, `retain`, `reward`, `cta`, `full_script`, `reading_time`, `is_favorite`, `created_at`, `updated_at` — RLS `auth.uid() = user_id`.
-- `generations`: `id`, `user_id`, `tokens`, `model`, `status`, `created_at` — RLS `auth.uid() = user_id`.
-- Trigger `handle_new_user` auto-creates a profile row on signup.
+## Status saat ini vs spec
 
-### Authentication
-- Email/password register (`src/routes/register.tsx`) and login (`src/routes/login.tsx`).
-- Google OAuth via `lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin })` on both pages.
-- Protected routes: `src/routes/_authenticated/route.tsx` redirects to `/login` if no user (covers `/dashboard`, `/library`, `/editor/$scriptId`, `/teleprompter/$scriptId`, `/profile`, `/upgrade`, `/onboarding`, `/generator`).
-- Sign-out button in workspace sidebar (`AppLayout` → `SidebarContent`) clears cache + signs out + navigates to `/login`.
-- Root `onAuthStateChange` listener invalidates router/queries and bounces to `routeAfterAuth()` (= `/onboarding` if profile incomplete, else `/dashboard`).
+| Area | Status | Aksi |
+|---|---|---|
+| Dashboard (greeting + niche, total/favorit, 5 recent) | ✅ sudah ada | tidak diubah |
+| Library (grid, search, filter niche & favorit, edit/duplicate/favorite/delete + konfirmasi, reading_time, empty state ke /generator) | ✅ sudah ada | tidak diubah |
+| Editor (title/niche/idea + 4 textarea hook/retain/reward/cta, auto-save 2s, indikator "Tersimpan", reading_time real-time ⌈kata/2.5⌉, tombol Teleprompter & kembali ke Library) | ✅ sudah ada | tidak diubah |
+| App Shell sidebar konsisten + indikator kuota | ✅ sudah ada (`Sidebar.tsx` + `QuotaPanel`) | biarkan dummy untuk halaman generator |
+| AI Generator alur baru (durasi+gaya, preview in-place, skeleton, struktur hook/retain/reward/cta, reading time, Save+Teleprompter) | ❌ masih versi lama (langsung redirect ke editor) | **rebuild** |
 
-### Onboarding (`/onboarding`)
-- 3 questions matching spec exactly:
-  - Niche dropdown: Skincare, Fashion, F&B, Edukasi, Finansial, Gaming, Lifestyle, Property, Beauty, Tech.
-  - Experience level radios: Pemula, Menengah, Berpengalaman.
-  - Goal text input.
-- Upserts into `profiles` then navigates to `/dashboard`. If profile already complete, auto-skips on mount.
+## Perubahan AI Generator (`src/routes/_authenticated/generator.tsx`)
 
-## Tiny fix to land
+1. **Header**: judul "AI Generator" + badge kanan menampilkan setting aktif, contoh `60s · Hook style`.
+2. **Card setting** kecil di atas form: dropdown `Durasi target` (30s / 60s / 90s) dan dropdown `Gaya` (Hook style / Story style / Listicle). State lokal, default 60s + Hook style.
+3. **Card Idea**: label "Idea", textarea (placeholder: *"5 kesalahan pemula bikin konten TikTok"*), tombol **Generate** (memanggil simulasi, bukan server fn).
+4. **Status Generating**: saat tombol ditekan, render card hasil dengan:
+   - Header "Generating…" + timer kecil (elapsed detik, update tiap 100ms).
+   - 4 blok skeleton (hook/retain/reward/cta), tiap blok berisi 2-4 baris `<div>` abu animasi `animate-pulse`. Baris diisi (skeleton diganti teks final) bertahap pakai `setTimeout` per section (≈ 600-900ms antar section, total ±3 detik).
+5. **Hasil dummy**: helper lokal `buildDummyScript({idea, niche, duration, style})` menghasilkan teks template terstruktur yang menyisipkan `idea` user. Contoh hook: *"Stop scroll dulu — kalau kamu pernah {idea}, video ini wajib kamu tonton."* Variasi sesuai `style` (Hook/Story/Listicle) dan panjang sesuai `duration`.
+6. **Setelah selesai**: tampilkan 4 section terpisah (Hook, Retain, Reward, CTA) dalam card berbeda + label. Di bawah: badge `~XXs read` dihitung `Math.ceil(totalWords / 2.5)`.
+7. **Aksi**: dua tombol di bawah hasil.
+   - **Save to Library** → insert ke tabel `scripts` lewat helper baru `createDummyScript()` di `src/lib/scripts.ts` (insert `title` = 60 char pertama idea, `idea`, `niche`, `tone` (= style), `hook/retain/reward/cta`, `full_script`, `reading_time`). Setelah sukses simpan `scriptId` ke state, toast sukses, invalidasi query `["scripts"]`, **tetap di halaman** agar tombol Teleprompter aktif. Tombol berubah jadi "Buka di Editor" → `/editor/$scriptId`.
+   - **Open Teleprompter** → disabled (`opacity-50 cursor-not-allowed`) sampai `scriptId` ada; aktif setelah save, link ke `/teleprompter/$scriptId`.
+8. Tombol "Generate Ulang" kecil di atas hasil untuk reset state (hapus hasil + scriptId, kembali ke form).
+9. Hilangkan import `generateScript` dari `ai.functions` di file ini (file tersebut tetap ada untuk prompt selanjutnya). Hilangkan `ErrorCard` rate-limit (tidak relevan untuk dummy); cukup toast error generik kalau idea < 3 karakter.
 
-One small redirect target mismatch — protected route guard sends to `/login` (correct per spec), but I should double-check the `_authenticated/route.tsx` target matches `/login` (not `/auth`). If it already does, no change. (Reading shows it redirects to `/login` ✅.)
+## Helper baru di `src/lib/scripts.ts`
 
-So: **no code changes required**. Plan reduces to verification.
+Tambahkan fungsi client-side `createDummyScript(input)` (pakai `supabase` browser client) yang `insert` row baru ke `scripts` dengan kolom-kolom dummy + `user_id = auth.uid()`, lalu return `id`. Tangani error `free_plan_script_limit_reached` dengan pesan ramah ("Library penuh, upgrade ke Premium.").
 
-## End-to-end smoke test (Playwright in shell, headless)
+## Verifikasi (build mode, setelah persetujuan)
 
-1. Open `/register`, create a fresh `e2e+<timestamp>@example.com` account with password `Passw0rd!` and name "E2E".
-2. Expect redirect to `/onboarding`.
-3. Fill niche=`Skincare`, level=`Pemula`, goal=`Konsisten posting 3 video / minggu`, submit.
-4. Expect redirect to `/dashboard`. Capture screenshot.
-5. Click "Sign out" in the sidebar (open mobile drawer if viewport <lg). Expect redirect to `/login`.
-6. Log back in with same credentials. Expect direct redirect to `/dashboard` (no onboarding loop). Capture screenshot.
-7. Open browser console log dump → assert zero errors.
-8. Read `profiles` table via `supabase--read_query` and confirm exactly one row exists for the new user with the values from step 3.
+Jalankan Playwright headless di sandbox dengan session ter-inject:
+1. Buka `/generator`, ketik idea, ganti durasi ke 90s + Listicle.
+2. Klik Generate → screenshot skeleton + timer berjalan.
+3. Tunggu selesai → cek 4 section + `~..s read` muncul.
+4. Klik Save → cek toast, tombol Teleprompter aktif, `scriptId` tersimpan.
+5. Buka `/library` → script baru muncul; favorit + duplicate + delete + search bekerja.
+6. Buka editor script tersebut → auto-save indikator "Tersimpan" muncul, reading_time live update.
+7. Klik Teleprompter → halaman teleprompter render tanpa error.
 
-If any assertion fails, drill into the failing step (network log + DOM snapshot) and patch only the offending code.
+## Catatan teknis (untuk reviewer)
 
-## Out of scope (untouched)
-
-- AI generator, rewrite, hook regen, teleprompter — kept as they are; no new AI logic.
-- Landing page, design system, sidebar layout — unchanged.
-- No schema migrations, no new tables, no new RLS policies.
+- `src/lib/ai.functions.ts` & `ai-shared.server.ts` **tidak dihapus**; akan dipakai lagi saat Gemini disambungkan.
+- Tidak ada perubahan skema database — kolom `scripts` sudah lengkap (`hook/retain/reward/cta/full_script/reading_time/tone/niche`).
+- Tidak ada perubahan pada Sidebar / QuotaPanel; quota saat ini sudah berbasis data nyata, jadi tetap akurat walau generate-nya dummy (dummy insert tetap kena trigger limit 20).
