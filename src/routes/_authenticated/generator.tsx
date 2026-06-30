@@ -281,7 +281,7 @@ function GeneratorPage() {
         </Card>
 
         {/* Result / Skeleton */}
-        {phase !== "idle" && result && (
+        {(phase === "generating" || phase === "done") && (
           <Card className="mt-6 space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -310,72 +310,106 @@ function GeneratorPage() {
 
             <SectionBlock
               label="Hook"
-              text={result.hook}
+              text={result?.hook ?? ""}
               ready={filled.has("hook")}
               lines={2}
             />
             <SectionBlock
               label="Retain"
-              text={result.retain}
+              text={result?.retain ?? ""}
               ready={filled.has("retain")}
               lines={4}
             />
             <SectionBlock
               label="Reward"
-              text={result.reward}
+              text={result?.reward ?? ""}
               ready={filled.has("reward")}
               lines={3}
             />
             <SectionBlock
               label="CTA"
-              text={result.cta}
+              text={result?.cta ?? ""}
               ready={filled.has("cta")}
               lines={2}
             />
 
-            {phase === "done" && (
+            {phase === "done" && scriptId && (
               <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-muted-foreground">
                   Estimasi durasi:{" "}
                   <span className="font-medium text-foreground">~{totalReadSec} detik</span>
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {scriptId ? (
-                    <Button asChild variant="secondary">
-                      <Link to="/editor/$scriptId" params={{ scriptId }}>
-                        <Pencil className="h-4 w-4" /> Buka di Editor
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button onClick={handleSave} disabled={saving}>
-                      {saving ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                      Save to Library
-                    </Button>
-                  )}
-                  {scriptId ? (
-                    <Button asChild>
-                      <Link to="/teleprompter/$scriptId" params={{ scriptId }}>
-                        <Play className="h-4 w-4" /> Open Teleprompter
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button
-                      disabled
-                      title="Simpan dulu untuk membuka Teleprompter"
-                      className="cursor-not-allowed opacity-50"
-                    >
+                  <Button asChild variant="secondary">
+                    <Link to="/editor/$scriptId" params={{ scriptId }}>
+                      <Pencil className="h-4 w-4" /> Buka di Editor
+                    </Link>
+                  </Button>
+                  <Button asChild>
+                    <Link to="/teleprompter/$scriptId" params={{ scriptId }}>
                       <Play className="h-4 w-4" /> Open Teleprompter
-                    </Button>
-                  )}
+                    </Link>
+                  </Button>
                 </div>
               </div>
             )}
           </Card>
         )}
+
+        {phase === "limit_reached" && (
+          <Card className="mt-6 space-y-4 border-amber-500/30 bg-amber-500/5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-500">
+                <Crown className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold">Limit harian tercapai</h3>
+                <p className="text-sm text-muted-foreground">
+                  {errorMessage ||
+                    "Kamu sudah mencapai batas generate hari ini."}{" "}
+                  Upgrade ke Premium untuk lanjut bikin script tanpa batas harian
+                  yang ketat.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild>
+                <Link to="/upgrade">
+                  <Crown className="h-4 w-4" /> Upgrade ke Premium
+                </Link>
+              </Button>
+              <Button variant="ghost" onClick={reset}>
+                Tutup
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {phase === "error" && (
+          <Card className="mt-6 space-y-4 border-destructive/30 bg-destructive/5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold">Gagal membuat script</h3>
+                <p className="text-sm text-muted-foreground">
+                  {errorMessage ||
+                    "Terjadi kesalahan saat menghubungi AI. Coba lagi sebentar."}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handleGenerate}>
+                <RotateCcw className="h-4 w-4" /> Coba Lagi
+              </Button>
+              <Button variant="ghost" onClick={reset}>
+                Tutup
+              </Button>
+            </div>
+          </Card>
+        )}
+
       </div>
     </AppLayout>
   );
