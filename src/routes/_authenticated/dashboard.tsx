@@ -1,9 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
-import { Sparkles, FilePlus, Library, Clock, Mic } from "lucide-react";
+import { FilePlus, Library, Star, Clock, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
+import {
+  createScript,
+  profileQuery,
+  scriptsCountsQuery,
+  scriptsRecentQuery,
+} from "@/lib/scripts";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -12,10 +20,37 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "description", content: "Your ScriptFlow workspace overview." },
     ],
   }),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(profileQuery()),
+      context.queryClient.ensureQueryData(scriptsCountsQuery()),
+      context.queryClient.ensureQueryData(scriptsRecentQuery(5)),
+    ]);
+  },
   component: DashboardPage,
 });
 
 function DashboardPage() {
+  const { data: profile } = useSuspenseQuery(profileQuery());
+  const { data: counts } = useSuspenseQuery(scriptsCountsQuery());
+  const { data: recent } = useSuspenseQuery(scriptsRecentQuery(5));
+  const navigate = useNavigate();
+  const router = useRouter();
+  const qc = useQueryClient();
+
+  async function handleCreate() {
+    try {
+      const s = await createScript({ niche: profile?.preferred_niche ?? null });
+      qc.invalidateQueries({ queryKey: ["scripts"] });
+      navigate({ to: "/editor/$scriptId", params: { scriptId: s.id } });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Gagal membuat script";
+      toast.error(msg);
+    }
+  }
+
+  const displayName = profile?.name?.trim() || "Creator";
+
   return (
     <AppLayout>
       <div className="mx-auto max-w-7xl px-6">
@@ -23,64 +58,78 @@ function DashboardPage() {
           <div>
             <Badge variant="muted">Workspace</Badge>
             <h1 className="mt-3 text-3xl font-bold tracking-tight text-gradient md:text-4xl">
-              Welcome back 👋
+              Halo, {displayName} 👋
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Pick up where you left off, or start a new script.
+              Niche: <span className="text-foreground">{profile?.preferred_niche ?? "—"}</span>
             </p>
           </div>
-          <Button asChild size="lg">
-            <Link to="/editor/$scriptId" params={{ scriptId: "new" }}>
-              <FilePlus className="h-4 w-4" /> New Script
+          <Button size="lg" onClick={handleCreate}>
+            <FilePlus className="h-4 w-4" /> Buat Script Baru
+          </Button>
+        </div>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
+          <StatCard icon={Library} label="Total scripts" value={counts.total} />
+          <StatCard icon={Star} label="Favorit" value={counts.favorites} />
+        </div>
+
+        <div className="mt-10 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight">Script terbaru</h2>
+            <p className="text-sm text-muted-foreground">5 script terakhir kamu sentuh.</p>
+          </div>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/library">
+              Lihat semua <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          <StatCard icon={Sparkles} label="AI generations today" value="0 / 5" />
-          <StatCard icon={Library} label="Scripts saved" value="0" />
-          <StatCard icon={Clock} label="Time saved" value="0 min" />
-        </div>
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-          <Card variant="glow">
+        {recent.length === 0 ? (
+          <Card className="mt-4" variant="muted">
             <CardHeader>
-              <CardTitle>Generate your first script</CardTitle>
+              <CardTitle>Belum ada script</CardTitle>
               <CardDescription>
-                Type an idea, pick a style, and let ScriptFlow draft a short-video script in seconds.
+                Mulai dengan membuat script pertamamu — isi manual atau lanjutkan lewat AI nanti.
               </CardDescription>
             </CardHeader>
-            <Button asChild>
-              <Link to="/editor/$scriptId" params={{ scriptId: "new" }}>
-                <Sparkles className="h-4 w-4" /> Start with AI
-              </Link>
+            <Button onClick={handleCreate}>
+              <FilePlus className="h-4 w-4" /> Buat Script Pertama
             </Button>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Practice mode</CardTitle>
-              <CardDescription>
-                Open any script in the built-in teleprompter and rehearse before recording.
-              </CardDescription>
-            </CardHeader>
-            <Button asChild variant="secondary">
-              <Link to="/teleprompter/$scriptId" params={{ scriptId: "demo" }}>
-                <Mic className="h-4 w-4" /> Try Teleprompter
-              </Link>
-            </Button>
-          </Card>
-        </div>
-
-        <Card className="mt-10" variant="muted">
-          <CardHeader>
-            <CardTitle>Recent scripts</CardTitle>
-            <CardDescription>You haven't created any scripts yet.</CardDescription>
-          </CardHeader>
-          <div className="rounded-xl border border-dashed border-border bg-background/40 p-10 text-center text-sm text-muted-foreground">
-            Your scripts will show up here.
+        ) : (
+          <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {recent.map((s) => (
+              <button
+                key={s.id}
+                onClick={() =>
+                  router.navigate({ to: "/editor/$scriptId", params: { scriptId: s.id } })
+                }
+                className="group rounded-2xl border border-border bg-surface p-5 text-left shadow-soft transition-transform hover:-translate-y-0.5"
+              >
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline">{s.niche ?? "Tanpa niche"}</Badge>
+                  <Star
+                    className={
+                      "h-4 w-4 " +
+                      (s.is_favorite
+                        ? "fill-electric text-electric"
+                        : "text-muted-foreground")
+                    }
+                  />
+                </div>
+                <h3 className="mt-3 line-clamp-2 text-base font-semibold">
+                  {s.title || "Untitled script"}
+                </h3>
+                <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  {s.reading_time ?? 0} detik
+                </p>
+              </button>
+            ))}
           </div>
-        </Card>
+        )}
       </div>
     </AppLayout>
   );
@@ -93,7 +142,7 @@ function StatCard({
 }: {
   icon: React.ElementType;
   label: string;
-  value: string;
+  value: number | string;
 }) {
   return (
     <Card className="flex items-center justify-between">
