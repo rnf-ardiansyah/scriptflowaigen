@@ -18,6 +18,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNewScriptRouteImport } from './routes/_authenticated/new-script'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
+import { Route as AuthenticatedGeneratorRouteImport } from './routes/_authenticated/generator'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedTeleprompterScriptIdRouteImport } from './routes/_authenticated/teleprompter.$scriptId'
 import { Route as AuthenticatedEditorScriptIdRouteImport } from './routes/_authenticated/editor.$scriptId'
@@ -66,6 +67,11 @@ const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGeneratorRoute = AuthenticatedGeneratorRouteImport.update({
+  id: '/generator',
+  path: '/generator',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/generator': typeof AuthenticatedGeneratorRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/new-script': typeof AuthenticatedNewScriptRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/generator': typeof AuthenticatedGeneratorRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/new-script': typeof AuthenticatedNewScriptRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/generator': typeof AuthenticatedGeneratorRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/new-script': typeof AuthenticatedNewScriptRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
+    | '/generator'
     | '/library'
     | '/new-script'
     | '/onboarding'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
+    | '/generator'
     | '/library'
     | '/new-script'
     | '/onboarding'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_authenticated/dashboard'
+    | '/_authenticated/generator'
     | '/_authenticated/library'
     | '/_authenticated/new-script'
     | '/_authenticated/onboarding'
@@ -240,6 +252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLibraryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/generator': {
+      id: '/_authenticated/generator'
+      path: '/generator'
+      fullPath: '/generator'
+      preLoaderRoute: typeof AuthenticatedGeneratorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -266,6 +285,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGeneratorRoute: typeof AuthenticatedGeneratorRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedNewScriptRoute: typeof AuthenticatedNewScriptRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
@@ -277,6 +297,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGeneratorRoute: AuthenticatedGeneratorRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedNewScriptRoute: AuthenticatedNewScriptRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
