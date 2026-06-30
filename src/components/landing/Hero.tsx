@@ -8,7 +8,7 @@ export function Hero() {
       <div className="hero-glow absolute inset-0 -z-10" />
       <div className="grid-bg absolute inset-0 -z-10" />
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div className="animate-fade-up">
             <a
@@ -20,29 +20,29 @@ export function Hero() {
               <ArrowRight className="h-3 w-3" />
             </a>
 
-            <h1 className="mt-6 text-balance text-5xl font-bold leading-[1.05] tracking-tight md:text-6xl lg:text-[68px]">
+            <h1 className="mt-6 text-balance text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl lg:text-[68px]">
               <span className="text-gradient">Stop staring at a</span>{" "}
               <span className="text-gradient-accent">blank screen.</span>
               <br />
               <span className="text-gradient">Start shipping videos faster.</span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               ScriptFlow is the AI workspace for short-video creators. Turn an idea into a script,
               organize your library, and rehearse with a built-in teleprompter — all in one place.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 to="/register"
-                className="group inline-flex items-center gap-2 rounded-xl bg-electric px-5 py-3 text-sm font-medium text-electric-foreground shadow-glow transition-transform hover:scale-[1.02]"
+                className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-electric px-5 py-3 text-sm font-medium text-electric-foreground shadow-glow transition-transform hover:scale-[1.02] sm:w-auto"
               >
                 Start Free
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <a
                 href="#showcase"
-                className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface/60 px-5 py-3 text-sm font-medium text-foreground backdrop-blur transition-colors hover:bg-surface-elevated"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface/60 px-5 py-3 text-sm font-medium text-foreground backdrop-blur transition-colors hover:bg-surface-elevated sm:w-auto"
               >
                 <Play className="h-4 w-4 text-electric" />
                 Watch Demo
@@ -52,9 +52,12 @@ export function Hero() {
           </div>
 
           {/* Dashboard with floating cards */}
-          <div className="relative animate-fade-up [animation-delay:120ms]">
+          <div className="relative w-full min-w-0 animate-fade-up [animation-delay:120ms]">
             <div className="absolute -inset-6 -z-10 rounded-3xl bg-electric/10 blur-3xl" />
-            <DashboardMock />
+            <div className="w-full max-w-full overflow-hidden">
+              <DashboardMock />
+            </div>
+
 
             {/* floating: teleprompter */}
             <div className="glass-panel absolute -left-6 bottom-10 hidden w-56 rounded-2xl p-3 shadow-elevated animate-float lg:block">

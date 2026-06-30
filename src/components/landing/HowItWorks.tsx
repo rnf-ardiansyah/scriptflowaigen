@@ -12,7 +12,7 @@ const steps = [
 export function HowItWorks() {
   return (
     <section className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="How it works"
           title="From idea to recording in 5 steps."

@@ -40,7 +40,7 @@ const faqs = [
 export function FAQ() {
   return (
     <section id="faq" className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-3xl px-6">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <SectionHeader eyebrow="FAQ" title="Questions, answered." />
         <div className="mt-12 rounded-2xl border border-border bg-surface px-2 md:px-6">
           <Accordion type="single" collapsible className="w-full">

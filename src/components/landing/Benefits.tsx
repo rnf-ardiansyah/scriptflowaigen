@@ -25,7 +25,7 @@ const stats = [
 export function Benefits() {
   return (
     <section className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Benefits"
           title="Built for creators. Loved by businesses."
@@ -103,7 +103,7 @@ function StatCard({ value, suffix, label }: { value: number; suffix: string; lab
       ref={ref}
       className="rounded-2xl border border-border bg-surface p-6 text-center shadow-soft"
     >
-      <p className="text-5xl font-bold tracking-tight text-gradient-accent">
+      <p className="text-4xl font-bold tracking-tight text-gradient-accent sm:text-5xl">
         {n}
         {suffix}
       </p>

@@ -16,14 +16,14 @@ import { SectionHeader } from "./SectionHeader";
 export function FeaturesBento() {
   return (
     <section id="features" className="relative py-24 md:py-32">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Core features"
           title="Everything you need. Nothing you don't."
           description="A focused toolkit for creators who want to ship more short-form video without the chaos."
         />
 
-        <div className="mt-14 grid auto-rows-[220px] grid-cols-1 gap-4 md:grid-cols-6">
+        <div className="mt-14 grid auto-rows-auto grid-cols-1 gap-4 md:auto-rows-[220px] md:grid-cols-6">
           {/* AI Generator — large */}
           <Cell className="md:col-span-4 md:row-span-2">
             <CellHeader icon={Sparkles} title="AI Script Generator" />
