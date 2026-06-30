@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 
 const links = [
@@ -46,18 +47,18 @@ export function Navbar() {
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <a
-            href="#pricing"
+          <Link
+            to="/login"
             className="hidden rounded-xl px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
           >
             Login
-          </a>
-          <a
-            href="#pricing"
+          </Link>
+          <Link
+            to="/register"
             className="inline-flex items-center gap-1.5 rounded-xl bg-electric px-4 py-2 text-sm font-medium text-electric-foreground shadow-glow transition-transform hover:scale-[1.02]"
           >
             Start Free
-          </a>
+          </Link>
         </div>
       </nav>
     </header>
