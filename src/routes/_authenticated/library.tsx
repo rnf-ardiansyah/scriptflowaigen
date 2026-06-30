@@ -191,8 +191,10 @@ function LibraryPage() {
             <p className="max-w-sm text-sm text-muted-foreground">
               Yuk mulai script pertamamu. Kamu bisa isi manual dulu — nanti tinggal pakai AI generate.
             </p>
-            <Button className="mt-2" onClick={handleCreate}>
-              <FilePlus className="h-4 w-4" /> Buat Script Pertama
+            <Button asChild className="mt-2">
+              <Link to="/new-script">
+                <FilePlus className="h-4 w-4" /> Buat Script Pertama
+              </Link>
             </Button>
           </Card>
         ) : filtered.length === 0 ? (
