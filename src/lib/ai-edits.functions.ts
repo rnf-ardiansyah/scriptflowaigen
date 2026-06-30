@@ -60,18 +60,8 @@ type ScriptRow = {
 };
 
 async function loadScriptOrThrow(
-  supabase: {
-    from: (t: string) => {
-      select: (cols: string) => {
-        eq: (
-          c: string,
-          v: unknown,
-        ) => {
-          eq: (c: string, v: unknown) => { maybeSingle: () => Promise<{ data: ScriptRow | null }> };
-        };
-      };
-    };
-  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
   scriptId: string,
   userId: string,
 ): Promise<ScriptRow> {
