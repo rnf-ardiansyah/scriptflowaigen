@@ -1,27 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
   ArrowLeft,
   Sparkles,
   Loader2,
   Play,
-  Save,
   RotateCcw,
   Pencil,
+  AlertTriangle,
+  Crown,
 } from "lucide-react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
 import { NICHES } from "@/lib/niches";
-import {
-  profileQuery,
-  createScript,
-  computeReadingTime,
-  buildFullScript,
-} from "@/lib/scripts";
+import { profileQuery, computeReadingTime } from "@/lib/scripts";
+import { generateScript } from "@/lib/ai.functions";
 
 export const Route = createFileRoute("/_authenticated/generator")({
   head: () => ({
@@ -40,79 +38,21 @@ const STYLES = ["Hook style", "Story style", "Listicle"] as const;
 type Style = (typeof STYLES)[number];
 
 type Sections = { hook: string; retain: string; reward: string; cta: string };
-type Phase = "idle" | "generating" | "done";
+type Phase = "idle" | "generating" | "done" | "limit_reached" | "error";
 
-// ---------- Dummy generator ----------
-function buildDummyScript({
-  idea,
-  niche,
-  duration,
-  style,
-}: {
-  idea: string;
-  niche: string;
-  duration: Duration;
-  style: Style;
-}): Sections {
-  const i = idea.trim().replace(/[.?!]+$/, "");
-  const longer = duration >= 60;
-  const longest = duration >= 90;
-
-  if (style === "Listicle") {
-    return {
-      hook: `Stop scroll! Ini ${longest ? "5" : longer ? "4" : "3"} hal tentang "${i}" yang jarang dibahas creator ${niche.toLowerCase()}.`,
-      retain: [
-        `Pertama, kebanyakan orang langsung loncat ke teknis, padahal hal paling penting soal "${i}" justru ada di mindset awal.`,
-        longer
-          ? `Kedua, ada pola yang berulang — dan kalau kamu sadar polanya, kamu bisa hindari kesalahan yang bikin progress kamu stuck berbulan-bulan.`
-          : "",
-        longest
-          ? `Ketiga, ada satu trik kecil yang sering diabaikan tapi efeknya gede banget — aku jelasin di bagian akhir.`
-          : "",
-      ]
-        .filter(Boolean)
-        .join(" "),
-      reward: `Intinya: kalau kamu konsisten apply tiga hal ini ke "${i}", hasilnya bakal kelihatan dalam 2–3 minggu. Banyak yang udah buktiin di niche ${niche.toLowerCase()}.`,
-      cta: `Save video ini biar nggak lupa, dan follow buat tips ${niche.toLowerCase()} tiap minggu. Mana yang paling kamu butuhin? Tulis di komen.`,
-    };
+function classifyError(err: unknown): {
+  kind: "rate_limited" | "script_limit_reached" | "other";
+  message: string;
+} {
+  const raw = err instanceof Error ? err.message : String(err ?? "");
+  const code = (err as { lovable?: { code?: string } } | null)?.lovable?.code;
+  if (code === "rate_limited" || /kuota harian/i.test(raw)) {
+    return { kind: "rate_limited", message: raw };
   }
-
-  if (style === "Story style") {
-    return {
-      hook: `Dulu aku juga mikir "${i}" itu ribet — sampai akhirnya satu kejadian ngubah cara pandang aku 180 derajat.`,
-      retain: [
-        `Waktu itu aku coba semua tutorial random di internet. Hasilnya? Nol. Sampai aku nemu satu pendekatan sederhana yang ternyata dipakai banyak creator ${niche.toLowerCase()} sukses.`,
-        longer
-          ? `Yang bikin beda bukan tool-nya, bukan budget-nya — tapi cara mereka mikirin audiens dari detik pertama video.`
-          : "",
-        longest
-          ? `Aku tes pendekatan ini selama sebulan, dan reach video aku naik konsisten tanpa harus posting tiap hari.`
-          : "",
-      ]
-        .filter(Boolean)
-        .join(" "),
-      reward: `Jadi pelajarannya: "${i}" bukan soal seberapa keras kamu kerja, tapi seberapa tepat kamu eksekusi prinsip dasarnya.`,
-      cta: `Kalau kamu pernah ngalamin hal yang sama, share di komen. Follow buat cerita ${niche.toLowerCase()} lainnya setiap Selasa & Jumat.`,
-    };
+  if (code === "script_limit_reached" || /batas 20 script/i.test(raw)) {
+    return { kind: "script_limit_reached", message: raw };
   }
-
-  // Hook style (default)
-  return {
-    hook: `Stop scroll dulu — kalau kamu pernah mikirin "${i}", video ini wajib kamu tonton sampai habis.`,
-    retain: [
-      `Karena 90% orang yang ngebahas "${i}" cuma nyentuh permukaannya doang. Aku bakal kasih kamu kerangka berpikir yang langsung bisa kamu pakai hari ini di konten ${niche.toLowerCase()} kamu.`,
-      longer
-        ? `Dan ini bukan teori — ini hal yang udah aku tes berkali-kali di akun aku sendiri dan akun temen-temen creator.`
-        : "",
-      longest
-        ? `Aku juga bakal kasih tau satu kesalahan paling umum yang bikin video kamu gagal nge-hook, biar kamu nggak ulangin lagi.`
-        : "",
-    ]
-      .filter(Boolean)
-      .join(" "),
-    reward: `Kuncinya simpel: fokus di 3 detik pertama, kasih alasan kuat buat stay, lalu kasih payoff yang bikin penonton mau share. Itu rumus dasar yang works buat "${i}".`,
-    cta: `Like kalau ini membantu, dan follow buat breakdown ${niche.toLowerCase()} lainnya. Komen "next" biar aku tau topik mana yang mau kamu bahas berikutnya.`,
-  };
+  return { kind: "other", message: raw || "Terjadi kesalahan tak terduga." };
 }
 
 function GeneratorPage() {
