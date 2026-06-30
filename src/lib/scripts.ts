@@ -109,6 +109,7 @@ export async function createScript(
     full_script: partial.full_script ?? "",
     reading_time: partial.reading_time ?? 0,
     is_favorite: partial.is_favorite ?? false,
+    tone: partial.tone ?? null,
   };
   const { data, error } = await supabase
     .from("scripts")
