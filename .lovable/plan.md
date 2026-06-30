@@ -1,83 +1,58 @@
 ## Goal
-Aktifkan Lovable Cloud, buat skema database (profiles, scripts, generations) dengan RLS, dan implementasikan auth Email/Password + Google OAuth dengan flow onboarding → dashboard.
+Build manual CRUD for scripts: Dashboard, Library, and Editor — no AI yet. Verify full flow works end-to-end.
 
-## 1. Aktifkan Lovable Cloud
-- Panggil `supabase--enable` untuk provisioning backend.
-- Konfigurasi Google sebagai social provider via `supabase--configure_social_auth`.
+## Data layer (`src/lib/scripts.ts`)
+Thin Supabase wrappers (browser client, RLS scopes to `auth.uid()`):
+- `listScripts()` — all user scripts, ordered by `updated_at desc`.
+- `listRecentScripts(limit=5)` — for dashboard.
+- `getScript(id)`, `createScript(partial)`, `updateScript(id, patch)`, `deleteScript(id)`, `duplicateScript(id)`, `toggleFavorite(id, value)`.
+- `countScripts()` returns `{ total, favorites }`.
+- Helper `computeReadingTime(hook, retain, reward, cta)` → `Math.ceil(wordCount / 2.5)` seconds, and `buildFullScript(...)` joining the 4 sections.
 
-## 2. Database Schema (migration)
-Buat 3 tabel di schema `public` dengan RLS + GRANT lengkap:
+React Query keys: `['scripts','list']`, `['scripts','recent']`, `['scripts','counts']`, `['scripts','detail', id]`. Mutations invalidate the right keys.
 
-**profiles**
-- `user_id uuid PK references auth.users(id) on delete cascade`
-- `name text`, `preferred_niche text`, `experience_level text`, `goal text`
-- `plan text default 'free' check (plan in ('free','premium'))`
-- `created_at timestamptz default now()`
+Shared `NICHES` constant (reuse the onboarding list) exported from `src/lib/niches.ts` so dropdowns stay in sync.
 
-**scripts**
-- `id uuid PK default gen_random_uuid()`
-- `user_id uuid references auth.users(id) on delete cascade not null`
-- `title, idea, niche, hook, retain, reward, cta, full_script text`
-- `reading_time int`, `is_favorite bool default false`
-- `created_at, updated_at timestamptz default now()`
-- Trigger update_updated_at
+## `/dashboard` (rewrite `src/routes/_authenticated/dashboard.tsx`)
+- Loader primes profile + counts + recent scripts via `ensureQueryData`.
+- Greeting: `Halo, {profile.name} 👋` + sub-line `Niche: {preferred_niche}`.
+- Stat cards: Total scripts, Favorit. (Drop the fake "AI generations / time saved" placeholders.)
+- Big primary CTA "Buat Script Baru" → creates a blank script via `createScript`, then `navigate({ to: '/editor/$scriptId', params: { scriptId: newId }})`. Falls back to `/editor/new` only if creation fails.
+- "Lihat semua" link → `/library`.
+- Recent scripts list (max 5): card with title, niche badge, `reading_time` as `X detik`, star icon filled if favorite. Click → editor. Empty state with CTA.
 
-**generations**
-- `id uuid PK default gen_random_uuid()`
-- `user_id uuid references auth.users(id) on delete cascade not null`
-- `tokens int`, `model text`, `status text check (status in ('success','failed'))`
-- `created_at timestamptz default now()`
+## `/library` (rewrite `src/routes/_authenticated/library.tsx`)
+- Loader: `ensureQueryData(listScripts)`.
+- Local state: `search`, `nicheFilter`, `favoritesOnly`. Real-time filter in-memory over title + idea (case-insensitive).
+- Toolbar: search input, niche `<select>` (All + niches), favorites toggle button, "Buat Script Baru" button.
+- Grid of cards: title, niche badge, `reading_time` as `X detik`, favorite star, updated date.
+  - Actions row: Edit, Duplicate, Favorite (toggle), Delete (opens Dialog confirmation).
+- Empty state when zero scripts: illustration + "Belum ada script" + CTA to create.
+- Filtered-empty state when filters yield zero: "Tidak ada hasil" + clear filters button.
+- Mutations use React Query with optimistic invalidation; toast (sonner) on success/error.
 
-**RLS Policies** — semua tabel: user hanya bisa SELECT/INSERT/UPDATE/DELETE baris dimana `auth.uid() = user_id`.
+## `/editor/$scriptId` (rewrite `src/routes/_authenticated/editor.$scriptId.tsx`)
+- Handle two modes:
+  - `scriptId === 'new'`: on mount, create a blank script then `router.navigate` to its real id (replace history) so auto-save has a target.
+  - Otherwise: `ensureQueryData(getScript(id))`. If not found → `notFoundComponent`.
+- Form fields: `title` (Input), `niche` (select from `NICHES`), `idea` (Textarea), and 4 Textareas: `hook`, `retain`, `reward`, `cta`.
+- Local form state mirrors loaded script. A `useEffect` with 2-second debounce on any change calls `updateScript(id, patch)` including recomputed `full_script` and `reading_time`.
+- Save indicator: small text top-right cycling `Mengetik…` → `Menyimpan…` → `Tersimpan ✓` (with timestamp).
+- Live "Estimasi durasi: XX detik" computed from current form values.
+- Header buttons: "← Kembali ke Library" (link to `/library`), "Buka di Teleprompter" (link to `/teleprompter/$scriptId`).
+- Remove the placeholder AI-assistant sidebar (or keep it as a "Coming soon" panel without functional buttons — leaning remove to keep scope tight).
 
-**GRANTs** — `authenticated`: SELECT/INSERT/UPDATE/DELETE; `service_role`: ALL. Tidak ada akses anon.
+## Toaster
+Wire sonner `<Toaster />` once in `__root.tsx` if not already present, so library/editor mutations can show feedback.
 
-**Trigger auto-profile**: `handle_new_user()` security definer pada `auth.users` AFTER INSERT — buat row di `profiles` dengan `user_id` + `name` (dari `raw_user_meta_data.name` atau email).
+## Verification
+After build, drive Playwright with the injected Supabase session:
+1. Sign in flow already covered — restore session, hit `/dashboard`.
+2. Click "Buat Script Baru" → land in editor with a real id.
+3. Type into fields, wait 2.5s, see "Tersimpan", reload, values persist.
+4. `reading_time` updates as words change.
+5. Library: appears, search filters, favorite toggle, duplicate creates "(Copy) …", delete confirms and removes.
+6. Empty state shown after deleting all.
 
-## 3. Auth Implementation
-
-**Halaman publik** (top-level routes): `/login`, `/register` sudah ada — wire ke Supabase Auth:
-- Email/password signUp & signInWithPassword
-- Tombol "Continue with Google" → `lovable.auth.signInWithOAuth('google', { redirect_uri: window.location.origin + '/auth/callback' })`
-- Buat route publik `/auth/callback` yang menunggu session, lalu cek profile completeness → redirect `/onboarding` atau `/dashboard`
-
-**Logic redirect setelah login**:
-- Query `profiles` untuk user saat ini
-- Jika `preferred_niche`, `experience_level`, `goal` semua terisi → `/dashboard`
-- Jika belum → `/onboarding`
-
-## 4. Protected Routes
-Pindahkan `/dashboard`, `/library`, `/editor/$scriptId`, `/teleprompter/$scriptId`, `/profile`, `/upgrade`, `/onboarding` ke bawah `src/routes/_authenticated/`.
-
-Buat layout managed `src/routes/_authenticated/route.tsx` (`ssr: false`, gate `supabase.auth.getUser()` → redirect `/login`).
-
-Update `src/start.ts` untuk append bearer middleware (`attachSupabaseAuth`).
-
-## 5. Onboarding Page
-`/onboarding` form (3 field):
-- Niche dropdown: Skincare, Fashion, F&B, Edukasi, Finansial, Gaming, Lifestyle, Property, Beauty, Tech
-- Experience level radio: Pemula, Menengah, Berpengalaman
-- Goal text input
-- Submit → UPDATE `profiles` set 3 kolom → navigate `/dashboard`
-
-Jika user buka `/onboarding` padahal profile sudah lengkap → redirect `/dashboard`.
-
-## 6. Logout
-Tombol logout di `AppLayout` nav + `/profile` page:
-- `queryClient.cancelQueries()` → `queryClient.clear()` → `supabase.auth.signOut()` → `navigate('/login', { replace: true })`
-
-## 7. Auth State Listener
-Di `__root.tsx` wire single `onAuthStateChange` (filter SIGNED_IN/SIGNED_OUT/USER_UPDATED) → `router.invalidate()` + `queryClient.invalidateQueries()` (kecuali SIGNED_OUT).
-
-## 8. Verifikasi
-Setelah build sukses, jalankan Playwright headless test:
-1. Register email baru → cek redirect ke `/onboarding`
-2. Isi onboarding → cek redirect ke `/dashboard`
-3. Logout → cek redirect ke `/login`
-4. Login ulang → cek langsung ke `/dashboard` (skip onboarding)
-5. Cek tidak ada error di console
-
-## Catatan Teknis
-- Landing page (`src/routes/index.tsx`) dan semua section landing TIDAK diubah.
-- AI generate & teleprompter logic tidak diimplementasi di tahap ini (placeholder tetap).
-- Semua query auth-scoped via browser `supabase` client (RLS handle scoping).
+## Out of scope (next prompt)
+AI generation, teleprompter logic, generations table writes.
