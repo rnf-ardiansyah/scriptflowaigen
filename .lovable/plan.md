@@ -1,69 +1,112 @@
-## Goal
-Tambahkan 3 fitur AI tambahan di Script Editor (`/editor/:scriptId`) yang memanfaatkan Gemini via Lovable AI Gateway, mengikuti pola loading + error handling yang sama dengan AI Script Generator, dan tetap menghormati rate-limit harian (free 5 / premium 100) serta logging ke tabel `generations`.
+## 1. Database migration
 
-## Fitur
+**New table `folders`** (with grants + RLS scoped to `auth.uid()`):
+- `id uuid pk`, `user_id uuid not null`, `name text not null`, `created_at timestamptz default now()`.
+- Policies: owner-only ALL.
+- Index on `(user_id, created_at desc)`.
 
-### 1. AI Rewrite
-- Tombol **"Rewrite"** di header editor → dropdown 3 gaya: *Lebih Santai*, *Lebih Formal*, *Lebih Lucu*.
-- Kirim `full_script` (gabungan hook/retain/reward/cta saat ini) + niche + idea + gaya ke Gemini.
-- Prompt menginstruksikan Gemini menulis ulang **dengan tetap mempertahankan struktur 4 bagian** dan inti pesan. Respons WAJIB JSON `{hook, retain, reward, cta}`. Retry 1× kalau parse gagal (mirroring `generateScript`).
-- Hasil tidak langsung menimpa: muncul **Diff Preview Dialog** (side-by-side / stacked: "Sebelum" vs "Sesudah" per bagian) dengan tombol **Terima** (replace form + trigger auto-save) atau **Tolak** (tutup dialog, form tidak berubah).
+**Add `folder_id uuid` to `scripts`** with `references public.folders(id) on delete set null` — so deleting a folder leaves its scripts intact with `folder_id = null` (no data loss, matches spec).
 
-### 2. AI Shorten
-- Tombol **"Persingkat Script"** → dropdown target durasi: **30 detik** / **15 detik**.
-- Hitung `target_words = target_detik × 2.5` dan kirim ke Gemini sebagai constraint keras ("jumlah kata total ≤ N, jangan melebihi"). Tetap minta output JSON 4 bagian, intinya tetap utuh.
-- Preview dialog yang sama (re-use) dengan badge tambahan "Estimasi durasi baru: XX detik". Terima/Tolak persis seperti Rewrite.
+**Server-side free-plan script cap (hard enforcement)** via a `BEFORE INSERT` trigger on `scripts`:
+- Reads caller's plan from `profiles`.
+- If `plan = 'free'` and `count(*) where user_id = NEW.user_id >= 20`, `RAISE EXCEPTION` with a recognizable message like `free_plan_script_limit_reached`.
+- `SECURITY DEFINER`, `search_path = public`.
 
-### 3. AI Hook Regenerator
-- Tombol ikon kecil (✨) di samping label field **Hook**.
-- Kirim `idea` + `niche` + hook saat ini sebagai konteks; minta **3 variasi hook berbeda** dalam JSON `{variants: [string, string, string]}`. Retry 1× jika gagal.
-- Dialog menampilkan ketiga kandidat sebagai cards yang bisa diklik. Klik salah satu → set field hook + tutup dialog (auto-save jalan otomatis lewat mekanisme debounce existing). Sisanya dibuang. Ada tombol "Batal".
+This guarantees the 20-script cap holds even if a client bypasses the UI/server function — Supabase REST inserts hit the trigger too.
 
-## Backend (server functions)
+## 2. Server function quota changes
 
-Buat file baru `src/lib/ai-edits.functions.ts` agar `ai.functions.ts` (generator dari nol) tidak makin besar. Tiga server function, masing-masing pakai `requireSupabaseAuth` middleware:
+**`src/lib/ai.functions.ts` — `generateScript`:**
+- Before the existing AI rate-limit check, count user's scripts. If `plan = 'free'` and `count >= 20`, throw `makeError({ code: "script_limit_reached", limit: 20, message: "..." })`. Cache hits still allowed (no new row).
+- Catch the trigger's exception on the final insert and re-throw as the same `script_limit_reached` lovable error (defense in depth).
 
-- `rewriteScript({ scriptId, style })` → style: `"santai" | "formal" | "lucu"`.
-- `shortenScript({ scriptId, targetSeconds })` → 15 atau 30.
-- `regenerateHook({ scriptId })` → returns `{ variants: string[] }`.
+**`src/lib/ai-shared.server.ts`:** extend `GenerationErrorCode` with `"script_limit_reached"`.
 
-Semua tiga melakukan urutan ini (sama dengan `generateScript`, di-extract ke helper):
-1. Load script milik user (verify `user_id`); kalau `full_script` kosong → return error `empty_script` dengan pesan "Isi dulu script-nya sebelum pakai AI rewrite/shorten/regen."
-2. Cek plan + rate-limit harian (`generations` `status='success'`, hari ini, ≥ limit → error `rate_limited`). **Tidak ada cache** untuk fitur-fitur ini (rewrite/shorten/regen by-design menghasilkan varian baru tiap kali).
-3. Panggil Gemini (`google/gemini-3-flash-preview`) via `createLovableAiGatewayProvider`, dengan retry 1× pada parse failure. Pakai helper `extractJson` yang sudah ada (export-kan dari `ai.functions.ts` atau pindahkan ke `src/lib/ai-shared.server.ts`).
-4. Log ke `generations` (`model: "gemini-flash"`, status success/failed, tokens).
-5. **Tidak menulis ke tabel `scripts`** — server fn hanya mengembalikan hasil. Penulisan terjadi di client setelah user menekan "Terima" (Rewrite/Shorten) atau pilih variant (Hook). Penulisan memakai mekanisme `update()` + debounce auto-save yang sudah ada di editor — TIDAK butuh perubahan logika save.
+**New `src/lib/folders.functions.ts`** (auth-gated `createServerFn`s):
+- `listFolders()` → `{ id, name, created_at, script_count }[]`.
+- `createFolder({ name })`.
+- `renameFolder({ id, name })`.
+- `deleteFolder({ id })` — relies on `on delete set null` to detach scripts.
+- `assignScriptToFolder({ scriptId, folderId | null })`.
 
-Error shape konsisten dengan `generateScript`: `Error & { lovable: { code: "rate_limited" | "parse_failed" | "ai_unavailable" | "empty_script", message, plan?, limit? } }`.
+These wrap `context.supabase` so RLS still applies; no admin client needed.
 
-## Frontend (editor)
+**New quota-summary server function** `src/lib/quota.functions.ts → getQuotaSummary()` returning `{ plan, generationsToday, generationLimit, scriptsUsed, scriptLimit | null }`. Dashboard reads this via TanStack Query.
 
-`src/routes/_authenticated/editor.$scriptId.tsx`:
-- Tambahkan header action group di sebelah "Buka di Teleprompter":
-  - `RewriteMenu` (DropdownMenu shadcn — sudah ada di `src/components/ui/dropdown-menu.tsx`? cek; jika tidak, pakai `<details>`/popover sederhana berbasis komponen yang sudah ada agar konsisten).
-  - `ShortenMenu` dengan 2 opsi durasi.
-- Pada label Hook tambah tombol icon ✨ kecil yang membuka `HookVariantsDialog`.
-- Komponen baru `src/components/app/PreviewDiffDialog.tsx`: dialog membandingkan 4 bagian (kiri "Sebelum" abu-abu, kanan "Sesudah" highlight electric), tombol Terima/Tolak. Reusable untuk Rewrite & Shorten.
-- Komponen baru `src/components/app/HookVariantsDialog.tsx`: list 3 card, klik untuk pilih.
-- Loading state: tombol berubah jadi `<Loader2 spin/>` + label "Memproses…" + disabled. Setelah selesai, buka dialog.
-- Error handling konsisten (pola yang sama dengan `/new-script`):
-  - `rate_limited` → `toast` ramah + tombol "Upgrade" yang link ke `/upgrade`.
-  - `parse_failed` / generic → `toast.error` dengan pesan + tombol implicit "coba lagi" (user klik tombol lagi).
-  - `empty_script` → toast info.
-- Saat user "Terima":
-  - Rewrite/Shorten: panggil `update("hook"|"retain"|"reward"|"cta", …)` untuk keempat field → mekanisme debounce 2s yang sudah ada menyimpan otomatis ke DB; SaveIndicator existing menampilkan progress.
-  - Hook regen: panggil `update("hook", chosen)`.
-- Invalidate `["scripts"]` setelah save selesai (sudah ditangani auto-save existing).
+## 3. Frontend changes
 
-## Rate-limit & logging
-- Tiga server fn baru ikut akumulasi `generations` yang sama → otomatis terhitung ke kuota harian user bersama generator dari nol. Tidak butuh kolom baru.
+**`/upgrade` (`src/routes/_authenticated/upgrade.tsx`)** — rewrite as a side-by-side Free vs Premium comparison per spec:
+- Free: 5 AI/hari, max 20 script, Teleprompter, basic niche template.
+- Premium **Rp 29.000/bulan**: unlimited library, 100 AI/hari, semua niche, Favorite, AI Rewrite, AI Hook Generator, priority speed.
+- "Upgrade ke Premium" button → `toast.info("Pembayaran segera hadir")` placeholder (no payment gateway).
 
-## Files
-- **New**: `src/lib/ai-edits.functions.ts`, `src/lib/ai-shared.server.ts` (extract helper `buildLimitCheck`, `callGemini`, `extractJson`), `src/components/app/PreviewDiffDialog.tsx`, `src/components/app/HookVariantsDialog.tsx`.
-- **Modified**: `src/lib/ai.functions.ts` (re-export helpers dari `ai-shared.server.ts` agar tetap satu sumber), `src/routes/_authenticated/editor.$scriptId.tsx` (tombol + dialogs + mutation calls).
-- **No DB migration needed.**
+**Dashboard (`src/routes/_authenticated/dashboard.tsx`)** — add a Quota card row using `getQuotaSummary`:
+- "X dari 5 generate hari ini" (free) / "X dari 100 generate hari ini" (premium).
+- "X dari 20 script tersimpan" (free) / "X script tersimpan" (premium, no cap).
+- Subtle progress bar; when free quota at limit, show inline "Upgrade" link to `/upgrade`.
 
-## Out of scope
-- Tidak menyentuh teleprompter, generator dari nol, atau struktur tabel.
-- Tidak menambah caching untuk rewrite/shorten/regen (sengaja, variasi adalah fitur).
-- Tidak membuat versi history / undo permanen — hanya konfirmasi Terima/Tolak sebelum overwrite.
+**`/new-script` error handling** — already routes `lovable.code` errors to friendly UI; add a `"script_limit_reached"` branch with copy + CTA to `/upgrade`.
+
+**Library (`src/routes/_authenticated/library.tsx`)** — add folder UI:
+- Left sidebar (collapses into top tab strip on mobile) listing `Semua Script` (default) + each folder with script counts, plus a "+ Folder baru" inline form.
+- Selecting a folder filters the grid (`folder_id = selected` or `IS NULL` for "Tanpa folder"). Search/niche/favorite filters compose with folder filter.
+- Per-card "Move to…" action via existing dropdown menu — lists folders + "Tanpa folder" option, calls `assignScriptToFolder`.
+- Per-folder kebab → Rename / Delete (confirm dialog: "Script di folder ini tidak akan terhapus, hanya dipindah keluar folder").
+- "Buat Script Baru" CTA: still navigates to `/new-script`. If quota summary shows free user already at 20 scripts, show a banner above the grid with upgrade link (still allow click — generate flow surfaces the hard error).
+
+**Types** — extend `ScriptRow` in `src/lib/scripts.ts` with `folder_id: string | null`; add it to select projections.
+
+## 4. Out of scope (per user instructions)
+
+- Real payments / Stripe wiring.
+- Premium-only gating of AI Rewrite / Hook Generator features (spec only lists them as premium *marketing* differentiators; current build keeps them quota-gated). Mention this trade-off after build so user can decide whether to enforce later.
+
+## Technical details
+
+- Trigger SQL (single migration with table + grants + RLS + trigger):
+
+```sql
+create table public.folders (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  name text not null,
+  created_at timestamptz not null default now()
+);
+grant select, insert, update, delete on public.folders to authenticated;
+grant all on public.folders to service_role;
+alter table public.folders enable row level security;
+create policy folders_all_own on public.folders for all to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create index folders_user_idx on public.folders (user_id, created_at desc);
+
+alter table public.scripts
+  add column folder_id uuid references public.folders(id) on delete set null;
+create index scripts_folder_idx on public.scripts (folder_id);
+
+create or replace function public.enforce_free_script_limit()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare v_plan text; v_count int;
+begin
+  select plan into v_plan from public.profiles where user_id = new.user_id;
+  if coalesce(v_plan,'free') = 'free' then
+    select count(*) into v_count from public.scripts where user_id = new.user_id;
+    if v_count >= 20 then
+      raise exception 'free_plan_script_limit_reached' using errcode = 'P0001';
+    end if;
+  end if;
+  return new;
+end $$;
+create trigger scripts_free_limit
+  before insert on public.scripts
+  for each row execute function public.enforce_free_script_limit();
+```
+
+- Server function maps Postgres error message `free_plan_script_limit_reached` → lovable `{ code: "script_limit_reached", limit: 20 }`.
+- Folders sidebar uses existing `Card`/`Button`/dropdown primitives — no new shadcn components needed.
+- All folder mutations invalidate `["folders"]` and `["scripts"]` query keys for instant UI refresh.
+
+## Verification
+
+- After migration: `tsgo --noEmit`.
+- Manual: log in as free user (set `profiles.plan='free'`), insert 20 scripts, confirm 21st insert errors and `/new-script` shows upgrade CTA.
+- Folder create/assign/filter/delete round-trip in `/library`; deleted folder leaves scripts visible under "Tanpa folder".
