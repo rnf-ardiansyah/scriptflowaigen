@@ -156,11 +156,7 @@ function GeneratorPage() {
     }
   }
 
-  const totalReadSec = result
-    ? computeReadingTime(
-        [result.hook, result.retain, result.reward, result.cta].join("\n\n"),
-      )
-    : 0;
+  const totalReadSec = result ? computeReadingTime(result) : 0;
 
 
   return (
