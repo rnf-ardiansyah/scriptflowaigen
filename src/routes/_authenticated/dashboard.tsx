@@ -89,11 +89,10 @@ function DashboardPage() {
         ) : (
           <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {recent.map((s) => (
-              <button
+              <Link
                 key={s.id}
-                onClick={() =>
-                  router.navigate({ to: "/editor/$scriptId", params: { scriptId: s.id } })
-                }
+                to="/editor/$scriptId"
+                params={{ scriptId: s.id }}
                 className="group rounded-2xl border border-border bg-surface p-5 text-left shadow-soft transition-transform hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between">
@@ -114,7 +113,7 @@ function DashboardPage() {
                   <Clock className="h-3.5 w-3.5" />
                   {s.reading_time ?? 0} detik
                 </p>
-              </button>
+              </Link>
             ))}
           </div>
         )}
