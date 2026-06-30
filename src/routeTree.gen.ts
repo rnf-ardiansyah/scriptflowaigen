@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUpgradeRouteImport } from './routes/_authenticated/upgrade'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedNewScriptRouteImport } from './routes/_authenticated/new-script'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedTeleprompterScriptIdRouteImport } from './routes/_authenticated/teleprompter.$scriptId'
@@ -55,6 +56,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNewScriptRoute = AuthenticatedNewScriptRouteImport.update({
+  id: '/new-script',
+  path: '/new-script',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   id: '/library',
   path: '/library',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/library': typeof AuthenticatedLibraryRoute
+  '/new-script': typeof AuthenticatedNewScriptRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/upgrade': typeof AuthenticatedUpgradeRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/library': typeof AuthenticatedLibraryRoute
+  '/new-script': typeof AuthenticatedNewScriptRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/upgrade': typeof AuthenticatedUpgradeRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/new-script': typeof AuthenticatedNewScriptRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/upgrade': typeof AuthenticatedUpgradeRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/library'
+    | '/new-script'
     | '/onboarding'
     | '/profile'
     | '/upgrade'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/library'
+    | '/new-script'
     | '/onboarding'
     | '/profile'
     | '/upgrade'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_authenticated/dashboard'
     | '/_authenticated/library'
+    | '/_authenticated/new-script'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
     | '/_authenticated/upgrade'
@@ -214,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/new-script': {
+      id: '/_authenticated/new-script'
+      path: '/new-script'
+      fullPath: '/new-script'
+      preLoaderRoute: typeof AuthenticatedNewScriptRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/library': {
       id: '/_authenticated/library'
       path: '/library'
@@ -248,6 +267,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedNewScriptRoute: typeof AuthenticatedNewScriptRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedUpgradeRoute: typeof AuthenticatedUpgradeRoute
@@ -258,6 +278,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedNewScriptRoute: AuthenticatedNewScriptRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedUpgradeRoute: AuthenticatedUpgradeRoute,
