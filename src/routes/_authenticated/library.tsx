@@ -631,7 +631,7 @@ function FolderTab({
         <button
           onClick={onDelete}
           aria-label={`Hapus folder ${label}`}
-          className="mr-1 hidden rounded-md p-1 text-muted-foreground hover:bg-background hover:text-destructive group-hover:block"
+          className="mr-1 rounded-md p-1 text-muted-foreground hover:bg-background hover:text-destructive md:hidden md:group-hover:block"
         >
           <MoreHorizontal className="h-3.5 w-3.5" />
         </button>
