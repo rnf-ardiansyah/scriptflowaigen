@@ -7,6 +7,8 @@ import { LayoutDashboard, Library, User, Crown, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -83,7 +85,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
             })}
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
             <Button
+
               variant="ghost"
               size="sm"
               onClick={handleSignOut}

@@ -1,25 +1,27 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SectionHeader } from "./SectionHeader";
 
 type PricingRoute = "/register" | "/upgrade";
 
-const free = [
-  "5 AI generations / day",
-  "20 saved scripts",
-  "Basic templates",
-  "Built-in teleprompter",
-  "Dark mode",
+type Feature = { label: string; ok: boolean };
+
+const free: Feature[] = [
+  { label: "5 AI generate per hari", ok: true },
+  { label: "Script Library maksimal 20 script", ok: true },
+  { label: "Akses Teleprompter", ok: true },
+  { label: "Basic niche template", ok: true },
+  { label: "AI Rewrite & Hook Generator", ok: false },
+  { label: "Priority generation speed", ok: false },
 ];
 
-const premium = [
-  "Unlimited script library",
-  "100 AI generations / day",
-  "Premium templates",
-  "AI Rewrite & tone control",
-  "Priority AI speed",
-  "Auto-save & search",
-  "Folders & favorites",
+const premium: Feature[] = [
+  { label: "100 AI generate per hari", ok: true },
+  { label: "Unlimited Script Library", ok: true },
+  { label: "Akses Teleprompter", ok: true },
+  { label: "Semua niche template", ok: true },
+  { label: "Favorite, AI Rewrite, AI Hook Generator", ok: true },
+  { label: "Priority generation speed", ok: true },
 ];
 
 export function Pricing() {
@@ -28,26 +30,26 @@ export function Pricing() {
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader
           eyebrow="Pricing"
-          title="Simple pricing. Start free."
-          description="Use ScriptFlow free forever. Upgrade when you're ready to scale your content."
+          title="Simple pricing. Mulai gratis."
+          description="Pakai ScriptFlow gratis selamanya. Upgrade kapan pun kamu butuh lebih banyak script dan kecepatan AI."
         />
 
         <div className="mx-auto mt-14 grid max-w-4xl gap-6 md:grid-cols-2">
           <PlanCard
             name="Free"
-            price="$0"
-            period="forever"
-            description="Everything you need to test your first ideas."
-            cta="Start Free"
+            price="Rp0"
+            period="/ bulan"
+            description="Cocok buat eksplorasi awal."
+            cta="Mulai Gratis"
             ctaTo="/register"
             features={free}
           />
           <PlanCard
             name="Premium"
-            price="$12"
-            period="/ month"
-            description="For creators shipping content every week."
-            cta="Get Premium"
+            price="Rp29.000"
+            period="/ bulan"
+            description="Buat kreator yang nge-publish tiap minggu."
+            cta="Upgrade ke Premium"
             ctaTo="/upgrade"
             features={premium}
             highlight
@@ -55,7 +57,7 @@ export function Pricing() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Cancel anytime. No credit card to start.
+          Bisa cancel kapan saja. Nggak perlu kartu kredit buat mulai.
         </p>
       </div>
     </section>
@@ -78,7 +80,7 @@ function PlanCard({
   description: string;
   cta: string;
   ctaTo: PricingRoute;
-  features: string[];
+  features: Feature[];
   highlight?: boolean;
 }) {
   return (
@@ -112,9 +114,19 @@ function PlanCard({
       </Link>
       <ul className="mt-7 space-y-3">
         {features.map((f) => (
-          <li key={f} className="flex items-start gap-2.5 text-sm">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-electric" />
-            <span className="text-foreground/90">{f}</span>
+          <li key={f.label} className="flex items-start gap-2.5 text-sm">
+            {f.ok ? (
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-electric" />
+            ) : (
+              <X className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+            )}
+            <span
+              className={
+                f.ok ? "text-foreground/90" : "text-muted-foreground line-through"
+              }
+            >
+              {f.label}
+            </span>
           </li>
         ))}
       </ul>

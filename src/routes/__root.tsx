@@ -12,6 +12,8 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { ThemeProvider } from "../components/theme/ThemeProvider";
+
 
 function NotFoundComponent() {
   return (
@@ -113,10 +115,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const themeInitScript = `(function(){try{var t=localStorage.getItem('scriptflow-theme');if(t!=='light'&&t!=='dark'){t='dark';}document.documentElement.classList.remove('dark','light');document.documentElement.classList.add(t);document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.classList.add('dark');}})();`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <HeadContent />
       </head>
       <body className="bg-background text-foreground antialiased">
@@ -165,8 +170,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster theme="dark" position="bottom-right" richColors closeButton />
+      <ThemeProvider>
+        <Outlet />
+        <Toaster position="bottom-right" richColors closeButton />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
+
