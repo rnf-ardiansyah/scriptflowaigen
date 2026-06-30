@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  createScript,
   deleteScript,
   duplicateScript,
   scriptsListQuery,
