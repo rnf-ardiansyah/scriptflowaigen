@@ -315,15 +315,20 @@ function ScriptPart({
   hint,
   value,
   onChange,
+  accessory,
 }: {
   label: string;
   hint: string;
   value: string;
   onChange: (v: string) => void;
+  accessory?: React.ReactNode;
 }) {
   return (
     <Card>
-      <Label htmlFor={label}>{label}</Label>
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor={label}>{label}</Label>
+        {accessory}
+      </div>
       <p className="-mt-1 mb-2 text-[11px] text-muted-foreground">{hint}</p>
       <Textarea
         id={label}
