@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+
 
 const links = [
   { label: "Features", href: "#features" },
@@ -47,7 +49,9 @@ export function Navbar() {
           ))}
         </div>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Link
+
             to="/login"
             className="hidden rounded-xl px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
           >
