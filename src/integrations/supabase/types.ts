@@ -85,6 +85,7 @@ export type Database = {
           retain: string | null
           reward: string | null
           title: string | null
+          tone: string | null
           updated_at: string
           user_id: string
         }
@@ -101,6 +102,7 @@ export type Database = {
           retain?: string | null
           reward?: string | null
           title?: string | null
+          tone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -117,6 +119,7 @@ export type Database = {
           retain?: string | null
           reward?: string | null
           title?: string | null
+          tone?: string | null
           updated_at?: string
           user_id?: string
         }
