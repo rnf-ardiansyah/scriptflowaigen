@@ -84,7 +84,7 @@ function NewScriptPage() {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-3xl px-6">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" size="sm">
             <Link to="/dashboard">

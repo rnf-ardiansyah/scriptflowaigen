@@ -192,7 +192,7 @@ function EditorLoaded({ scriptId }: { scriptId: string }) {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-5xl px-6">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Button asChild variant="ghost" size="sm">
             <Link to="/library">

@@ -40,7 +40,7 @@ const PREMIUM_FEATURES = [
 function UpgradePage() {
   return (
     <AppLayout>
-      <div className="mx-auto max-w-5xl px-6">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <Button asChild variant="ghost" size="sm">
           <Link to="/dashboard">
             <ArrowLeft className="h-4 w-4" /> Kembali ke dashboard
