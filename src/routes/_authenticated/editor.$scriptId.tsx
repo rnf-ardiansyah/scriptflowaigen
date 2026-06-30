@@ -14,6 +14,7 @@ import {
   createScript,
   scriptDetailQuery,
   updateScript,
+  type ScriptRow,
 } from "@/lib/scripts";
 import { NICHES } from "@/lib/niches";
 import { AIActions, HookRegenButton } from "@/components/app/AIActions";
@@ -69,7 +70,6 @@ const empty: FormState = {
 function EditorPage() {
   const { scriptId } = Route.useParams();
   const navigate = useNavigate();
-  const router = useRouter();
   const qc = useQueryClient();
   const [creating, setCreating] = useState(scriptId === "new");
 
@@ -158,7 +158,7 @@ function EditorLoaded({ scriptId }: { scriptId: string }) {
       setStatus("saving");
       try {
         const full_script = buildFullScript(form);
-        await updateScript(scriptId, {
+        const updated = await updateScript(scriptId, {
           title: form.title,
           niche: form.niche || null,
           idea: form.idea,
@@ -171,7 +171,15 @@ function EditorLoaded({ scriptId }: { scriptId: string }) {
         });
         dirtyRef.current = false;
         setStatus("saved");
-        qc.invalidateQueries({ queryKey: ["scripts"] });
+        // Update the detail cache in-place (avoid refetching what we just wrote),
+        // and refresh only the list-shaped queries that show title/reading_time.
+        qc.setQueryData<ScriptRow | null>(
+          ["scripts", "detail", scriptId],
+          updated,
+        );
+        qc.invalidateQueries({ queryKey: ["scripts", "list"] });
+        qc.invalidateQueries({ queryKey: ["scripts", "recent"] });
+        qc.invalidateQueries({ queryKey: ["scripts", "counts"] });
       } catch (e) {
         setStatus("error");
         toast.error(e instanceof Error ? e.message : "Auto-save gagal");
