@@ -69,110 +69,99 @@ function GeneratorPage() {
   const [filled, setFilled] = useState<Set<keyof Sections>>(new Set());
   const [elapsed, setElapsed] = useState(0);
   const [scriptId, setScriptId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const timerRef = useRef<number | null>(null);
-  const fillTimeouts = useRef<number[]>([]);
+  const generate = useServerFn(generateScript);
 
   useEffect(() => {
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
-      fillTimeouts.current.forEach((t) => window.clearTimeout(t));
     };
   }, []);
 
+  function stopTimer() {
+    if (timerRef.current) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }
+
   function reset() {
-    if (timerRef.current) window.clearInterval(timerRef.current);
-    fillTimeouts.current.forEach((t) => window.clearTimeout(t));
-    fillTimeouts.current = [];
+    stopTimer();
     setPhase("idle");
     setResult(null);
     setFilled(new Set());
     setElapsed(0);
     setScriptId(null);
+    setErrorMessage("");
   }
 
-  function handleGenerate() {
-    if (idea.trim().length < 3) {
+  async function handleGenerate() {
+    const trimmedIdea = idea.trim();
+    if (trimmedIdea.length < 3) {
       toast.error("Tulis ide kontennya dulu (minimal 3 karakter).");
       return;
     }
+
     // reset previous run
-    fillTimeouts.current.forEach((t) => window.clearTimeout(t));
-    fillTimeouts.current = [];
+    stopTimer();
     setScriptId(null);
+    setResult(null);
     setFilled(new Set());
     setElapsed(0);
+    setErrorMessage("");
     setPhase("generating");
-
-    const final = buildDummyScript({ idea: idea.trim(), niche, duration, style });
-    setResult(final);
 
     const start = performance.now();
     timerRef.current = window.setInterval(() => {
       setElapsed((performance.now() - start) / 1000);
     }, 100);
 
-    const order: (keyof Sections)[] = ["hook", "retain", "reward", "cta"];
-    order.forEach((key, idx) => {
-      const t = window.setTimeout(
-        () => {
-          setFilled((prev) => {
-            const next = new Set(prev);
-            next.add(key);
-            return next;
-          });
-          if (idx === order.length - 1) {
-            if (timerRef.current) {
-              window.clearInterval(timerRef.current);
-              timerRef.current = null;
-            }
-            setPhase("done");
-          }
-        },
-        700 + idx * 750,
-      );
-      fillTimeouts.current.push(t);
-    });
-  }
-
-  async function handleSave() {
-    if (!result) return;
-    setSaving(true);
     try {
-      const trimmedIdea = idea.trim();
-      const title =
-        trimmedIdea.length > 60 ? `${trimmedIdea.slice(0, 60)}…` : trimmedIdea;
-      const full_script = buildFullScript(result);
-      const reading_time = computeReadingTime(result);
-      const created = await createScript({
-        title,
-        idea: trimmedIdea,
-        niche,
-        tone: style,
-        hook: result.hook,
-        retain: result.retain,
-        reward: result.reward,
-        cta: result.cta,
-        full_script,
-        reading_time,
+      const res = await generate({
+        data: { idea: trimmedIdea, niche, tone: style },
       });
-      setScriptId(created.id);
+      stopTimer();
+      setResult({
+        hook: res.hook,
+        retain: res.retain,
+        reward: res.reward,
+        cta: res.cta,
+      });
+      setFilled(new Set(["hook", "retain", "reward", "cta"]));
+      setScriptId(res.scriptId);
+      setPhase("done");
       qc.invalidateQueries({ queryKey: ["scripts"] });
-      toast.success("Script disimpan ke Library ✨");
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Gagal menyimpan";
-      if (msg.includes("free_plan_script_limit_reached")) {
-        toast.error("Library penuh — upgrade ke Premium untuk menyimpan lebih banyak.");
+      qc.invalidateQueries({ queryKey: ["quota"] });
+      qc.invalidateQueries({ queryKey: ["generations"] });
+      if (res.cached) {
+        toast.success("Pakai hasil tersimpan (cache) — kuota tidak terpotong.");
       } else {
-        toast.error(msg);
+        toast.success("Script berhasil dibuat ✨");
       }
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      stopTimer();
+      const classified = classifyError(err);
+      if (
+        classified.kind === "rate_limited" ||
+        classified.kind === "script_limit_reached"
+      ) {
+        setPhase("limit_reached");
+        setErrorMessage(classified.message);
+      } else {
+        setPhase("error");
+        setErrorMessage(classified.message);
+      }
     }
   }
 
-  const totalReadSec = result ? computeReadingTime(result) : 0;
+  const totalReadSec = result
+    ? computeReadingTime(
+        [result.hook, result.retain, result.reward, result.cta].join("\n\n"),
+      )
+    : 0;
+
 
   return (
     <AppLayout>
