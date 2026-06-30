@@ -5,7 +5,7 @@ import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
 import { Check, Sparkles } from "lucide-react";
 
-export const Route = createFileRoute("/upgrade")({
+export const Route = createFileRoute("/_authenticated/upgrade")({
   head: () => ({
     meta: [
       { title: "Upgrade — ScriptFlow Premium" },

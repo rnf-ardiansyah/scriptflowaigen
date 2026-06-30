@@ -9,35 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as LibraryRouteImport } from './routes/library'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TeleprompterScriptIdRouteImport } from './routes/teleprompter.$scriptId'
-import { Route as EditorScriptIdRouteImport } from './routes/editor.$scriptId'
+import { Route as AuthenticatedUpgradeRouteImport } from './routes/_authenticated/upgrade'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedTeleprompterScriptIdRouteImport } from './routes/_authenticated/teleprompter.$scriptId'
+import { Route as AuthenticatedEditorScriptIdRouteImport } from './routes/_authenticated/editor.$scriptId'
 
-const UpgradeRoute = UpgradeRouteImport.update({
-  id: '/upgrade',
-  path: '/upgrade',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -45,14 +31,8 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LibraryRoute = LibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -60,134 +40,136 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TeleprompterScriptIdRoute = TeleprompterScriptIdRouteImport.update({
-  id: '/teleprompter/$scriptId',
-  path: '/teleprompter/$scriptId',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedUpgradeRoute = AuthenticatedUpgradeRouteImport.update({
+  id: '/upgrade',
+  path: '/upgrade',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const EditorScriptIdRoute = EditorScriptIdRouteImport.update({
-  id: '/editor/$scriptId',
-  path: '/editor/$scriptId',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTeleprompterScriptIdRoute =
+  AuthenticatedTeleprompterScriptIdRouteImport.update({
+    id: '/teleprompter/$scriptId',
+    path: '/teleprompter/$scriptId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEditorScriptIdRoute =
+  AuthenticatedEditorScriptIdRouteImport.update({
+    id: '/editor/$scriptId',
+    path: '/editor/$scriptId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upgrade': typeof UpgradeRoute
-  '/editor/$scriptId': typeof EditorScriptIdRoute
-  '/teleprompter/$scriptId': typeof TeleprompterScriptIdRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/upgrade': typeof AuthenticatedUpgradeRoute
+  '/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
+  '/teleprompter/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upgrade': typeof UpgradeRoute
-  '/editor/$scriptId': typeof EditorScriptIdRoute
-  '/teleprompter/$scriptId': typeof TeleprompterScriptIdRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/upgrade': typeof AuthenticatedUpgradeRoute
+  '/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
+  '/teleprompter/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/library': typeof LibraryRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upgrade': typeof UpgradeRoute
-  '/editor/$scriptId': typeof EditorScriptIdRoute
-  '/teleprompter/$scriptId': typeof TeleprompterScriptIdRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/upgrade': typeof AuthenticatedUpgradeRoute
+  '/_authenticated/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
+  '/_authenticated/teleprompter/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
+    | '/register'
     | '/dashboard'
     | '/library'
-    | '/login'
     | '/onboarding'
     | '/profile'
-    | '/register'
     | '/upgrade'
     | '/editor/$scriptId'
     | '/teleprompter/$scriptId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
+    | '/register'
     | '/dashboard'
     | '/library'
-    | '/login'
     | '/onboarding'
     | '/profile'
-    | '/register'
     | '/upgrade'
     | '/editor/$scriptId'
     | '/teleprompter/$scriptId'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
-    | '/library'
+    | '/_authenticated'
     | '/login'
-    | '/onboarding'
-    | '/profile'
     | '/register'
-    | '/upgrade'
-    | '/editor/$scriptId'
-    | '/teleprompter/$scriptId'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/library'
+    | '/_authenticated/onboarding'
+    | '/_authenticated/profile'
+    | '/_authenticated/upgrade'
+    | '/_authenticated/editor/$scriptId'
+    | '/_authenticated/teleprompter/$scriptId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
-  LibraryRoute: typeof LibraryRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
-  OnboardingRoute: typeof OnboardingRoute
-  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
-  UpgradeRoute: typeof UpgradeRoute
-  EditorScriptIdRoute: typeof EditorScriptIdRoute
-  TeleprompterScriptIdRoute: typeof TeleprompterScriptIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/upgrade': {
-      id: '/upgrade'
-      path: '/upgrade'
-      fullPath: '/upgrade'
-      preLoaderRoute: typeof UpgradeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -197,18 +179,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/library': {
-      id: '/library'
-      path: '/library'
-      fullPath: '/library'
-      preLoaderRoute: typeof LibraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -218,34 +193,87 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/teleprompter/$scriptId': {
-      id: '/teleprompter/$scriptId'
+    '/_authenticated/upgrade': {
+      id: '/_authenticated/upgrade'
+      path: '/upgrade'
+      fullPath: '/upgrade'
+      preLoaderRoute: typeof AuthenticatedUpgradeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthenticatedLibraryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/teleprompter/$scriptId': {
+      id: '/_authenticated/teleprompter/$scriptId'
       path: '/teleprompter/$scriptId'
       fullPath: '/teleprompter/$scriptId'
-      preLoaderRoute: typeof TeleprompterScriptIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedTeleprompterScriptIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/editor/$scriptId': {
-      id: '/editor/$scriptId'
+    '/_authenticated/editor/$scriptId': {
+      id: '/_authenticated/editor/$scriptId'
       path: '/editor/$scriptId'
       fullPath: '/editor/$scriptId'
-      preLoaderRoute: typeof EditorScriptIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedEditorScriptIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedUpgradeRoute: typeof AuthenticatedUpgradeRoute
+  AuthenticatedEditorScriptIdRoute: typeof AuthenticatedEditorScriptIdRoute
+  AuthenticatedTeleprompterScriptIdRoute: typeof AuthenticatedTeleprompterScriptIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedUpgradeRoute: AuthenticatedUpgradeRoute,
+  AuthenticatedEditorScriptIdRoute: AuthenticatedEditorScriptIdRoute,
+  AuthenticatedTeleprompterScriptIdRoute:
+    AuthenticatedTeleprompterScriptIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
-  LibraryRoute: LibraryRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
-  OnboardingRoute: OnboardingRoute,
-  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
-  UpgradeRoute: UpgradeRoute,
-  EditorScriptIdRoute: EditorScriptIdRoute,
-  TeleprompterScriptIdRoute: TeleprompterScriptIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

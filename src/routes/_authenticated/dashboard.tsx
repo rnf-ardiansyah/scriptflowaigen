@@ -5,7 +5,7 @@ import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
 import { Sparkles, FilePlus, Library, Clock, Mic } from "lucide-react";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — ScriptFlow" },

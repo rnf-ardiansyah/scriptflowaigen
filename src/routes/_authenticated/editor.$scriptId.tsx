@@ -6,7 +6,7 @@ import { Card } from "@/components/app/Card";
 import { Input, Label, Textarea } from "@/components/app/Input";
 import { Sparkles, Mic, Save } from "lucide-react";
 
-export const Route = createFileRoute("/editor/$scriptId")({
+export const Route = createFileRoute("/_authenticated/editor/$scriptId")({
   head: ({ params }) => ({
     meta: [
       { title: `Editor — ${params.scriptId} · ScriptFlow` },

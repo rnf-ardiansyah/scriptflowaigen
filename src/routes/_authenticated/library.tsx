@@ -6,7 +6,7 @@ import { Input } from "@/components/app/Input";
 import { Badge } from "@/components/app/Badge";
 import { FilePlus, Search, Star } from "lucide-react";
 
-export const Route = createFileRoute("/library")({
+export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
     meta: [
       { title: "Library — ScriptFlow" },

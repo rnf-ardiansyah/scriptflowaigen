@@ -128,6 +128,39 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    let mounted = true;
+    let subscription: { unsubscribe: () => void } | null = null;
+    (async () => {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { routeAfterAuth } = await import("@/lib/profile-helpers");
+      const { data } = supabase.auth.onAuthStateChange((event) => {
+        if (!mounted) return;
+        if (event === "SIGNED_OUT") {
+          router.invalidate();
+          return;
+        }
+        if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+          router.invalidate();
+          queryClient.invalidateQueries();
+          // After OAuth full-page redirect, send the user from public landing/auth pages to their app.
+          const path = window.location.pathname;
+          if (path === "/" || path === "/login" || path === "/register") {
+            routeAfterAuth().then((dest) => {
+              router.navigate({ to: dest, replace: true });
+            });
+          }
+        }
+      });
+      subscription = data.subscription;
+    })();
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
+  }, [queryClient, router]);
 
   return (
     <QueryClientProvider client={queryClient}>

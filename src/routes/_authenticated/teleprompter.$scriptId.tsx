@@ -4,7 +4,7 @@ import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
 import { Play, Pause, Settings2 } from "lucide-react";
 
-export const Route = createFileRoute("/teleprompter/$scriptId")({
+export const Route = createFileRoute("/_authenticated/teleprompter/$scriptId")({
   head: ({ params }) => ({
     meta: [
       { title: `Teleprompter — ${params.scriptId} · ScriptFlow` },
