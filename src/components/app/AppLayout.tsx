@@ -1,9 +1,11 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { Logo } from "@/components/landing/Logo";
 import { Button } from "./Button";
-import { Bell, LayoutDashboard, Library, User, Crown } from "lucide-react";
+import { Bell, LayoutDashboard, Library, User, Crown, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -15,6 +17,8 @@ const nav = [
 export function AppLayout({ children }: { children: ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let raf = 0;
@@ -26,6 +30,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/login", replace: true });
+  }
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -68,8 +79,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
             >
               <Bell className="h-4 w-4" />
             </button>
-            <Button asChild size="sm">
-              <Link to="/upgrade">Upgrade</Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              aria-label="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Sign out</span>
             </Button>
           </div>
         </nav>

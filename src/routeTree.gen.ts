@@ -9,35 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as LibraryRouteImport } from './routes/library'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TeleprompterScriptIdRouteImport } from './routes/teleprompter.$scriptId'
-import { Route as EditorScriptIdRouteImport } from './routes/editor.$scriptId'
 
-const UpgradeRoute = UpgradeRouteImport.update({
-  id: '/upgrade',
-  path: '/upgrade',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -45,149 +23,49 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LibraryRoute = LibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TeleprompterScriptIdRoute = TeleprompterScriptIdRouteImport.update({
-  id: '/teleprompter/$scriptId',
-  path: '/teleprompter/$scriptId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EditorScriptIdRoute = EditorScriptIdRouteImport.update({
-  id: '/editor/$scriptId',
-  path: '/editor/$scriptId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upgrade': typeof UpgradeRoute
-  '/editor/$scriptId': typeof EditorScriptIdRoute
-  '/teleprompter/$scriptId': typeof TeleprompterScriptIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upgrade': typeof UpgradeRoute
-  '/editor/$scriptId': typeof EditorScriptIdRoute
-  '/teleprompter/$scriptId': typeof TeleprompterScriptIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
-  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
-  '/upgrade': typeof UpgradeRoute
-  '/editor/$scriptId': typeof EditorScriptIdRoute
-  '/teleprompter/$scriptId': typeof TeleprompterScriptIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/dashboard'
-    | '/library'
-    | '/login'
-    | '/onboarding'
-    | '/profile'
-    | '/register'
-    | '/upgrade'
-    | '/editor/$scriptId'
-    | '/teleprompter/$scriptId'
+  fullPaths: '/' | '/login' | '/register'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/dashboard'
-    | '/library'
-    | '/login'
-    | '/onboarding'
-    | '/profile'
-    | '/register'
-    | '/upgrade'
-    | '/editor/$scriptId'
-    | '/teleprompter/$scriptId'
-  id:
-    | '__root__'
-    | '/'
-    | '/dashboard'
-    | '/library'
-    | '/login'
-    | '/onboarding'
-    | '/profile'
-    | '/register'
-    | '/upgrade'
-    | '/editor/$scriptId'
-    | '/teleprompter/$scriptId'
+  to: '/' | '/login' | '/register'
+  id: '__root__' | '/' | '/login' | '/register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
-  LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
-  OnboardingRoute: typeof OnboardingRoute
-  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
-  UpgradeRoute: typeof UpgradeRoute
-  EditorScriptIdRoute: typeof EditorScriptIdRoute
-  TeleprompterScriptIdRoute: typeof TeleprompterScriptIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/upgrade': {
-      id: '/upgrade'
-      path: '/upgrade'
-      fullPath: '/upgrade'
-      preLoaderRoute: typeof UpgradeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -197,20 +75,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/library': {
-      id: '/library'
-      path: '/library'
-      fullPath: '/library'
-      preLoaderRoute: typeof LibraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -218,34 +82,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/teleprompter/$scriptId': {
-      id: '/teleprompter/$scriptId'
-      path: '/teleprompter/$scriptId'
-      fullPath: '/teleprompter/$scriptId'
-      preLoaderRoute: typeof TeleprompterScriptIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/editor/$scriptId': {
-      id: '/editor/$scriptId'
-      path: '/editor/$scriptId'
-      fullPath: '/editor/$scriptId'
-      preLoaderRoute: typeof EditorScriptIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
-  LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
-  OnboardingRoute: OnboardingRoute,
-  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
-  UpgradeRoute: UpgradeRoute,
-  EditorScriptIdRoute: EditorScriptIdRoute,
-  TeleprompterScriptIdRoute: TeleprompterScriptIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
