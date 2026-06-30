@@ -23,7 +23,7 @@ export function FeaturesBento() {
           description="A focused toolkit for creators who want to ship more short-form video without the chaos."
         />
 
-        <div className="mt-14 grid auto-rows-[220px] grid-cols-1 gap-4 md:grid-cols-6">
+        <div className="mt-14 grid auto-rows-auto grid-cols-1 gap-4 md:auto-rows-[220px] md:grid-cols-6">
           {/* AI Generator — large */}
           <Cell className="md:col-span-4 md:row-span-2">
             <CellHeader icon={Sparkles} title="AI Script Generator" />

@@ -99,7 +99,7 @@ function PlanCard({
       <h3 className="text-lg font-semibold">{name}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       <div className="mt-5 flex items-end gap-1">
-        <span className="text-5xl font-bold tracking-tight text-foreground">{price}</span>
+        <span className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{price}</span>
         <span className="mb-1.5 text-sm text-muted-foreground">{period}</span>
       </div>
       <Link
