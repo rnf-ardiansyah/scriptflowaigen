@@ -14,6 +14,7 @@ export type ScriptRow = {
   full_script: string | null;
   reading_time: number | null;
   is_favorite: boolean;
+  tone: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -108,6 +109,7 @@ export async function createScript(
     full_script: partial.full_script ?? "",
     reading_time: partial.reading_time ?? 0,
     is_favorite: partial.is_favorite ?? false,
+    tone: partial.tone ?? null,
   };
   const { data, error } = await supabase
     .from("scripts")

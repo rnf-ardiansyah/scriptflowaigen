@@ -1,13 +1,11 @@
-import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
 import { FilePlus, Library, Star, Clock, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
 import {
-  createScript,
   profileQuery,
   scriptsCountsQuery,
   scriptsRecentQuery,
@@ -34,20 +32,6 @@ function DashboardPage() {
   const { data: profile } = useSuspenseQuery(profileQuery());
   const { data: counts } = useSuspenseQuery(scriptsCountsQuery());
   const { data: recent } = useSuspenseQuery(scriptsRecentQuery(5));
-  const navigate = useNavigate();
-  const router = useRouter();
-  const qc = useQueryClient();
-
-  async function handleCreate() {
-    try {
-      const s = await createScript({ niche: profile?.preferred_niche ?? null });
-      qc.invalidateQueries({ queryKey: ["scripts"] });
-      navigate({ to: "/editor/$scriptId", params: { scriptId: s.id } });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Gagal membuat script";
-      toast.error(msg);
-    }
-  }
 
   const displayName = profile?.name?.trim() || "Creator";
 
@@ -64,8 +48,10 @@ function DashboardPage() {
               Niche: <span className="text-foreground">{profile?.preferred_niche ?? "—"}</span>
             </p>
           </div>
-          <Button size="lg" onClick={handleCreate}>
-            <FilePlus className="h-4 w-4" /> Buat Script Baru
+          <Button asChild size="lg">
+            <Link to="/new-script">
+              <FilePlus className="h-4 w-4" /> Buat Script Baru
+            </Link>
           </Button>
         </div>
 
@@ -94,18 +80,19 @@ function DashboardPage() {
                 Mulai dengan membuat script pertamamu — isi manual atau lanjutkan lewat AI nanti.
               </CardDescription>
             </CardHeader>
-            <Button onClick={handleCreate}>
-              <FilePlus className="h-4 w-4" /> Buat Script Pertama
+            <Button asChild>
+              <Link to="/new-script">
+                <FilePlus className="h-4 w-4" /> Buat Script Pertama
+              </Link>
             </Button>
           </Card>
         ) : (
           <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {recent.map((s) => (
-              <button
+              <Link
                 key={s.id}
-                onClick={() =>
-                  router.navigate({ to: "/editor/$scriptId", params: { scriptId: s.id } })
-                }
+                to="/editor/$scriptId"
+                params={{ scriptId: s.id }}
                 className="group rounded-2xl border border-border bg-surface p-5 text-left shadow-soft transition-transform hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between">
@@ -126,7 +113,7 @@ function DashboardPage() {
                   <Clock className="h-3.5 w-3.5" />
                   {s.reading_time ?? 0} detik
                 </p>
-              </button>
+              </Link>
             ))}
           </div>
         )}

@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  createScript,
   deleteScript,
   duplicateScript,
   scriptsListQuery,
@@ -78,15 +77,9 @@ function LibraryPage() {
     });
   }, [scripts, search, nicheFilter, favoritesOnly]);
 
-  async function handleCreate() {
-    try {
-      const s = await createScript({ niche: profile?.preferred_niche ?? null });
-      invalidate();
-      navigate({ to: "/editor/$scriptId", params: { scriptId: s.id } });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Gagal membuat script");
-    }
-  }
+  // "Buat Script Baru" routes to /new-script (AI generator).
+
+
 
   async function handleDuplicate(s: ScriptRow) {
     try {
@@ -136,8 +129,10 @@ function LibraryPage() {
               Cari, atur, dan buka ulang script yang sudah kamu buat.
             </p>
           </div>
-          <Button size="lg" onClick={handleCreate}>
-            <FilePlus className="h-4 w-4" /> Buat Script Baru
+          <Button asChild size="lg">
+            <Link to="/new-script">
+              <FilePlus className="h-4 w-4" /> Buat Script Baru
+            </Link>
           </Button>
         </div>
 
@@ -195,8 +190,10 @@ function LibraryPage() {
             <p className="max-w-sm text-sm text-muted-foreground">
               Yuk mulai script pertamamu. Kamu bisa isi manual dulu — nanti tinggal pakai AI generate.
             </p>
-            <Button className="mt-2" onClick={handleCreate}>
-              <FilePlus className="h-4 w-4" /> Buat Script Pertama
+            <Button asChild className="mt-2">
+              <Link to="/new-script">
+                <FilePlus className="h-4 w-4" /> Buat Script Pertama
+              </Link>
             </Button>
           </Card>
         ) : filtered.length === 0 ? (
