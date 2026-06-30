@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      folders: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       generations: {
         Row: {
           created_at: string
@@ -75,6 +96,7 @@ export type Database = {
         Row: {
           created_at: string
           cta: string | null
+          folder_id: string | null
           full_script: string | null
           hook: string | null
           id: string
@@ -92,6 +114,7 @@ export type Database = {
         Insert: {
           created_at?: string
           cta?: string | null
+          folder_id?: string | null
           full_script?: string | null
           hook?: string | null
           id?: string
@@ -109,6 +132,7 @@ export type Database = {
         Update: {
           created_at?: string
           cta?: string | null
+          folder_id?: string | null
           full_script?: string | null
           hook?: string | null
           id?: string
@@ -123,7 +147,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "scripts_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

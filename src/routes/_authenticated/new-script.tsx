@@ -28,6 +28,7 @@ const TONES = ["Santai", "Formal", "Persuasif", "Edukatif", "Storytelling"] as c
 type ErrState =
   | null
   | { kind: "rate_limited"; plan?: string; limit?: number; message: string }
+  | { kind: "script_limit"; message: string }
   | { kind: "parse_failed"; message: string }
   | { kind: "generic"; message: string };
 
@@ -69,6 +70,8 @@ function NewScriptPage() {
           limit: lovable.limit,
           message: lovable.message,
         });
+      } else if (lovable?.code === "script_limit_reached") {
+        setError({ kind: "script_limit", message: lovable.message });
       } else if (lovable?.code === "parse_failed") {
         setError({ kind: "parse_failed", message: lovable.message });
       } else {
@@ -189,17 +192,21 @@ function ErrorCard({
   error: NonNullable<ErrState>;
   onRetry: () => void;
 }) {
-  if (error.kind === "rate_limited") {
+  if (error.kind === "rate_limited" || error.kind === "script_limit") {
+    const isLimit = error.kind === "script_limit";
     return (
       <Card className="mt-8 flex flex-col items-center gap-4 py-12 text-center">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-electric/10 text-electric">
           <Zap className="h-6 w-6" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">Kuota harian habis</h2>
+          <h2 className="text-lg font-semibold">
+            {isLimit ? "Script Library penuh" : "Kuota harian habis"}
+          </h2>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            {error.message} Upgrade ke Premium untuk dapat 100 generate per hari, atau
-            coba lagi besok.
+            {error.message}
+            {!isLimit &&
+              " Upgrade ke Premium untuk dapat 100 generate per hari, atau coba lagi besok."}
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">

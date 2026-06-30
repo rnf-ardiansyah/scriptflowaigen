@@ -15,6 +15,7 @@ export type ScriptRow = {
   reading_time: number | null;
   is_favorite: boolean;
   tone: string | null;
+  folder_id: string | null;
   created_at: string;
   updated_at: string;
 };
