@@ -191,8 +191,23 @@ function EditorLoaded({ scriptId }: { scriptId: string }) {
               <ArrowLeft className="h-4 w-4" /> Kembali ke Library
             </Link>
           </Button>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <SaveIndicator status={status} />
+            <AIActions
+              scriptId={scriptId}
+              current={{
+                hook: form.hook,
+                retain: form.retain,
+                reward: form.reward,
+                cta: form.cta,
+              }}
+              onApplyFull={(p) => {
+                dirtyRef.current = true;
+                setForm((prev) => ({ ...prev, ...p }));
+                setStatus("typing");
+              }}
+              onApplyHook={(h) => update("hook", h)}
+            />
             <Button
               variant="secondary"
               onClick={() =>
