@@ -1,5 +1,8 @@
 import { Check, Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { SectionHeader } from "./SectionHeader";
+
+type PricingRoute = "/register" | "/upgrade";
 
 const free = [
   "5 AI generations / day",
@@ -36,6 +39,7 @@ export function Pricing() {
             period="forever"
             description="Everything you need to test your first ideas."
             cta="Start Free"
+            ctaTo="/register"
             features={free}
           />
           <PlanCard
@@ -44,6 +48,7 @@ export function Pricing() {
             period="/ month"
             description="For creators shipping content every week."
             cta="Get Premium"
+            ctaTo="/upgrade"
             features={premium}
             highlight
           />
@@ -63,6 +68,7 @@ function PlanCard({
   period,
   description,
   cta,
+  ctaTo,
   features,
   highlight,
 }: {
@@ -71,6 +77,7 @@ function PlanCard({
   period: string;
   description: string;
   cta: string;
+  ctaTo: PricingRoute;
   features: string[];
   highlight?: boolean;
 }) {
@@ -93,8 +100,8 @@ function PlanCard({
         <span className="text-5xl font-bold tracking-tight text-foreground">{price}</span>
         <span className="mb-1.5 text-sm text-muted-foreground">{period}</span>
       </div>
-      <a
-        href="#"
+      <Link
+        to={ctaTo}
         className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-medium transition-all ${
           highlight
             ? "bg-electric text-electric-foreground shadow-glow hover:scale-[1.01]"
@@ -102,7 +109,7 @@ function PlanCard({
         }`}
       >
         {cta}
-      </a>
+      </Link>
       <ul className="mt-7 space-y-3">
         {features.map((f) => (
           <li key={f} className="flex items-start gap-2.5 text-sm">
