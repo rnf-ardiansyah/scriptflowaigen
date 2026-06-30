@@ -1,51 +1,26 @@
+## Status: sudah selesai sebelumnya
 
-## Tujuan tahap ini
+Halaman `/teleprompter/:scriptId` (`src/routes/_authenticated/teleprompter.$scriptId.tsx`) sudah memenuhi semua requirement di prompt ini:
 
-Bangun ulang **AI Generator** sesuai alur baru (preview hasil di tempat, skeleton loading, dummy output, lalu save/teleprompter), sambil memastikan Dashboard, Library, dan Editor sudah cocok dengan spec. Tahap ini **tidak** menyentuh integrasi Gemini sungguhan — kode `generateScript` server fn dibiarkan utuh agar bisa dihidupkan kembali di prompt berikutnya, tapi tombol Generate di UI memakai jalur dummy lokal.
-
-## Status saat ini vs spec
-
-| Area | Status | Aksi |
+| # | Requirement | Status |
 |---|---|---|
-| Dashboard (greeting + niche, total/favorit, 5 recent) | ✅ sudah ada | tidak diubah |
-| Library (grid, search, filter niche & favorit, edit/duplicate/favorite/delete + konfirmasi, reading_time, empty state ke /generator) | ✅ sudah ada | tidak diubah |
-| Editor (title/niche/idea + 4 textarea hook/retain/reward/cta, auto-save 2s, indikator "Tersimpan", reading_time real-time ⌈kata/2.5⌉, tombol Teleprompter & kembali ke Library) | ✅ sudah ada | tidak diubah |
-| App Shell sidebar konsisten + indikator kuota | ✅ sudah ada (`Sidebar.tsx` + `QuotaPanel`) | biarkan dummy untuk halaman generator |
-| AI Generator alur baru (durasi+gaya, preview in-place, skeleton, struktur hook/retain/reward/cta, reading time, Save+Teleprompter) | ❌ masih versi lama (langsung redirect ke editor) | **rebuild** |
+| 1 | Fullscreen view, teks besar, kontras tinggi (hitam/putih) | ✅ overlay `fixed inset-0`, font 32/48/64px, bold |
+| 2 | Start/Pause | ✅ tombol di bottom bar + state `isPlaying` |
+| 3 | Slider speed 0.5×–3×, default 1× | ✅ `min=0.5 max=3 step=0.1` |
+| 4 | 3 tingkatan font (S/M/L) | ✅ `FONT_SIZES` |
+| 5 | Dark mode toggle independen, default ON | ✅ state `isDark` default `true` |
+| 6 | Smooth auto-scroll via `requestAnimationFrame` | ✅ loop rAF + delta-time |
+| 7 | Fullscreen API browser | ✅ `requestFullscreen` / `exitFullscreen` |
+| 8 | Spacebar pause/resume | ✅ keydown listener (ignore input/textarea) |
+| 9 | Tap layar = pause/resume di mobile | ✅ `onClick={handleSurfaceTap}` |
+| 10 | Tombol Kembali ke editor, auto-hide saat fullscreen | ✅ top-left bar fade out 3s |
+| 11 | Empty state kalau script kosong | ✅ pesan + CTA "Buka editor" |
 
-## Perubahan AI Generator (`src/routes/_authenticated/generator.tsx`)
+## Rencana
 
-1. **Header**: judul "AI Generator" + badge kanan menampilkan setting aktif, contoh `60s · Hook style`.
-2. **Card setting** kecil di atas form: dropdown `Durasi target` (30s / 60s / 90s) dan dropdown `Gaya` (Hook style / Story style / Listicle). State lokal, default 60s + Hook style.
-3. **Card Idea**: label "Idea", textarea (placeholder: *"5 kesalahan pemula bikin konten TikTok"*), tombol **Generate** (memanggil simulasi, bukan server fn).
-4. **Status Generating**: saat tombol ditekan, render card hasil dengan:
-   - Header "Generating…" + timer kecil (elapsed detik, update tiap 100ms).
-   - 4 blok skeleton (hook/retain/reward/cta), tiap blok berisi 2-4 baris `<div>` abu animasi `animate-pulse`. Baris diisi (skeleton diganti teks final) bertahap pakai `setTimeout` per section (≈ 600-900ms antar section, total ±3 detik).
-5. **Hasil dummy**: helper lokal `buildDummyScript({idea, niche, duration, style})` menghasilkan teks template terstruktur yang menyisipkan `idea` user. Contoh hook: *"Stop scroll dulu — kalau kamu pernah {idea}, video ini wajib kamu tonton."* Variasi sesuai `style` (Hook/Story/Listicle) dan panjang sesuai `duration`.
-6. **Setelah selesai**: tampilkan 4 section terpisah (Hook, Retain, Reward, CTA) dalam card berbeda + label. Di bawah: badge `~XXs read` dihitung `Math.ceil(totalWords / 2.5)`.
-7. **Aksi**: dua tombol di bawah hasil.
-   - **Save to Library** → insert ke tabel `scripts` lewat helper baru `createDummyScript()` di `src/lib/scripts.ts` (insert `title` = 60 char pertama idea, `idea`, `niche`, `tone` (= style), `hook/retain/reward/cta`, `full_script`, `reading_time`). Setelah sukses simpan `scriptId` ke state, toast sukses, invalidasi query `["scripts"]`, **tetap di halaman** agar tombol Teleprompter aktif. Tombol berubah jadi "Buka di Editor" → `/editor/$scriptId`.
-   - **Open Teleprompter** → disabled (`opacity-50 cursor-not-allowed`) sampai `scriptId` ada; aktif setelah save, link ke `/teleprompter/$scriptId`.
-8. Tombol "Generate Ulang" kecil di atas hasil untuk reset state (hapus hasil + scriptId, kembali ke form).
-9. Hilangkan import `generateScript` dari `ai.functions` di file ini (file tersebut tetap ada untuk prompt selanjutnya). Hilangkan `ErrorCard` rate-limit (tidak relevan untuk dummy); cukup toast error generik kalau idea < 3 karakter.
+Tidak ada perubahan kode. Saya akan:
 
-## Helper baru di `src/lib/scripts.ts`
+1. Konfirmasi ke kamu bahwa fitur sudah ada (built di tahap teleprompter sebelumnya, sebelum integrasi AI).
+2. Opsional: jalankan Playwright smoke test buka `/teleprompter/<scriptId>` dari script yang ada di library untuk memastikan auto-scroll, Space, dan tombol speed/font/dark masih bekerja setelah perubahan-perubahan terbaru (light mode, mobile nav, dll).
 
-Tambahkan fungsi client-side `createDummyScript(input)` (pakai `supabase` browser client) yang `insert` row baru ke `scripts` dengan kolom-kolom dummy + `user_id = auth.uid()`, lalu return `id`. Tangani error `free_plan_script_limit_reached` dengan pesan ramah ("Library penuh, upgrade ke Premium.").
-
-## Verifikasi (build mode, setelah persetujuan)
-
-Jalankan Playwright headless di sandbox dengan session ter-inject:
-1. Buka `/generator`, ketik idea, ganti durasi ke 90s + Listicle.
-2. Klik Generate → screenshot skeleton + timer berjalan.
-3. Tunggu selesai → cek 4 section + `~..s read` muncul.
-4. Klik Save → cek toast, tombol Teleprompter aktif, `scriptId` tersimpan.
-5. Buka `/library` → script baru muncul; favorit + duplicate + delete + search bekerja.
-6. Buka editor script tersebut → auto-save indikator "Tersimpan" muncul, reading_time live update.
-7. Klik Teleprompter → halaman teleprompter render tanpa error.
-
-## Catatan teknis (untuk reviewer)
-
-- `src/lib/ai.functions.ts` & `ai-shared.server.ts` **tidak dihapus**; akan dipakai lagi saat Gemini disambungkan.
-- Tidak ada perubahan skema database — kolom `scripts` sudah lengkap (`hook/retain/reward/cta/full_script/reading_time/tone/niche`).
-- Tidak ada perubahan pada Sidebar / QuotaPanel; quota saat ini sudah berbasis data nyata, jadi tetap akurat walau generate-nya dummy (dummy insert tetap kena trigger limit 20).
+Mau aku jalankan smoke test verifikasi saja, atau skip dan lanjut ke tahap berikutnya?
