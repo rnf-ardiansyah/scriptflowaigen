@@ -1,15 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { queryOptions } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
-import { FilePlus, Library, Star, Clock, ArrowRight } from "lucide-react";
+import { FilePlus, Library, Star, Clock, ArrowRight, Zap, Database, Sparkles } from "lucide-react";
 import {
   profileQuery,
   scriptsCountsQuery,
   scriptsRecentQuery,
 } from "@/lib/scripts";
+import { getQuotaSummaryFn, type QuotaSummary } from "@/lib/quota.functions";
+
+const quotaQuery = (fn: () => Promise<QuotaSummary>) =>
+  queryOptions({ queryKey: ["quota", "summary"], queryFn: fn });
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -19,19 +25,23 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
     ],
   }),
   loader: async ({ context }) => {
+    const getQuota = () => getQuotaSummaryFn();
     await Promise.all([
       context.queryClient.ensureQueryData(profileQuery()),
       context.queryClient.ensureQueryData(scriptsCountsQuery()),
       context.queryClient.ensureQueryData(scriptsRecentQuery(5)),
+      context.queryClient.ensureQueryData(quotaQuery(getQuota)),
     ]);
   },
   component: DashboardPage,
 });
 
 function DashboardPage() {
+  const getQuota = useServerFn(getQuotaSummaryFn);
   const { data: profile } = useSuspenseQuery(profileQuery());
   const { data: counts } = useSuspenseQuery(scriptsCountsQuery());
   const { data: recent } = useSuspenseQuery(scriptsRecentQuery(5));
+  const { data: quota } = useSuspenseQuery(quotaQuery(() => getQuota()));
 
   const displayName = profile?.name?.trim() || "Creator";
 
@@ -59,6 +69,8 @@ function DashboardPage() {
           <StatCard icon={Library} label="Total scripts" value={counts.total} />
           <StatCard icon={Star} label="Favorit" value={counts.favorites} />
         </div>
+
+        <QuotaPanel quota={quota} />
 
         <div className="mt-10 flex items-end justify-between">
           <div>
