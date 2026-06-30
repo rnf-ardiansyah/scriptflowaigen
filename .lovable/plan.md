@@ -1,58 +1,41 @@
-## Goal
-Build manual CRUD for scripts: Dashboard, Library, and Editor — no AI yet. Verify full flow works end-to-end.
+## Teleprompter Build Plan — `/teleprompter/:scriptId`
 
-## Data layer (`src/lib/scripts.ts`)
-Thin Supabase wrappers (browser client, RLS scopes to `auth.uid()`):
-- `listScripts()` — all user scripts, ordered by `updated_at desc`.
-- `listRecentScripts(limit=5)` — for dashboard.
-- `getScript(id)`, `createScript(partial)`, `updateScript(id, patch)`, `deleteScript(id)`, `duplicateScript(id)`, `toggleFavorite(id, value)`.
-- `countScripts()` returns `{ total, favorites }`.
-- Helper `computeReadingTime(hook, retain, reward, cta)` → `Math.ceil(wordCount / 2.5)` seconds, and `buildFullScript(...)` joining the 4 sections.
+Replace the current placeholder with a fully functional teleprompter that runs as its own immersive screen (no AppLayout chrome, so it can truly go fullscreen and stay distraction-free).
 
-React Query keys: `['scripts','list']`, `['scripts','recent']`, `['scripts','counts']`, `['scripts','detail', id]`. Mutations invalidate the right keys.
+### Data
+- Fetch the script via existing `scriptQueryOptions(scriptId)` from `src/lib/scripts.ts` (TanStack Query, same pattern as the editor).
+- Use `script.full_script`; if empty, fall back to concatenating `hook/retain/reward/cta` for resilience. If still empty → show empty state with a CTA button linking to `/editor/$scriptId`.
 
-Shared `NICHES` constant (reuse the onboarding list) exported from `src/lib/niches.ts` so dropdowns stay in sync.
+### Layout
+- Route renders a custom full-viewport shell (no `AppLayout`): `fixed inset-0` container that owns its own background + text color based on the teleprompter's local dark/light toggle (independent of app theme).
+- Top bar (auto-hides after 3s of inactivity, reappears on mouse move / tap):
+  - Back button → `/editor/$scriptId`
+  - Fullscreen toggle (Fullscreen API: `requestFullscreen` / `exitFullscreen`, listen to `fullscreenchange`)
+  - Dark/Light toggle (local state, default dark)
+- Bottom control bar (also auto-hides):
+  - Start / Pause button (primary, large)
+  - Speed slider 0.5x–3x, step 0.1, default 1x, current value label
+  - Font size control: 3 presets (S / M / L) mapped to ~32px / 48px / 64px
+- Center: scrollable script container with large line-height, max-width for readability, generous top/bottom padding so text starts mid-screen and can scroll past.
 
-## `/dashboard` (rewrite `src/routes/_authenticated/dashboard.tsx`)
-- Loader primes profile + counts + recent scripts via `ensureQueryData`.
-- Greeting: `Halo, {profile.name} 👋` + sub-line `Niche: {preferred_niche}`.
-- Stat cards: Total scripts, Favorit. (Drop the fake "AI generations / time saved" placeholders.)
-- Big primary CTA "Buat Script Baru" → creates a blank script via `createScript`, then `navigate({ to: '/editor/$scriptId', params: { scriptId: newId }})`. Falls back to `/editor/new` only if creation fails.
-- "Lihat semua" link → `/library`.
-- Recent scripts list (max 5): card with title, niche badge, `reading_time` as `X detik`, star icon filled if favorite. Click → editor. Empty state with CTA.
+### Auto-scroll engine
+- `requestAnimationFrame` loop. Track `lastTimestamp`; each frame compute `delta = now - last` and increment `scrollTop` by `baseSpeed * speedMultiplier * (delta / 1000)` (e.g. base 60 px/s at 1x).
+- Use fractional accumulator (separate `scrollPosRef` number) and apply `Math.round` to `scrollTop` to avoid jitter while keeping sub-pixel precision.
+- Pause stops the rAF loop; resume restarts with fresh timestamp (no jump).
+- Stop loop at `scrollHeight - clientHeight`.
 
-## `/library` (rewrite `src/routes/_authenticated/library.tsx`)
-- Loader: `ensureQueryData(listScripts)`.
-- Local state: `search`, `nicheFilter`, `favoritesOnly`. Real-time filter in-memory over title + idea (case-insensitive).
-- Toolbar: search input, niche `<select>` (All + niches), favorites toggle button, "Buat Script Baru" button.
-- Grid of cards: title, niche badge, `reading_time` as `X detik`, favorite star, updated date.
-  - Actions row: Edit, Duplicate, Favorite (toggle), Delete (opens Dialog confirmation).
-- Empty state when zero scripts: illustration + "Belum ada script" + CTA to create.
-- Filtered-empty state when filters yield zero: "Tidak ada hasil" + clear filters button.
-- Mutations use React Query with optimistic invalidation; toast (sonner) on success/error.
+### Interactions
+- Spacebar → toggle play/pause (preventDefault to avoid page scroll). Attach to `window` keydown, cleanup on unmount.
+- Tap anywhere on the scroll surface (mobile + desktop click) → toggle play/pause. Control bars themselves stop propagation so clicking controls doesn't pause.
+- Mouse move / touch → reveal control bars + reset auto-hide timer.
 
-## `/editor/$scriptId` (rewrite `src/routes/_authenticated/editor.$scriptId.tsx`)
-- Handle two modes:
-  - `scriptId === 'new'`: on mount, create a blank script then `router.navigate` to its real id (replace history) so auto-save has a target.
-  - Otherwise: `ensureQueryData(getScript(id))`. If not found → `notFoundComponent`.
-- Form fields: `title` (Input), `niche` (select from `NICHES`), `idea` (Textarea), and 4 Textareas: `hook`, `retain`, `reward`, `cta`.
-- Local form state mirrors loaded script. A `useEffect` with 2-second debounce on any change calls `updateScript(id, patch)` including recomputed `full_script` and `reading_time`.
-- Save indicator: small text top-right cycling `Mengetik…` → `Menyimpan…` → `Tersimpan ✓` (with timestamp).
-- Live "Estimasi durasi: XX detik" computed from current form values.
-- Header buttons: "← Kembali ke Library" (link to `/library`), "Buka di Teleprompter" (link to `/teleprompter/$scriptId`).
-- Remove the placeholder AI-assistant sidebar (or keep it as a "Coming soon" panel without functional buttons — leaning remove to keep scope tight).
+### State
+Local component state: `isPlaying`, `speed` (1), `fontSizePreset` ('m'), `isDark` (true), `isFullscreen`, `controlsVisible`. Refs: `scrollRef`, `rafRef`, `scrollPosRef`, `lastTsRef`, `hideTimerRef`.
 
-## Toaster
-Wire sonner `<Toaster />` once in `__root.tsx` if not already present, so library/editor mutations can show feedback.
+### Empty state
+If `full_script` (and fallback concat) is blank → centered card: "Script masih kosong. Tulis script-nya dulu di editor." + button to editor.
 
-## Verification
-After build, drive Playwright with the injected Supabase session:
-1. Sign in flow already covered — restore session, hit `/dashboard`.
-2. Click "Buat Script Baru" → land in editor with a real id.
-3. Type into fields, wait 2.5s, see "Tersimpan", reload, values persist.
-4. `reading_time` updates as words change.
-5. Library: appears, search filters, favorite toggle, duplicate creates "(Copy) …", delete confirms and removes.
-6. Empty state shown after deleting all.
+### Files touched
+- `src/routes/_authenticated/teleprompter.$scriptId.tsx` — full rewrite into the teleprompter screen described above.
 
-## Out of scope (next prompt)
-AI generation, teleprompter logic, generations table writes.
+No DB, no schema, no other files changed. The editor's existing "Buka di Teleprompter" button already links here.
