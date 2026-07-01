@@ -109,6 +109,7 @@ function LoginPage() {
           onClick={handleGoogle}
           disabled={googleLoading}
         >
+          <GoogleIcon />
           {googleLoading ? "Opening Google…" : "Continue with Google"}
         </Button>
       </form>

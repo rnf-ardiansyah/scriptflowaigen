@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AuthLayout } from "@/components/app/AuthLayout";
 import { Button } from "@/components/app/Button";
 import { Input, Label } from "@/components/app/Input";
+import { GoogleIcon } from "@/components/app/GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { routeAfterAuth } from "@/lib/profile-helpers";
