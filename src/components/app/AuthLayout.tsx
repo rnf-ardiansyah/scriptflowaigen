@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@/components/landing/Logo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function AuthLayout({
   title,
