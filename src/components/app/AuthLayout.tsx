@@ -21,12 +21,15 @@ export function AuthLayout({
 
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6">
         <Link to="/"><Logo /></Link>
-        <Link
-          to="/"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ← Back to home
-        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            to="/"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            ← Back to home
+          </Link>
+        </div>
       </header>
 
       <main className="flex flex-1 items-center justify-center px-6 py-10">
