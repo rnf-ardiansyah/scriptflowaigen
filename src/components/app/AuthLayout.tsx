@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { Logo } from "@/components/landing/Logo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
@@ -21,13 +22,15 @@ export function AuthLayout({
 
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6">
         <Link to="/"><Logo /></Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
           <Link
             to="/"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Kembali ke beranda"
+            title="Kembali ke beranda"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground transition-colors hover:bg-surface-elevated hover:text-foreground"
           >
-            ← Back to home
+            <ArrowLeft className="h-4 w-4" />
           </Link>
         </div>
       </header>
