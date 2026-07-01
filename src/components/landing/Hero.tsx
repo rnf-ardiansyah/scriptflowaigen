@@ -21,10 +21,10 @@ export function Hero() {
             </a>
 
             <h1 className="mt-6 text-balance text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl lg:text-[68px]">
-              <span className="text-gradient">Stop staring at a</span>{" "}
-              <span className="text-gradient-accent">blank screen.</span>
+              <span className="text-gradient">Write Better Short Video Scripts</span>{" "}
+              <span className="text-gradient-accent">in Minutes</span>
               <br />
-              <span className="text-gradient">Start shipping videos faster.</span>
+              <span className="text-gradient">with AI</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
