@@ -1,5 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
 import { Bell, Menu } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 function titleFromPath(pathname: string) {
   const seg = pathname.split("/").filter(Boolean)[0] ?? "workspace";
@@ -29,6 +30,7 @@ export function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         </nav>
       </div>
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <button
           type="button"
           aria-label="Notifikasi"
