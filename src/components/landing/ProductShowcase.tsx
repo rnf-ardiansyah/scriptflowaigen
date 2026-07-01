@@ -7,9 +7,9 @@ export function ProductShowcase() {
     <section id="showcase" className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="Product"
-          title="A real workspace, not a chat box."
-          description="Everything you need to ship a short video lives next to your script — generate, edit, save, rehearse."
+          eyebrow="Produk"
+          title="Workspace beneran, bukan sekadar kotak chat."
+          description="Semua yang kamu butuh buat nge-publish video pendek ada di sebelah skripmu — generate, edit, simpan, latihan."
         />
 
         <div className="relative mt-16">
@@ -31,12 +31,12 @@ export function ProductShowcase() {
 
             <div className="glass-panel absolute -right-6 -top-6 hidden w-56 rotate-[3deg] rounded-2xl p-3 shadow-elevated lg:block">
               <div className="flex items-center gap-2 text-[11px] font-medium">
-                <History className="h-3 w-3 text-electric" /> History
+                <History className="h-3 w-3 text-electric" /> Riwayat
               </div>
               <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
-                <li>· TikTok Hook v3</li>
-                <li>· Product Launch promo</li>
-                <li>· Tutorial intro</li>
+                <li>· Hook TikTok v3</li>
+                <li>· Promo Product Launch</li>
+                <li>· Intro Tutorial</li>
               </ul>
             </div>
 
@@ -45,7 +45,7 @@ export function ProductShowcase() {
                 <Sparkles className="h-3 w-3 text-electric" /> AI Rewrite
               </div>
               <p className="mt-1.5 text-[11px] text-muted-foreground">
-                Stronger hook ready in <span className="text-foreground">1.2s</span>.
+                Hook lebih kuat siap dalam <span className="text-foreground">1.2 detik</span>.
               </p>
             </div>
           </div>

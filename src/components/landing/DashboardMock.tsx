@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 
 const TYPED = [
-  "Hook: Most creators waste 2 hours staring at a blank screen.",
-  "Here's a 60-second script that fixes that — instantly.",
-  "Step 1: Open ScriptFlow and type your idea…",
+  "Hook: Kebanyakan kreator buang 2 jam mantengin layar kosong.",
+  "Ini skrip 60 detik yang langsung ngeberesin itu — seketika.",
+  "Langkah 1: Buka ScriptFlow dan tulis idemu…",
 ];
 
 export function DashboardMock() {
@@ -58,15 +58,15 @@ export function DashboardMock() {
         {/* sidebar */}
         <aside className="border-r border-border bg-background/40 p-3">
           <button className="flex w-full items-center gap-2 rounded-lg bg-electric px-2.5 py-1.5 text-[11px] font-medium text-electric-foreground">
-            <Plus className="h-3 w-3" /> New Script
+            <Plus className="h-3 w-3" /> Skrip Baru
           </button>
           <nav className="mt-4 space-y-0.5 text-[11px]">
             {[
               { icon: Sparkles, label: "AI Generator", active: true },
-              { icon: FileText, label: "All Scripts" },
-              { icon: Star, label: "Favorites" },
-              { icon: FolderOpen, label: "Folders" },
-              { icon: Clock, label: "Recent" },
+              { icon: FileText, label: "Semua Skrip" },
+              { icon: Star, label: "Favorit" },
+              { icon: FolderOpen, label: "Folder" },
+              { icon: Clock, label: "Terbaru" },
               { icon: Mic, label: "Teleprompter" },
             ].map((n) => (
               <div
@@ -83,11 +83,11 @@ export function DashboardMock() {
             ))}
           </nav>
           <div className="mt-5 border-t border-border pt-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Folders</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Folder</p>
             <ul className="mt-1.5 space-y-0.5 text-[11px] text-muted-foreground">
               <li className="truncate">📁 TikTok Hooks</li>
               <li className="truncate">📁 Product Launch</li>
-              <li className="truncate">📁 Tutorials</li>
+              <li className="truncate">📁 Tutorial</li>
             </ul>
           </div>
           <div className="mt-5 rounded-lg border border-border bg-surface p-2.5">
@@ -97,7 +97,7 @@ export function DashboardMock() {
             <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-background">
               <div className="h-full w-2/3 rounded-full bg-electric" />
             </div>
-            <p className="mt-1.5 text-[10px] text-muted-foreground">62 / 100 AI today</p>
+            <p className="mt-1.5 text-[10px] text-muted-foreground">62 / 100 AI hari ini</p>
           </div>
         </aside>
 
@@ -106,11 +106,11 @@ export function DashboardMock() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">AI Generator</p>
-              <h3 className="text-base font-semibold">New TikTok Script</h3>
+              <h3 className="text-base font-semibold">Skrip TikTok Baru</h3>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="rounded-md border border-border bg-background/60 px-2 py-0.5 text-[10px] text-muted-foreground">
-                60s · Hook style
+                60d · Gaya Hook
               </span>
             </div>
           </div>
@@ -119,10 +119,10 @@ export function DashboardMock() {
           <div className="mt-4 rounded-xl border border-border bg-background/60 p-3">
             <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
               <Sparkles className="h-3 w-3 text-electric" />
-              Idea
+              Ide
             </div>
             <p className="mt-1.5 text-[12px] text-foreground">
-              5 mistakes beginner creators make on TikTok
+              5 kesalahan kreator pemula di TikTok
             </p>
           </div>
 
@@ -130,9 +130,9 @@ export function DashboardMock() {
           <div className="mt-3 rounded-xl border border-border bg-background/40 p-3">
             <div className="flex items-center justify-between text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-electric animate-pulse" /> Generating…
+                <span className="h-1.5 w-1.5 rounded-full bg-electric animate-pulse" /> Sedang generate…
               </span>
-              <span>2.4s</span>
+              <span>2.4d</span>
             </div>
             <p className="mt-2 text-[12.5px] leading-relaxed text-foreground/90">
               {text}
@@ -147,12 +147,12 @@ export function DashboardMock() {
 
           <div className="mt-4 flex items-center gap-2">
             <button className="rounded-lg bg-electric px-3 py-1.5 text-[11px] font-medium text-electric-foreground">
-              Save to Library
+              Simpan ke Library
             </button>
             <button className="rounded-lg border border-border px-3 py-1.5 text-[11px] text-foreground hover:bg-surface-elevated">
-              Open Teleprompter
+              Buka Teleprompter
             </button>
-            <span className="ml-auto text-[10px] text-muted-foreground">~ 48s read</span>
+            <span className="ml-auto text-[10px] text-muted-foreground">~ 48d baca</span>
           </div>
         </section>
       </div>

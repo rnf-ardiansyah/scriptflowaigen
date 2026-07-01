@@ -5,9 +5,9 @@ import { Logo } from "./Logo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const links = [
-  { label: "Features", href: "#features" },
+  { label: "Fitur", href: "#features" },
   { label: "Showcase", href: "#showcase" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Harga", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -77,7 +77,7 @@ export function Navbar() {
             to="/register"
             className="inline-flex items-center gap-1.5 rounded-xl bg-electric px-4 py-2 text-sm font-medium text-electric-foreground shadow-glow transition-transform hover:scale-[1.02]"
           >
-            Start Free
+            Mulai Gratis
           </Link>
         </div>
 
@@ -136,7 +136,7 @@ export function Navbar() {
                 onClick={() => setOpen(false)}
                 className="inline-flex items-center justify-center rounded-xl bg-electric px-4 py-3 text-sm font-semibold text-electric-foreground shadow-glow"
               >
-                Start Free
+                Mulai Gratis
               </Link>
             </div>
           </div>

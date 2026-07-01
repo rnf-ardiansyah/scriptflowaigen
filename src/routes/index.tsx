@@ -15,22 +15,22 @@ import { Footer } from "@/components/landing/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ScriptFlow — AI Script Workspace for Short Video Creators" },
+      { title: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
       {
         name: "description",
         content:
-          "Turn ideas into short-video scripts with AI. Organize your library and rehearse with a built-in teleprompter — all in one workspace.",
+          "Ubah ide jadi skrip video pendek pakai AI. Rapikan library dan latihan dengan teleprompter bawaan — semua di satu workspace.",
       },
-      { property: "og:title", content: "ScriptFlow — AI Script Workspace for Short Video Creators" },
+      { property: "og:title", content: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
       {
         property: "og:description",
         content:
-          "The AI workspace for TikTok, Reels and Shorts creators. Idea → Script → Edit → Practice.",
+          "Workspace AI untuk kreator TikTok, Reels, dan Shorts. Ide → Skrip → Edit → Latihan.",
       },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://scriptflowaigen.lovable.app/" },
       { property: "og:type", content: "website" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://scriptflowaigen.lovable.app/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -41,8 +41,8 @@ export const Route = createFileRoute("/")({
           applicationCategory: "MultimediaApplication",
           operatingSystem: "Web",
           description:
-            "AI script workspace for short-form video creators. Generate, organize, and rehearse scripts in one place.",
-          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+            "Workspace AI untuk kreator video pendek. Generate, rapikan, dan latihan skrip di satu tempat.",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "IDR" },
         }),
       },
     ],

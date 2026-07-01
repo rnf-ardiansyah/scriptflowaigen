@@ -2,9 +2,9 @@ import { Check } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 
 const points = [
-  "Think, write, edit, organize and rehearse in one place",
-  "Designed around how creators actually work",
-  "Built for short-form: TikTok, Reels, Shorts",
+  "Mikir, nulis, edit, rapikan, dan latihan di satu tempat",
+  "Didesain sesuai cara kerja kreator sebenarnya",
+  "Dibangun khusus untuk short-form: TikTok, Reels, Shorts",
 ];
 
 export function SolutionSection() {
@@ -12,9 +12,9 @@ export function SolutionSection() {
     <section className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="The solution"
-          title="One workspace. One workflow. Everything connected."
-          description="ScriptFlow replaces the patchwork of tools creators use today with a single, focused workspace built for short-form video."
+          eyebrow="Solusinya"
+          title="Satu workspace. Satu alur. Semuanya nyambung."
+          description="ScriptFlow ganti tumpukan tools yang biasa dipakai kreator jadi satu workspace fokus yang dibangun untuk video pendek."
         />
 
         <div className="mt-14 grid items-center gap-10 lg:grid-cols-2">
@@ -22,17 +22,17 @@ export function SolutionSection() {
             <div className="absolute -inset-6 -z-10 rounded-3xl bg-electric/10 blur-3xl" />
             <div className="rounded-2xl border border-border bg-surface p-6 shadow-elevated">
               <div className="grid grid-cols-3 gap-3">
-                {["Idea", "Generate", "Edit"].map((s) => (
+                {["Ide", "Generate", "Edit"].map((s) => (
                   <Tile key={s} title={s} />
                 ))}
-                {["Save", "Practice", "Record"].map((s) => (
+                {["Simpan", "Latihan", "Rekam"].map((s) => (
                   <Tile key={s} title={s} muted />
                 ))}
               </div>
               <div className="mt-5 rounded-xl border border-electric/30 bg-electric/5 p-4">
                 <p className="text-sm text-foreground">
-                  <span className="text-electric">●</span> Live · Your last 3 scripts are auto-synced
-                  and ready in your library.
+                  <span className="text-electric">●</span> Live · 3 skrip terakhir kamu sudah
+                  auto-sync dan siap di library.
                 </p>
               </div>
             </div>
@@ -50,8 +50,8 @@ export function SolutionSection() {
               ))}
             </ul>
             <p className="mt-8 text-sm text-muted-foreground">
-              Built for beginner creators, freelancers, UMKM owners, and personal brands who want
-              to ship more — without the burnout.
+              Dibuat buat kreator pemula, freelancer, pemilik UMKM, dan personal brand yang mau
+              nge-publish lebih banyak — tanpa burnout.
             </p>
           </div>
         </div>

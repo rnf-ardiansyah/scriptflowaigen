@@ -18,9 +18,9 @@ export function FeaturesBento() {
     <section id="features" className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="Core features"
-          title="Everything you need. Nothing you don't."
-          description="A focused toolkit for creators who want to ship more short-form video without the chaos."
+          eyebrow="Fitur Utama"
+          title="Semua yang kamu butuh. Tanpa yang nggak perlu."
+          description="Toolkit fokus buat kreator yang mau nge-publish lebih banyak video pendek tanpa kacau."
         />
 
         <div className="mt-14 grid auto-rows-auto grid-cols-1 gap-4 md:auto-rows-[220px] md:grid-cols-6">
@@ -28,18 +28,18 @@ export function FeaturesBento() {
           <Cell className="md:col-span-4 md:row-span-2">
             <CellHeader icon={Sparkles} title="AI Script Generator" />
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              Turn an idea into a full short-video script in seconds — hooks, beats, and CTA
-              included.
+              Ubah satu ide jadi skrip video pendek lengkap dalam hitungan detik — hook, beat, dan
+              CTA sudah termasuk.
             </p>
             <div className="mt-5 rounded-xl border border-border bg-background/60 p-3">
               <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                <Sparkles className="h-3 w-3 text-electric" /> Idea
+                <Sparkles className="h-3 w-3 text-electric" /> Ide
               </div>
-              <p className="mt-1.5 text-[13px]">3 tips to grow on TikTok in 2026</p>
+              <p className="mt-1.5 text-[13px]">3 tips biar cepat naik di TikTok 2026</p>
             </div>
             <div className="mt-2.5 rounded-xl border border-electric/30 bg-electric/5 p-3">
               <div className="flex items-center gap-2 text-[11px] text-electric">
-                <span className="h-1.5 w-1.5 rounded-full bg-electric animate-pulse" /> Generating
+                <span className="h-1.5 w-1.5 rounded-full bg-electric animate-pulse" /> Sedang generate
               </div>
               <div className="mt-2 space-y-1.5">
                 <div className="h-2 w-11/12 rounded bg-surface-elevated" />
@@ -67,7 +67,7 @@ export function FeaturesBento() {
 
           {/* Teleprompter */}
           <Cell className="md:col-span-2">
-            <CellHeader icon={Mic} title="Built-in Teleprompter" />
+            <CellHeader icon={Mic} title="Teleprompter Built-in" />
             <div className="mt-3 rounded-xl border border-border bg-background/70 p-3">
               <div className="space-y-1.5">
                 <div className="h-1.5 w-10/12 rounded bg-surface-elevated" />
@@ -83,9 +83,9 @@ export function FeaturesBento() {
 
           {/* Templates */}
           <Cell className="md:col-span-2">
-            <CellHeader icon={LayoutTemplate} title="AI Templates" />
+            <CellHeader icon={LayoutTemplate} title="Template AI" />
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {["Hook", "Story", "Tutorial", "Promo", "POV", "Listicle"].map((t) => (
+              {["Hook", "Cerita", "Tutorial", "Promo", "POV", "Listicle"].map((t) => (
                 <span
                   key={t}
                   className="rounded-md border border-border bg-background/60 px-2 py-1 text-[11px] text-muted-foreground"
@@ -98,21 +98,21 @@ export function FeaturesBento() {
 
           {/* Reading Time */}
           <Cell className="md:col-span-2">
-            <CellHeader icon={Clock} title="Reading Time" />
+            <CellHeader icon={Clock} title="Estimasi Waktu Baca" />
             <div className="mt-3 flex items-end gap-3">
-              <span className="text-4xl font-bold text-gradient-accent">48s</span>
-              <span className="mb-1 text-xs text-muted-foreground">at 1.0× speed</span>
+              <span className="text-4xl font-bold text-gradient-accent">48d</span>
+              <span className="mb-1 text-xs text-muted-foreground">di kecepatan 1.0×</span>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              Know your runtime before you record.
+              Tahu durasi skripmu sebelum mulai rekaman.
             </p>
           </Cell>
 
           {/* Workspace */}
           <Cell className="md:col-span-2">
-            <CellHeader icon={FolderTree} title="Workspace Organization" />
+            <CellHeader icon={FolderTree} title="Organisasi Workspace" />
             <div className="mt-3 space-y-1.5 text-[11px]">
-              {["TikTok Hooks · 12", "Product Launch · 8", "Tutorials · 23"].map((t) => (
+              {["TikTok Hooks · 12", "Product Launch · 8", "Tutorial · 23"].map((t) => (
                 <div
                   key={t}
                   className="flex items-center gap-2 rounded-lg border border-border bg-background/60 px-2.5 py-1.5"
@@ -128,18 +128,18 @@ export function FeaturesBento() {
           <Cell className="md:col-span-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <CellHeader icon={Sparkles} title="And every detail in between" />
+                <CellHeader icon={Sparkles} title="Detail-detail kecil yang bikin nyaman" />
                 <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                  Quality-of-life features creators actually use, every day.
+                  Fitur harian yang beneran dipakai kreator setiap hari.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {[
                   { icon: Save, label: "Auto Save" },
-                  { icon: Search, label: "Search" },
-                  { icon: Copy, label: "Duplicate" },
-                  { icon: Star, label: "Favorites" },
-                  { icon: Moon, label: "Dark Mode" },
+                  { icon: Search, label: "Pencarian" },
+                  { icon: Copy, label: "Duplikat" },
+                  { icon: Star, label: "Favorit" },
+                  { icon: Moon, label: "Mode Gelap" },
                 ].map((f) => (
                   <span
                     key={f.label}

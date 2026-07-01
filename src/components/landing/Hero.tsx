@@ -16,20 +16,20 @@ export function Hero() {
               className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur"
             >
               <Sparkles className="h-3 w-3 text-electric" />
-              New · Built-in Teleprompter & AI Rewrite
+              Baru · Teleprompter Built-in & AI Rewrite
               <ArrowRight className="h-3 w-3" />
             </a>
 
             <h1 className="mt-6 text-balance text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl lg:text-[68px]">
-              <span className="text-gradient">Write Better Short Video Scripts</span>{" "}
-              <span className="text-gradient-accent">in Minutes</span>
+              <span className="text-gradient">Tulis Skrip Video Pendek Lebih Baik</span>{" "}
+              <span className="text-gradient-accent">dalam Hitungan Menit</span>
               <br />
-              <span className="text-gradient">with AI</span>
+              <span className="text-gradient">dengan AI</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              ScriptFlow is the AI workspace for short-video creators. Turn an idea into a script,
-              organize your library, and rehearse with a built-in teleprompter — all in one place.
+              ScriptFlow adalah workspace AI untuk kreator video pendek. Ubah ide jadi skrip,
+              rapikan library kamu, dan latihan pakai teleprompter bawaan — semuanya di satu tempat.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -37,7 +37,7 @@ export function Hero() {
                 to="/register"
                 className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-electric px-5 py-3 text-sm font-medium text-electric-foreground shadow-glow transition-transform hover:scale-[1.02] sm:w-auto"
               >
-                Start Free
+                Mulai Gratis
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <a
@@ -45,7 +45,7 @@ export function Hero() {
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface/60 px-5 py-3 text-sm font-medium text-foreground backdrop-blur transition-colors hover:bg-surface-elevated sm:w-auto"
               >
                 <Play className="h-4 w-4 text-electric" />
-                Watch Demo
+                Lihat Demo
               </a>
             </div>
 
@@ -82,10 +82,10 @@ export function Hero() {
               className="glass-panel absolute -right-4 -top-6 hidden w-52 rounded-2xl p-3 shadow-elevated animate-float [animation-delay:-2s] lg:block"
             >
               <div className="flex items-center gap-2 text-[11px] font-medium">
-                <Sparkles className="h-3 w-3 text-electric" /> AI Suggestion
+                <Sparkles className="h-3 w-3 text-electric" /> Saran AI
               </div>
               <p className="mt-1.5 text-[11px] text-muted-foreground">
-                Try a stronger hook: <span className="text-foreground">"You're losing followers because of this…"</span>
+                Coba hook yang lebih kuat: <span className="text-foreground">"Followers kamu hilang gara-gara ini…"</span>
               </p>
             </div>
           </div>
