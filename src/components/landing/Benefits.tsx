@@ -3,23 +3,23 @@ import { Clock, Sparkles, ShieldCheck, TrendingUp, Layers, Rocket, Check } from 
 import { SectionHeader } from "./SectionHeader";
 
 const creator = [
-  { icon: Clock, title: "Save hours every week", desc: "Skip the blank-page paralysis." },
-  { icon: Sparkles, title: "Better hooks", desc: "Templates engineered for retention." },
-  { icon: ShieldCheck, title: "Record with confidence", desc: "Teleprompter keeps you on-script." },
-  { icon: TrendingUp, title: "Stay consistent", desc: "A library that grows with you." },
+  { icon: Clock, title: "Hemat berjam-jam tiap minggu", desc: "Nggak lagi mentok di halaman kosong." },
+  { icon: Sparkles, title: "Hook lebih kuat", desc: "Template dirancang buat retensi." },
+  { icon: ShieldCheck, title: "Rekam dengan pede", desc: "Teleprompter jaga kamu tetap on-script." },
+  { icon: TrendingUp, title: "Konsisten setiap hari", desc: "Library yang tumbuh bareng kamu." },
 ];
 
 const business = [
-  { icon: Rocket, title: "Ship content faster", desc: "More posts, less overhead." },
-  { icon: Layers, title: "Promote products", desc: "On-brand scripts for launches." },
-  { icon: Sparkles, title: "Organize campaigns", desc: "Folders, favorites, search." },
-  { icon: TrendingUp, title: "Scale output", desc: "Repeatable creative pipeline." },
+  { icon: Rocket, title: "Ship konten lebih cepat", desc: "Lebih banyak posting, lebih sedikit overhead." },
+  { icon: Layers, title: "Promosi produk", desc: "Skrip on-brand buat launching." },
+  { icon: Sparkles, title: "Rapikan campaign", desc: "Folder, favorit, pencarian." },
+  { icon: TrendingUp, title: "Skala produksi", desc: "Alur kreatif yang bisa diulang." },
 ];
 
 const stats = [
-  { value: 10, suffix: "×", label: "Faster script writing" },
-  { value: 50, suffix: "k+", label: "Scripts created weekly" },
-  { value: 2, suffix: " min", label: "Average idea-to-script" },
+  { value: 10, suffix: "×", label: "Nulis skrip lebih cepat" },
+  { value: 50, suffix: "rb+", label: "Skrip dibuat tiap minggu" },
+  { value: 2, suffix: " menit", label: "Rata-rata ide ke skrip" },
 ];
 
 export function Benefits() {
@@ -27,13 +27,13 @@ export function Benefits() {
     <section className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="Benefits"
-          title="Built for creators. Loved by businesses."
+          eyebrow="Manfaat"
+          title="Dibangun buat kreator. Disukai brand & bisnis."
         />
 
         <div className="mt-14 grid gap-6 lg:grid-cols-2">
-          <Column title="For creators" items={creator} />
-          <Column title="For businesses" items={business} />
+          <Column title="Untuk kreator" items={creator} />
+          <Column title="Untuk bisnis" items={business} />
         </div>
 
         <div className="mt-12 grid gap-4 md:grid-cols-3">

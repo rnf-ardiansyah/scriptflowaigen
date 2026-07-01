@@ -10,18 +10,18 @@ const free: Feature[] = [
   { label: "5 AI generate per hari", ok: true },
   { label: "Script Library maksimal 20 script", ok: true },
   { label: "Akses Teleprompter", ok: true },
-  { label: "Basic niche template", ok: true },
+  { label: "Template niche dasar", ok: true },
   { label: "AI Rewrite & Hook Generator", ok: false },
-  { label: "Priority generation speed", ok: false },
+  { label: "Kecepatan generate prioritas", ok: false },
 ];
 
 const premium: Feature[] = [
   { label: "100 AI generate per hari", ok: true },
-  { label: "Unlimited Script Library", ok: true },
+  { label: "Script Library tanpa batas", ok: true },
   { label: "Akses Teleprompter", ok: true },
-  { label: "Semua niche template", ok: true },
-  { label: "Favorite, AI Rewrite, AI Hook Generator", ok: true },
-  { label: "Priority generation speed", ok: true },
+  { label: "Semua template niche", ok: true },
+  { label: "Favorit, AI Rewrite, AI Hook Generator", ok: true },
+  { label: "Kecepatan generate prioritas", ok: true },
 ];
 
 export function Pricing() {
@@ -29,8 +29,8 @@ export function Pricing() {
     <section id="pricing" className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="Pricing"
-          title="Simple pricing. Mulai gratis."
+          eyebrow="Harga"
+          title="Harga simpel. Mulai gratis."
           description="Pakai ScriptFlow gratis selamanya. Upgrade kapan pun kamu butuh lebih banyak script dan kecepatan AI."
         />
 
@@ -93,7 +93,7 @@ function PlanCard({
     >
       {highlight && (
         <span className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-electric px-3 py-1 text-[11px] font-semibold text-electric-foreground shadow-glow">
-          <Sparkles className="h-3 w-3" /> Recommended
+          <Sparkles className="h-3 w-3" /> Direkomendasikan
         </span>
       )}
       <h3 className="text-lg font-semibold">{name}</h3>

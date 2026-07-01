@@ -20,16 +20,16 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Halaman tidak ditemukan</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          Halaman yang kamu cari tidak ada atau sudah dipindahkan.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-xl bg-electric px-4 py-2 text-sm font-medium text-electric-foreground transition-colors hover:opacity-90"
           >
-            Go home
+            Kembali ke beranda
           </Link>
         </div>
       </div>
@@ -48,10 +48,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          Halaman ini gagal dimuat
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          Ada masalah di sisi kami. Coba refresh atau kembali ke beranda.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -61,13 +61,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-xl bg-electric px-4 py-2 text-sm font-medium text-electric-foreground transition-colors hover:opacity-90"
           >
-            Try again
+            Coba lagi
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-elevated"
           >
-            Go home
+            Kembali ke beranda
           </a>
         </div>
       </div>
@@ -81,21 +81,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#0b0f1c" },
-      { title: "ScriptFlow — AI Script Workspace for Short Video Creators" },
+      { title: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
       {
         name: "description",
         content:
-          "ScriptFlow turns ideas into short-video scripts. Generate with AI, organize your library, and rehearse with a built-in teleprompter — all in one workspace.",
+          "ScriptFlow mengubah ide jadi skrip video pendek. Generate pakai AI, rapikan library, dan latihan dengan teleprompter bawaan — semua di satu workspace.",
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "ScriptFlow" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@scriptflow" },
-      { property: "og:title", content: "ScriptFlow — AI Script Workspace for Short Video Creators" },
-      { name: "twitter:title", content: "ScriptFlow — AI Script Workspace for Short Video Creators" },
-      { name: "description", content: "ScriptFlow is an AI-powered workspace for short-form video creators to generate, organize, and rehearse scripts." },
-      { property: "og:description", content: "ScriptFlow is an AI-powered workspace for short-form video creators to generate, organize, and rehearse scripts." },
-      { name: "twitter:description", content: "ScriptFlow is an AI-powered workspace for short-form video creators to generate, organize, and rehearse scripts." },
+      { property: "og:title", content: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
+      { name: "twitter:title", content: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
+      { property: "og:description", content: "Workspace bertenaga AI untuk kreator video pendek — generate, rapikan, dan latihan skrip dalam satu tempat." },
+      { name: "twitter:description", content: "Workspace bertenaga AI untuk kreator video pendek — generate, rapikan, dan latihan skrip dalam satu tempat." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0e1bab9-988a-4adf-8556-f68f205b94af/id-preview-08977b0d--33fd0f6e-c650-4ea0-a888-7d810d2cda28.lovable.app-1782807838809.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0e1bab9-988a-4adf-8556-f68f205b94af/id-preview-08977b0d--33fd0f6e-c650-4ea0-a888-7d810d2cda28.lovable.app-1782807838809.png" },
     ],

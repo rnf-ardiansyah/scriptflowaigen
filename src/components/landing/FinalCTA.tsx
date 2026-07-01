@@ -12,27 +12,27 @@ export function FinalCTA() {
         <div className="grid items-center gap-10 md:grid-cols-[1.4fr_1fr]">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-              <Sparkles className="h-3 w-3 text-electric" /> Start free in seconds
+              <Sparkles className="h-3 w-3 text-electric" /> Mulai gratis dalam hitungan detik
             </div>
             <h2 className="mt-5 text-balance text-3xl font-bold leading-tight tracking-tight text-gradient sm:text-4xl md:text-5xl">
-              Ready to create better videos?
+              Siap bikin video yang lebih baik?
             </h2>
             <p className="mt-4 max-w-lg text-sm text-muted-foreground sm:text-base md:text-lg">
-              Generate your first script in less than a minute. No card. No fluff.
+              Generate skrip pertamamu dalam waktu kurang dari semenit. Tanpa kartu kredit. Tanpa ribet.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 to="/register"
                 className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-electric px-5 py-3 text-sm font-medium text-electric-foreground shadow-glow transition-transform hover:scale-[1.02] sm:w-auto"
               >
-                Start Free Today
+                Mulai Gratis Sekarang
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <a
                 href="#"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface/60 px-5 py-3 text-sm font-medium text-foreground backdrop-blur hover:bg-surface-elevated sm:w-auto"
               >
-                Book a Demo
+                Jadwalkan Demo
               </a>
             </div>
           </div>
@@ -40,7 +40,7 @@ export function FinalCTA() {
           <div className="glass-panel relative hidden rounded-2xl p-4 md:block">
             <div className="flex items-center justify-between text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3 text-electric" /> New Script
+                <Sparkles className="h-3 w-3 text-electric" /> Skrip Baru
               </span>
               <span className="text-electric">●</span>
             </div>
@@ -51,8 +51,8 @@ export function FinalCTA() {
               <div className="h-2 w-10/12 rounded bg-surface-elevated" />
             </div>
             <div className="mt-4 flex items-center justify-between text-[10px] text-muted-foreground">
-              <span>Generated in 1.4s</span>
-              <span>48s read</span>
+              <span>Selesai dalam 1.4d</span>
+              <span>48d baca</span>
             </div>
           </div>
         </div>

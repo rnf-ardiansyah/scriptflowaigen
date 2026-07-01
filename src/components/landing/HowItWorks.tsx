@@ -2,11 +2,11 @@ import { Lightbulb, Sparkles, Pencil, Mic, Video } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 
 const steps = [
-  { icon: Lightbulb, title: "Enter an idea", desc: "One sentence is enough." },
-  { icon: Sparkles, title: "AI writes the script", desc: "Hooks, beats, CTA — done." },
-  { icon: Pencil, title: "Customize", desc: "Tweak tone, length, voice." },
-  { icon: Mic, title: "Practice", desc: "Built-in teleprompter." },
-  { icon: Video, title: "Record", desc: "Confident. On-script. Done." },
+  { icon: Lightbulb, title: "Masukin ide", desc: "Cukup satu kalimat." },
+  { icon: Sparkles, title: "AI nulis skripnya", desc: "Hook, beat, CTA — beres." },
+  { icon: Pencil, title: "Sesuaikan", desc: "Atur tone, panjang, gaya bicara." },
+  { icon: Mic, title: "Latihan", desc: "Teleprompter built-in." },
+  { icon: Video, title: "Rekam", desc: "Pede. Sesuai skrip. Selesai." },
 ];
 
 export function HowItWorks() {
@@ -14,8 +14,8 @@ export function HowItWorks() {
     <section className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="How it works"
-          title="From idea to recording in 5 steps."
+          eyebrow="Cara Kerjanya"
+          title="Dari ide ke rekaman cuma 5 langkah."
         />
         <div className="relative mt-16">
           <div className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-transparent via-electric/40 to-transparent md:block" />
