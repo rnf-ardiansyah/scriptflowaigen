@@ -142,6 +142,7 @@ function RegisterPage() {
           onClick={handleGoogle}
           disabled={googleLoading}
         >
+          <GoogleIcon />
           {googleLoading ? "Opening Google…" : "Continue with Google"}
         </Button>
         <p className="text-center text-xs text-muted-foreground">
