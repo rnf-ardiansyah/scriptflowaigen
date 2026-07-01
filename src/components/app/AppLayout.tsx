@@ -61,7 +61,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="workspace-scope relative min-h-screen bg-background text-foreground">
+    <div className="relative min-h-screen bg-background text-foreground">
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-surface lg:block">
         <SidebarContent onSignOut={handleSignOut} signingOut={signingOut} />
