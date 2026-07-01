@@ -1,16 +1,13 @@
-## Plan
+## Objective
+Replace the Hero section headline on the landing page with the new copy.
 
-1. **Hapus pemaksa dark mode di workspace**
-   - `AppLayout` saat ini memakai class `workspace-scope`.
-   - Class ini di `src/styles.css` memang memaksa seluruh area setelah login selalu dark, sehingga toggle tidak bisa mengubah halaman authenticated menjadi light.
+## Changes
 
-2. **Biarkan App Shell mengikuti theme global**
-   - Ganti root wrapper workspace agar hanya memakai token global `bg-background text-foreground`.
-   - Theme toggle di `Topbar` tetap digunakan dan akan mengubah class `.light`/`.dark` global seperti landing page.
+### `src/components/landing/Hero.tsx`
+- Update the `<h1>` text from:
+  - "Stop staring at a blank screen. Start shipping videos faster."
+- To:
+  - "Write Better Short Video Scripts in Minutes with AI"
+- Preserve the existing `<br />` break and gradient styling classes (`text-gradient`, `text-gradient-accent`).
 
-3. **Rapikan CSS yang sudah tidak dipakai**
-   - Hapus blok `.workspace-scope` dari `src/styles.css` supaya tidak ada override dark mode tersembunyi lagi.
-
-4. **Verifikasi cepat**
-   - Cek halaman setelah login: dashboard/library/editor shell harus berubah warna saat toggle mode terang/gelap.
-   - Pastikan landing, login, dan register tetap mengikuti theme yang sama.
+No other files touched.
