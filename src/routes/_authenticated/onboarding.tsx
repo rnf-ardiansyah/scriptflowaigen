@@ -9,7 +9,7 @@ import { fetchCurrentProfile, isProfileComplete } from "@/lib/profile-helpers";
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
-      { title: "Welcome to ScriptFlow" },
+      { title: "Welcome to Script Flow" },
       { name: "description", content: "Set up your creator workspace." },
     ],
   }),
@@ -90,7 +90,7 @@ function OnboardingPage() {
   return (
     <AuthLayout
       title="Let's set up your workspace"
-      subtitle="3 quick questions so we can tailor ScriptFlow to you."
+      subtitle="3 quick questions so we can tailor Script Flow to you."
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
@@ -143,7 +143,7 @@ function OnboardingPage() {
         </div>
 
         <div>
-          <Label htmlFor="goal">What's your goal with ScriptFlow?</Label>
+          <Label htmlFor="goal">What's your goal with Script Flow?</Label>
           <Input
             id="goal"
             value={goal}

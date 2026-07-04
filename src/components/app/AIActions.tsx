@@ -27,14 +27,14 @@ import {
   type FourPartResult,
 } from "@/lib/ai-edits.functions";
 
-type LovableError = { code: string; message: string; plan?: string; limit?: number };
+type AIError = { code: string; message: string; plan?: string; limit?: number };
 
-function extractLovable(err: unknown): LovableError | null {
-  return (err as { lovable?: LovableError })?.lovable ?? null;
+function extractAIError(err: unknown): AIError | null {
+  return (err as { aiError?: AIError })?.aiError ?? null;
 }
 
 function handleError(err: unknown, fallback: string) {
-  const lov = extractLovable(err);
+  const lov = extractAIError(err);
   if (lov?.code === "rate_limited") {
     toast.error(lov.message, {
       action: { label: "Upgrade", onClick: () => (window.location.href = "/upgrade") },

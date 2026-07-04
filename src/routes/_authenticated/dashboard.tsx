@@ -20,8 +20,8 @@ const quotaQuery = (fn: () => Promise<QuotaSummary>) =>
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — ScriptFlow" },
-      { name: "description", content: "Your ScriptFlow workspace overview." },
+      { title: "Dashboard — Script Flow" },
+      { name: "description", content: "Your Script Flow workspace overview." },
     ],
   }),
   loader: async ({ context }) => {

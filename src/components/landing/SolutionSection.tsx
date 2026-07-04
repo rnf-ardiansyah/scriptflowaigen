@@ -14,7 +14,7 @@ export function SolutionSection() {
         <SectionHeader
           eyebrow="Solusinya"
           title="Satu workspace. Satu alur. Semuanya nyambung."
-          description="ScriptFlow ganti tumpukan tools yang biasa dipakai kreator jadi satu workspace fokus yang dibangun untuk video pendek."
+          description="Script Flow ganti tumpukan tools yang biasa dipakai kreator jadi satu workspace fokus yang dibangun untuk video pendek."
         />
 
         <div className="mt-14 grid items-center gap-10 lg:grid-cols-2">

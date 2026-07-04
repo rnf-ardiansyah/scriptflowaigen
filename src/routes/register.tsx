@@ -5,14 +5,13 @@ import { Button } from "@/components/app/Button";
 import { Input, Label } from "@/components/app/Input";
 import { GoogleIcon } from "@/components/app/GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { routeAfterAuth } from "@/lib/profile-helpers";
 import { mapAuthError } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Create your ScriptFlow account" },
+      { title: "Create your Script Flow account" },
       {
         name: "description",
         content: "Start free. Generate your first short-video script in under a minute.",
@@ -66,17 +65,16 @@ function RegisterPage() {
   async function handleGoogle() {
     setError(null);
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
     });
-    if (result.error) {
-      setError(mapAuthError(result.error.message ?? "Google sign-in failed"));
+    if (error) {
+      setError(mapAuthError(error.message ?? "Google sign-in failed"));
       setGoogleLoading(false);
-      return;
     }
-    if (result.redirected) return;
-    const dest = await routeAfterAuth();
-    navigate({ to: dest, replace: true });
   }
 
   return (

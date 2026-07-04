@@ -31,7 +31,7 @@ export function Pricing() {
         <SectionHeader
           eyebrow="Harga"
           title="Harga simpel. Mulai gratis."
-          description="Pakai ScriptFlow gratis selamanya. Upgrade kapan pun kamu butuh lebih banyak script dan kecepatan AI."
+          description="Pakai Script Flow gratis selamanya. Upgrade kapan pun kamu butuh lebih banyak script dan kecepatan AI."
         />
 
         <div className="mx-auto mt-14 grid max-w-4xl gap-6 md:grid-cols-2">
