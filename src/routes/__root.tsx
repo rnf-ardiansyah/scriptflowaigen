@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
+import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../components/theme/ThemeProvider";
 
 
@@ -39,6 +40,9 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  useEffect(() => {
+    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -77,22 +81,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#0b0f1c" },
-      { title: "Script Flow — Workspace AI untuk Kreator Video Pendek" },
+      { title: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
       {
         name: "description",
         content:
-          "Script Flow mengubah ide jadi skrip video pendek. Generate pakai AI, rapikan library, dan latihan dengan teleprompter bawaan — semua di satu workspace.",
+          "ScriptFlow mengubah ide jadi skrip video pendek. Generate pakai AI, rapikan library, dan latihan dengan teleprompter bawaan — semua di satu workspace.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Script Flow" },
+      { property: "og:site_name", content: "ScriptFlow" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@scriptflow" },
-      { property: "og:title", content: "Script Flow — Workspace AI untuk Kreator Video Pendek" },
-      { name: "twitter:title", content: "Script Flow — Workspace AI untuk Kreator Video Pendek" },
+      { property: "og:title", content: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
+      { name: "twitter:title", content: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
       { property: "og:description", content: "Workspace bertenaga AI untuk kreator video pendek — generate, rapikan, dan latihan skrip dalam satu tempat." },
       { name: "twitter:description", content: "Workspace bertenaga AI untuk kreator video pendek — generate, rapikan, dan latihan skrip dalam satu tempat." },
-      { property: "og:image", content: "/og-image.png" },
-      { name: "twitter:image", content: "/og-image.png" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0e1bab9-988a-4adf-8556-f68f205b94af/id-preview-08977b0d--33fd0f6e-c650-4ea0-a888-7d810d2cda28.lovable.app-1782807838809.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0e1bab9-988a-4adf-8556-f68f205b94af/id-preview-08977b0d--33fd0f6e-c650-4ea0-a888-7d810d2cda28.lovable.app-1782807838809.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

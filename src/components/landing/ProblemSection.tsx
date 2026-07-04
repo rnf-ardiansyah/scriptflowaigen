@@ -18,7 +18,7 @@ export function ProblemSection() {
         <SectionHeader
           eyebrow="Masalahnya"
           title="Bikin konten harusnya nggak seribet ini."
-          description="Kebanyakan kreator buang waktu berjam-jam gonta-ganti tools daripada beneran nge-publish video. Script Flow ngakhirin itu semua."
+          description="Kebanyakan kreator buang waktu berjam-jam gonta-ganti tools daripada beneran nge-publish video. ScriptFlow ngakhirin itu semua."
         />
 
         <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -45,7 +45,7 @@ export function ProblemSection() {
             note="6 tools. Bolak-balik terus. Nggak ada yang tersimpan."
           />
           <WorkflowColumn
-            label="Script Flow"
+            label="ScriptFlow"
             tone="electric"
             steps={flow}
             note="1 workspace. Ide sampai rekaman. Semua auto-tersimpan."

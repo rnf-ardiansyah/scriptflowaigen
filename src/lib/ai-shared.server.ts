@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 
 export type GenerationErrorCode =
   | "rate_limited"
@@ -15,8 +15,8 @@ export type GenerationError = {
 };
 
 export function makeAiError(err: GenerationError): Error {
-  const e = new Error(err.message) as Error & { aiError?: GenerationError };
-  e.aiError = err;
+  const e = new Error(err.message) as Error & { lovable?: GenerationError };
+  e.lovable = err;
   return e;
 }
 
@@ -65,22 +65,22 @@ export function computeReadingTime(text: string): number {
 }
 
 /**
- * Call Gemini directly and return raw text. Retries are caller's job.
+ * Call Gemini via Lovable AI Gateway and return raw text. Retries are caller's job.
  */
 export async function callGemini(prompt: string): Promise<{
   text: string;
   tokens: number | null;
 }> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) {
     throw makeAiError({
       code: "ai_unavailable",
-      message: "AI Gemini belum dikonfigurasi (GEMINI_API_KEY kosong).",
+      message: "AI gateway belum dikonfigurasi.",
     });
   }
-  const google = createGoogleGenerativeAI({ apiKey });
+  const gateway = createLovableAiGatewayProvider(apiKey);
   const result = await generateText({
-    model: google("gemini-1.5-flash"),
+    model: gateway("google/gemini-3-flash-preview"),
     prompt,
     temperature: 0.8,
   });
