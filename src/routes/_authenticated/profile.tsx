@@ -135,6 +135,11 @@ function ProfilePage() {
                 {name || "Unnamed creator"}
               </p>
               <p className="truncate text-xs text-muted-foreground">{authEmail || "—"}</p>
+              {memberSince && (
+                <p className="mt-0.5 truncate text-[11px] text-muted-foreground/80">
+                  Bergabung sejak {memberSince}
+                </p>
+              )}
             </div>
             <Badge variant="electric" className="capitalize">
               {profile?.plan ?? "free"}
@@ -190,6 +195,48 @@ function ProfilePage() {
           <Button asChild>
             <Link to="/upgrade">Lihat Premium</Link>
           </Button>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Ganti password</CardTitle>
+            <CardDescription>
+              Perbarui password akun kamu. Minimal 6 karakter.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleChangePassword} className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label htmlFor="new-password">Password baru</Label>
+              <Input
+                id="new-password"
+                type="password"
+                minLength={6}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimal 6 karakter"
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirm-password">Konfirmasi password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Ulangi password baru"
+              />
+            </div>
+            <div className="md:col-span-2 flex justify-end">
+              <Button
+                type="submit"
+                disabled={changingPassword || !newPassword || !confirmPassword}
+              >
+                <KeyRound className="h-4 w-4" />
+                {changingPassword ? "Menyimpan…" : "Perbarui password"}
+              </Button>
+            </div>
+          </form>
         </Card>
 
         <Card className="mt-6">
