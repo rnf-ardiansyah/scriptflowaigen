@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard
+Disallow: /generator
+Disallow: /library
+Disallow: /editor
+Disallow: /teleprompter
+Disallow: /profile
+Disallow: /onboarding
+Disallow: /upgrade
+Disallow: /new-script
+
+Sitemap: https://scriptflowaigen.lovable.app/sitemap.xml

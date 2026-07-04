@@ -1,29 +1,31 @@
 import { Twitter, Github, Youtube, Linkedin } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 
-const cols = [
+type FooterLink = { label: string; href: string; to?: never } | { label: string; to: "/privacy" | "/terms" | "/login" | "/register"; href?: never };
+
+const cols: { title: string; links: FooterLink[] }[] = [
   {
     title: "Produk",
     links: [
       { label: "Fitur", href: "#features" },
       { label: "Harga", href: "#pricing" },
-      { label: "Roadmap", href: "#" },
+      { label: "FAQ", href: "#faq" },
     ],
   },
   {
-    title: "Sumber Daya",
+    title: "Akun",
     links: [
-      { label: "Blog", href: "#" },
-      { label: "Dokumentasi", href: "#" },
-      { label: "Komunitas", href: "#" },
+      { label: "Login", to: "/login" },
+      { label: "Daftar gratis", to: "/register" },
     ],
   },
   {
     title: "Perusahaan",
     links: [
-      { label: "Privasi", href: "#" },
-      { label: "Ketentuan", href: "#" },
-      { label: "Kontak", href: "#" },
+      { label: "Kebijakan Privasi", to: "/privacy" },
+      { label: "Ketentuan Layanan", to: "/terms" },
+      { label: "Kontak", href: "mailto:support@scriptflow.app" },
     ],
   },
 ];
@@ -58,12 +60,21 @@ export function Footer() {
             <ul className="mt-4 space-y-2.5">
               {c.links.map((l) => (
                 <li key={l.label}>
-                  <a
-                    href={l.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {l.label}
-                  </a>
+                  {l.to ? (
+                    <Link
+                      to={l.to}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {l.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={l.href}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {l.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
