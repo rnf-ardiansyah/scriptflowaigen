@@ -13,7 +13,7 @@ export function Logo({ className = "" }: { className?: string }) {
       />
       <img
         src={wordmarkAsset.url}
-        alt="Script Flow"
+        alt="ScriptFlow"
         className="h-5 w-auto select-none sm:h-6"
         draggable={false}
       />

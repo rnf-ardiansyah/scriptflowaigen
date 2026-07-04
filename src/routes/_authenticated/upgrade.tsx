@@ -8,11 +8,11 @@ import { Check, Sparkles, ArrowLeft, X } from "lucide-react";
 export const Route = createFileRoute("/_authenticated/upgrade")({
   head: () => ({
     meta: [
-      { title: "Upgrade — Script Flow Premium" },
+      { title: "Upgrade — ScriptFlow Premium" },
       {
         name: "description",
         content:
-          "Bandingkan plan Free dan Premium Script Flow. Upgrade untuk unlimited script & 100 AI generate/hari.",
+          "Bandingkan plan Free dan Premium ScriptFlow. Upgrade untuk unlimited script & 100 AI generate/hari.",
       },
     ],
   }),

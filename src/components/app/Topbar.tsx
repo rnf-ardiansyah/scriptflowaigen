@@ -1,8 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
-import { Menu } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { NotificationsBell } from "./NotificationsBell";
-import { UserMenu } from "./UserMenu";
 
 function titleFromPath(pathname: string) {
   const seg = pathname.split("/").filter(Boolean)[0] ?? "workspace";
@@ -33,8 +31,19 @@ export function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
       </div>
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <NotificationsBell />
-        <UserMenu />
+        <button
+          type="button"
+          aria-label="Notifikasi"
+          className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+        >
+          <Bell className="h-4 w-4" />
+        </button>
+        <div
+          aria-hidden
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-electric/15 text-sm font-semibold text-electric"
+        >
+          U
+        </div>
       </div>
     </header>
   );

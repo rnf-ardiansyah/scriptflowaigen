@@ -6,7 +6,7 @@ import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
 import { Card } from "@/components/app/Card";
 import { Input, Label, Textarea } from "@/components/app/Input";
-import { ArrowLeft, Mic, Check, Loader2, Clock, Copy, Download } from "lucide-react";
+import { ArrowLeft, Mic, Check, Loader2, Clock } from "lucide-react";
 import { toast } from "sonner";
 import {
   buildFullScript,
@@ -22,7 +22,7 @@ import { AIActions, HookRegenButton } from "@/components/app/AIActions";
 export const Route = createFileRoute("/_authenticated/editor/$scriptId")({
   head: ({ params }) => ({
     meta: [
-      { title: `Editor — Script Flow` },
+      { title: `Editor — ScriptFlow` },
       { name: "description", content: `Edit script ${params.scriptId}.` },
     ],
   }),
@@ -216,49 +216,6 @@ function EditorLoaded({ scriptId }: { scriptId: string }) {
               }}
               onApplyHook={(h) => update("hook", h)}
             />
-            <Button
-              variant="secondary"
-              onClick={async () => {
-                const full = buildFullScript(form);
-                if (!full.trim()) {
-                  toast.error("Skrip masih kosong");
-                  return;
-                }
-                try {
-                  await navigator.clipboard.writeText(full);
-                  toast.success("Skrip disalin ke clipboard");
-                } catch {
-                  toast.error("Gagal menyalin");
-                }
-              }}
-            >
-              <Copy className="h-4 w-4" /> Copy
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                const full = buildFullScript(form);
-                if (!full.trim()) {
-                  toast.error("Skrip masih kosong");
-                  return;
-                }
-                const safeTitle = (form.title || "script")
-                  .replace(/[^a-z0-9-_ ]/gi, "")
-                  .trim()
-                  .slice(0, 60) || "script";
-                const blob = new Blob([full], { type: "text/plain;charset=utf-8" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `${safeTitle}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              }}
-            >
-              <Download className="h-4 w-4" /> Download
-            </Button>
             <Button
               variant="secondary"
               onClick={() =>

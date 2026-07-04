@@ -15,7 +15,7 @@ import {
 const TYPED = [
   "Hook: Kebanyakan kreator buang 2 jam mantengin layar kosong.",
   "Ini skrip 60 detik yang langsung ngeberesin itu — seketika.",
-  "Langkah 1: Buka Script Flow dan tulis idemu…",
+  "Langkah 1: Buka ScriptFlow dan tulis idemu…",
 ];
 
 export function DashboardMock() {

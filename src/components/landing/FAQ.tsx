@@ -8,20 +8,20 @@ import { SectionHeader } from "./SectionHeader";
 
 const faqs = [
   {
-    q: "Apa itu Script Flow?",
-    a: "Script Flow adalah workspace AI untuk kreator video pendek. Generate skrip, rapikan library, dan latihan pakai teleprompter bawaan — semuanya di satu tempat.",
+    q: "Apa itu ScriptFlow?",
+    a: "ScriptFlow adalah workspace AI untuk kreator video pendek. Generate skrip, rapikan library, dan latihan pakai teleprompter bawaan — semuanya di satu tempat.",
   },
   {
     q: "Cocok buat siapa?",
     a: "Kreator pemula, kreator TikTok / Reels / Shorts, freelancer, pemilik UMKM, dan personal brand yang mau nge-publish lebih banyak video tanpa burnout.",
   },
   {
-    q: "Bisa pakai Script Flow gratis?",
+    q: "Bisa pakai ScriptFlow gratis?",
     a: "Bisa banget. Paket Free membolehkan kamu generate sampai 5 skrip per hari, menyimpan 20 skrip, dan pakai teleprompter selamanya.",
   },
   {
     q: "Gimana cara kerja AI-nya?",
-    a: "Kamu tinggal masukin ide. Script Flow pakai template khusus dan model AI yang ditune buat video pendek — hook kuat, alur padat, CTA jelas.",
+    a: "Kamu tinggal masukin ide. ScriptFlow pakai template khusus dan model AI yang ditune buat video pendek — hook kuat, alur padat, CTA jelas.",
   },
   {
     q: "Skrip hasil AI bisa diedit?",

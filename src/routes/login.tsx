@@ -5,14 +5,15 @@ import { Button } from "@/components/app/Button";
 import { Input, Label } from "@/components/app/Input";
 import { GoogleIcon } from "@/components/app/GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { routeAfterAuth } from "@/lib/profile-helpers";
 import { mapAuthError } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Log in — Script Flow" },
-      { name: "description", content: "Log in to your Script Flow workspace." },
+      { title: "Log in — ScriptFlow" },
+      { name: "description", content: "Log in to your ScriptFlow workspace." },
     ],
   }),
   component: LoginPage,
@@ -43,22 +44,23 @@ function LoginPage() {
   async function handleGoogle() {
     setError(null);
     setGoogleLoading(true);
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin,
-      },
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
     });
-    if (oauthError) {
-      setError(mapAuthError(oauthError.message ?? "Google sign-in failed"));
+    if (result.error) {
+      setError(mapAuthError(result.error.message ?? "Google sign-in failed"));
       setGoogleLoading(false);
+      return;
     }
+    if (result.redirected) return;
+    const dest = await routeAfterAuth();
+    navigate({ to: dest, replace: true });
   }
 
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Log in to your Script Flow workspace."
+      subtitle="Log in to your ScriptFlow workspace."
       footer={
         <>
           New here?{" "}
@@ -81,15 +83,7 @@ function LoginPage() {
           />
         </div>
         <div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link
-              to="/forgot-password"
-              className="text-xs text-electric hover:underline"
-            >
-              Lupa password?
-            </Link>
-          </div>
+          <Label htmlFor="password">Password</Label>
           <Input
             id="password"
             type="password"

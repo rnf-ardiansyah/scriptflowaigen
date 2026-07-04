@@ -1,31 +1,29 @@
 import { Twitter, Github, Youtube, Linkedin } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 
-type FooterLink = { label: string; href: string; to?: never } | { label: string; to: "/privacy" | "/terms" | "/login" | "/register"; href?: never };
-
-const cols: { title: string; links: FooterLink[] }[] = [
+const cols = [
   {
     title: "Produk",
     links: [
       { label: "Fitur", href: "#features" },
       { label: "Harga", href: "#pricing" },
-      { label: "FAQ", href: "#faq" },
+      { label: "Roadmap", href: "#" },
     ],
   },
   {
-    title: "Akun",
+    title: "Sumber Daya",
     links: [
-      { label: "Login", to: "/login" },
-      { label: "Daftar gratis", to: "/register" },
+      { label: "Blog", href: "#" },
+      { label: "Dokumentasi", href: "#" },
+      { label: "Komunitas", href: "#" },
     ],
   },
   {
     title: "Perusahaan",
     links: [
-      { label: "Kebijakan Privasi", to: "/privacy" },
-      { label: "Ketentuan Layanan", to: "/terms" },
-      { label: "Kontak", href: "mailto:support@scriptflow.app" },
+      { label: "Privasi", href: "#" },
+      { label: "Ketentuan", href: "#" },
+      { label: "Kontak", href: "#" },
     ],
   },
 ];
@@ -60,21 +58,12 @@ export function Footer() {
             <ul className="mt-4 space-y-2.5">
               {c.links.map((l) => (
                 <li key={l.label}>
-                  {l.to ? (
-                    <Link
-                      to={l.to}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {l.label}
-                    </Link>
-                  ) : (
-                    <a
-                      href={l.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {l.label}
-                    </a>
-                  )}
+                  <a
+                    href={l.href}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {l.label}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -83,7 +72,7 @@ export function Footer() {
       </div>
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:px-6 lg:px-8">
-          <p>© {new Date().getFullYear()} Script Flow. Semua hak dilindungi.</p>
+          <p>© {new Date().getFullYear()} ScriptFlow. Semua hak dilindungi.</p>
           <p>Dibuat untuk kreator.</p>
         </div>
       </div>

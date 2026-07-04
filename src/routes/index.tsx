@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
-import { SocialProof } from "@/components/landing/SocialProof";
 import { ProblemSection } from "@/components/landing/ProblemSection";
 import { SolutionSection } from "@/components/landing/SolutionSection";
 import { FeaturesBento } from "@/components/landing/FeaturesBento";
@@ -16,29 +15,29 @@ import { Footer } from "@/components/landing/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Script Flow — Workspace AI untuk Kreator Video Pendek" },
+      { title: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
       {
         name: "description",
         content:
           "Ubah ide jadi skrip video pendek pakai AI. Rapikan library dan latihan dengan teleprompter bawaan — semua di satu workspace.",
       },
-      { property: "og:title", content: "Script Flow — Workspace AI untuk Kreator Video Pendek" },
+      { property: "og:title", content: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
       {
         property: "og:description",
         content:
           "Workspace AI untuk kreator TikTok, Reels, dan Shorts. Ide → Skrip → Edit → Latihan.",
       },
-      { property: "og:url", content: "https://scriptflow.app/" },
+      { property: "og:url", content: "https://scriptflowaigen.lovable.app/" },
       { property: "og:type", content: "website" },
     ],
-    links: [{ rel: "canonical", href: "https://scriptflow.app/" }],
+    links: [{ rel: "canonical", href: "https://scriptflowaigen.lovable.app/" }],
     scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          name: "Script Flow",
+          name: "ScriptFlow",
           applicationCategory: "MultimediaApplication",
           operatingSystem: "Web",
           description:
@@ -57,7 +56,6 @@ function Index() {
       <Navbar />
       <main>
         <Hero />
-        <SocialProof />
         <ProblemSection />
         <SolutionSection />
         <FeaturesBento />

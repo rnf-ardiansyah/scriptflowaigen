@@ -27,21 +27,21 @@ import {
   type FourPartResult,
 } from "@/lib/ai-edits.functions";
 
-type AppError = { code: string; message: string; plan?: string; limit?: number };
+type LovableError = { code: string; message: string; plan?: string; limit?: number };
 
-function extractAppError(err: unknown): AppError | null {
-  return (err as { appError?: AppError })?.appError ?? null;
+function extractLovable(err: unknown): LovableError | null {
+  return (err as { lovable?: LovableError })?.lovable ?? null;
 }
 
 function handleError(err: unknown, fallback: string) {
-  const appErr = extractAppError(err);
-  if (appErr?.code === "rate_limited") {
-    toast.error(appErr.message, {
+  const lov = extractLovable(err);
+  if (lov?.code === "rate_limited") {
+    toast.error(lov.message, {
       action: { label: "Upgrade", onClick: () => (window.location.href = "/upgrade") },
     });
     return;
   }
-  toast.error(appErr?.message ?? (err instanceof Error ? err.message : fallback));
+  toast.error(lov?.message ?? (err instanceof Error ? err.message : fallback));
 }
 
 type Patch = { hook: string; retain: string; reward: string; cta: string };

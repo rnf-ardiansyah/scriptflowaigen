@@ -24,7 +24,7 @@ import { generateScript } from "@/lib/ai.functions";
 export const Route = createFileRoute("/_authenticated/generator")({
   head: () => ({
     meta: [
-      { title: "AI Generator — Script Flow" },
+      { title: "AI Generator — ScriptFlow" },
       { name: "description", content: "Generate script video pendek dengan AI." },
     ],
   }),
@@ -45,7 +45,7 @@ function classifyError(err: unknown): {
   message: string;
 } {
   const raw = err instanceof Error ? err.message : String(err ?? "");
-  const code = (err as { appError?: { code?: string } } | null)?.appError?.code;
+  const code = (err as { lovable?: { code?: string } } | null)?.lovable?.code;
   if (code === "rate_limited" || /kuota harian/i.test(raw)) {
     return { kind: "rate_limited", message: raw };
   }
