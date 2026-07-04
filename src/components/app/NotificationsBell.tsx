@@ -102,7 +102,7 @@ export function NotificationsBell() {
   async function markOneRead(id: string) {
     const { error } = await supabase
       .from("notifications" as never)
-      .update({ read_at: new Date().toISOString() })
+      .update({ read_at: new Date().toISOString() } as never)
       .eq("id", id);
     if (error) {
       toast.error("Gagal menandai notifikasi");
@@ -115,7 +115,7 @@ export function NotificationsBell() {
     if (!userId || unread.length === 0) return;
     const { error } = await supabase
       .from("notifications" as never)
-      .update({ read_at: new Date().toISOString() })
+      .update({ read_at: new Date().toISOString() } as never)
       .eq("user_id", userId)
       .is("read_at", null);
     if (error) {
