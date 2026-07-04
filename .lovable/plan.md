@@ -1,9 +1,13 @@
-Tambahkan icon Google berwarna (multi-color) ke tombol "Continue with Google" pada halaman `/login` dan `/register`.
+## Tujuan
+Bersihkan `Topbar` dari elemen yang tidak berfungsi: tombol notifikasi (bell) dan avatar bulat "U" di kanannya.
 
-Detail penerapan:
-1. Di `src/routes/login.tsx`: sisipkan SVG icon Google (G berwarna) di sebelah kiri teks tombol Google.
-2. Di `src/routes/register.tsx`: lakukan hal yang sama.
-3. Gunakan inline SVG agar tidak perlu menambah dependency baru.
-4. Pastikan icon dan teks tetap sejajar rapi (flex, gap-2) dan responsif.
+## Perubahan
+File: `src/components/app/Topbar.tsx`
 
-Tidak ada perubahan pada logic auth, layout, atau komponen lain.
+1. Hapus tombol `<button aria-label="Notifikasi">` beserta icon `Bell`.
+2. Hapus `<div>` avatar berisi huruf "U".
+3. Hapus import `Bell` dari `lucide-react` (sisakan `Menu`).
+4. Pertahankan `ThemeToggle` di sisi kanan.
+
+## Hasil akhir
+Sisi kanan Topbar hanya berisi `ThemeToggle`. Tidak ada UI palsu / pajangan. Jika nanti fitur notifikasi benar-benar dibutuhkan, kita akan bangun ulang dengan state, data, dan panel yang berfungsi (bukan tombol kosong).
