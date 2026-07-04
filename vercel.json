@@ -1,3 +1,13 @@
 {
-  "framework": "tanstack-start"
+  "outputDirectory": "dist/client",
+  "rewrites": [
+    {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/ssr"
+    }
+  ]
 }
