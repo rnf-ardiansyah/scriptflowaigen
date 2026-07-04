@@ -8,7 +8,7 @@ import { Input, Label } from "@/components/app/Input";
 import { Badge } from "@/components/app/Badge";
 import { supabase } from "@/integrations/supabase/client";
 import { profileQuery } from "@/lib/scripts";
-import { LogOut } from "lucide-react";
+import { LogOut, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -32,6 +32,9 @@ function ProfilePage() {
 
   const [name, setName] = useState(profile?.name ?? "");
   const [signingOut, setSigningOut] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const [authEmail, setAuthEmail] = useState<string>("");
 
