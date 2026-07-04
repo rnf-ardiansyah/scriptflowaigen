@@ -8,7 +8,7 @@ import { Input, Label } from "@/components/app/Input";
 import { Badge } from "@/components/app/Badge";
 import { supabase } from "@/integrations/supabase/client";
 import { profileQuery } from "@/lib/scripts";
-import { LogOut } from "lucide-react";
+import { LogOut, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -32,6 +32,9 @@ function ProfilePage() {
 
   const [name, setName] = useState(profile?.name ?? "");
   const [signingOut, setSigningOut] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const [authEmail, setAuthEmail] = useState<string>("");
 
@@ -79,7 +82,37 @@ function ProfilePage() {
     }
   }
 
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (changingPassword) return;
+    if (newPassword.length < 6) {
+      toast.error("Password minimal 6 karakter");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Konfirmasi password tidak cocok");
+      return;
+    }
+    setChangingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPassword(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNewPassword("");
+    setConfirmPassword("");
+    toast.success("Password berhasil diperbarui");
+  }
+
   const initial = (name || authEmail || "?").slice(0, 1).toUpperCase();
+  const memberSince = profile?.created_at
+    ? new Date(profile.created_at).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
 
   return (
     <AppLayout>
@@ -102,6 +135,11 @@ function ProfilePage() {
                 {name || "Unnamed creator"}
               </p>
               <p className="truncate text-xs text-muted-foreground">{authEmail || "—"}</p>
+              {memberSince && (
+                <p className="mt-0.5 truncate text-[11px] text-muted-foreground/80">
+                  Bergabung sejak {memberSince}
+                </p>
+              )}
             </div>
             <Badge variant="electric" className="capitalize">
               {profile?.plan ?? "free"}
@@ -157,6 +195,48 @@ function ProfilePage() {
           <Button asChild>
             <Link to="/upgrade">Lihat Premium</Link>
           </Button>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Ganti password</CardTitle>
+            <CardDescription>
+              Perbarui password akun kamu. Minimal 6 karakter.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleChangePassword} className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label htmlFor="new-password">Password baru</Label>
+              <Input
+                id="new-password"
+                type="password"
+                minLength={6}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimal 6 karakter"
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirm-password">Konfirmasi password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Ulangi password baru"
+              />
+            </div>
+            <div className="md:col-span-2 flex justify-end">
+              <Button
+                type="submit"
+                disabled={changingPassword || !newPassword || !confirmPassword}
+              >
+                <KeyRound className="h-4 w-4" />
+                {changingPassword ? "Menyimpan…" : "Perbarui password"}
+              </Button>
+            </div>
+          </form>
         </Card>
 
         <Card className="mt-6">
