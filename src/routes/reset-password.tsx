@@ -10,8 +10,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Reset password — ScriptFlow" },
-      { name: "description", content: "Atur password baru untuk akun ScriptFlow." },
+      { title: "Reset password — Script Flow" },
+      { name: "description", content: "Atur password baru untuk akun Script Flow." },
     ],
   }),
   component: ResetPasswordPage,

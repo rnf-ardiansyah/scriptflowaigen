@@ -28,7 +28,7 @@ export function Hero() {
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              ScriptFlow adalah workspace AI untuk kreator video pendek. Ubah ide jadi skrip,
+              Script Flow adalah workspace AI untuk kreator video pendek. Ubah ide jadi skrip,
               rapikan library kamu, dan latihan pakai teleprompter bawaan — semuanya di satu tempat.
             </p>
 

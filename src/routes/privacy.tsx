@@ -4,16 +4,16 @@ import { LegalLayout } from "@/components/landing/LegalLayout";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Kebijakan Privasi — ScriptFlow" },
+      { title: "Kebijakan Privasi — Script Flow" },
       {
         name: "description",
         content:
-          "Kebijakan privasi ScriptFlow: data apa yang kami kumpulkan, bagaimana kami menyimpannya, dan hak kamu.",
+          "Kebijakan privasi Script Flow: data apa yang kami kumpulkan, bagaimana kami menyimpannya, dan hak kamu.",
       },
-      { property: "og:title", content: "Kebijakan Privasi — ScriptFlow" },
-      { property: "og:url", content: "https://scriptflowaigen.lovable.app/privacy" },
+      { property: "og:title", content: "Kebijakan Privasi — Script Flow" },
+      { property: "og:url", content: "https://scriptflow.app/privacy" },
     ],
-    links: [{ rel: "canonical", href: "https://scriptflowaigen.lovable.app/privacy" }],
+    links: [{ rel: "canonical", href: "https://scriptflow.app/privacy" }],
   }),
   component: PrivacyPage,
 });
@@ -22,7 +22,7 @@ function PrivacyPage() {
   return (
     <LegalLayout title="Kebijakan Privasi" updated="4 Juli 2026">
       <p>
-        Halaman ini dipelihara oleh tim ScriptFlow untuk menjelaskan bagaimana kami
+        Halaman ini dipelihara oleh tim Script Flow untuk menjelaskan bagaimana kami
         menangani data kamu ketika menggunakan workspace kami. Bahasa di sini
         sengaja dibuat ringkas dan jelas.
       </p>
@@ -37,7 +37,7 @@ function PrivacyPage() {
 
       <h2 className="text-xl font-semibold text-foreground">Cara kami menggunakannya</h2>
       <ul className="list-disc pl-6">
-        <li>Menyediakan dan menjaga kualitas layanan ScriptFlow.</li>
+        <li>Menyediakan dan menjaga kualitas layanan Script Flow.</li>
         <li>Menerapkan batas kuota dan mencegah penyalahgunaan.</li>
         <li>Memberi notifikasi produk yang relevan.</li>
       </ul>

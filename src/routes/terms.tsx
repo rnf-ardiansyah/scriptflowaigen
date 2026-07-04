@@ -4,16 +4,16 @@ import { LegalLayout } from "@/components/landing/LegalLayout";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Ketentuan Layanan — ScriptFlow" },
+      { title: "Ketentuan Layanan — Script Flow" },
       {
         name: "description",
         content:
-          "Ketentuan layanan ScriptFlow: aturan penggunaan akun, konten, pembayaran, dan pemutusan layanan.",
+          "Ketentuan layanan Script Flow: aturan penggunaan akun, konten, pembayaran, dan pemutusan layanan.",
       },
-      { property: "og:title", content: "Ketentuan Layanan — ScriptFlow" },
-      { property: "og:url", content: "https://scriptflowaigen.lovable.app/terms" },
+      { property: "og:title", content: "Ketentuan Layanan — Script Flow" },
+      { property: "og:url", content: "https://scriptflow.app/terms" },
     ],
-    links: [{ rel: "canonical", href: "https://scriptflowaigen.lovable.app/terms" }],
+    links: [{ rel: "canonical", href: "https://scriptflow.app/terms" }],
   }),
   component: TermsPage,
 });
@@ -22,7 +22,7 @@ function TermsPage() {
   return (
     <LegalLayout title="Ketentuan Layanan" updated="4 Juli 2026">
       <p>
-        Dengan membuat akun atau menggunakan ScriptFlow, kamu setuju dengan
+        Dengan membuat akun atau menggunakan Script Flow, kamu setuju dengan
         ketentuan berikut. Kami sengaja membuatnya singkat.
       </p>
 
@@ -34,13 +34,13 @@ function TermsPage() {
 
       <h2 className="text-xl font-semibold text-foreground">2. Konten kamu</h2>
       <p>
-        Skrip dan ide yang kamu buat di ScriptFlow adalah milik kamu. Kami hanya
+        Skrip dan ide yang kamu buat di Script Flow adalah milik kamu. Kami hanya
         menyimpan dan memprosesnya untuk menjalankan layanan.
       </p>
 
       <h2 className="text-xl font-semibold text-foreground">3. Penggunaan yang dilarang</h2>
       <ul className="list-disc pl-6">
-        <li>Menggunakan ScriptFlow untuk konten ilegal, kebencian, atau spam.</li>
+        <li>Menggunakan Script Flow untuk konten ilegal, kebencian, atau spam.</li>
         <li>Melakukan reverse-engineering atau scraping otomatis pada layanan.</li>
         <li>Menyalahgunakan kuota AI (mis. membagikan API/akses secara massal).</li>
       </ul>

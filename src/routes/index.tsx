@@ -16,29 +16,29 @@ import { Footer } from "@/components/landing/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
+      { title: "Script Flow — Workspace AI untuk Kreator Video Pendek" },
       {
         name: "description",
         content:
           "Ubah ide jadi skrip video pendek pakai AI. Rapikan library dan latihan dengan teleprompter bawaan — semua di satu workspace.",
       },
-      { property: "og:title", content: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
+      { property: "og:title", content: "Script Flow — Workspace AI untuk Kreator Video Pendek" },
       {
         property: "og:description",
         content:
           "Workspace AI untuk kreator TikTok, Reels, dan Shorts. Ide → Skrip → Edit → Latihan.",
       },
-      { property: "og:url", content: "https://scriptflowaigen.lovable.app/" },
+      { property: "og:url", content: "https://scriptflow.app/" },
       { property: "og:type", content: "website" },
     ],
-    links: [{ rel: "canonical", href: "https://scriptflowaigen.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://scriptflow.app/" }],
     scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          name: "ScriptFlow",
+          name: "Script Flow",
           applicationCategory: "MultimediaApplication",
           operatingSystem: "Web",
           description:

@@ -17,7 +17,7 @@ import { Button } from "@/components/app/Button";
 export const Route = createFileRoute("/_authenticated/teleprompter/$scriptId")({
   head: () => ({
     meta: [
-      { title: "Teleprompter · ScriptFlow" },
+      { title: "Teleprompter · Script Flow" },
       { name: "description", content: "Rehearse your script in the built-in teleprompter." },
     ],
   }),

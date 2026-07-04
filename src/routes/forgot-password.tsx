@@ -9,8 +9,8 @@ import { mapAuthError } from "@/lib/auth-errors";
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
-      { title: "Lupa password — ScriptFlow" },
-      { name: "description", content: "Reset password akun ScriptFlow kamu." },
+      { title: "Lupa password — Script Flow" },
+      { name: "description", content: "Reset password akun Script Flow kamu." },
     ],
   }),
   component: ForgotPasswordPage,

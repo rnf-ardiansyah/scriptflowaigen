@@ -22,7 +22,7 @@ import { AIActions, HookRegenButton } from "@/components/app/AIActions";
 export const Route = createFileRoute("/_authenticated/editor/$scriptId")({
   head: ({ params }) => ({
     meta: [
-      { title: `Editor — ScriptFlow` },
+      { title: `Editor — Script Flow` },
       { name: "description", content: `Edit script ${params.scriptId}.` },
     ],
   }),

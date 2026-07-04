@@ -57,7 +57,7 @@ const foldersQuery = (fn: () => Promise<FolderSummary[]>) =>
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
     meta: [
-      { title: "Library — ScriptFlow" },
+      { title: "Library — Script Flow" },
       { name: "description", content: "All your saved short-video scripts." },
     ],
   }),

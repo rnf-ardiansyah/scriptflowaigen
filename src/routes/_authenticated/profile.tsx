@@ -14,10 +14,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "Profile — ScriptFlow" },
+      { title: "Profile — Script Flow" },
       {
         name: "description",
-        content: "Manage your ScriptFlow profile and preferences.",
+        content: "Manage your Script Flow profile and preferences.",
       },
     ],
   }),
