@@ -45,9 +45,28 @@ export default {
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
+      
+      // Return JSON error for server function calls, HTML for pages
+      const isServerFn = request.url.includes('/_server/') || request.url.includes('/api/');
+      const err = error as { message?: string; code?: string } | undefined;
+      
+      if (isServerFn) {
+        return new Response(
+          JSON.stringify({
+            error: true,
+            message: err?.message || 'Server error',
+            code: err?.code || 'server_error',
+          }),
+          {
+            status: 500,
+            headers: { 'content-type': 'application/json' },
+          },
+        );
+      }
+      
       return new Response(renderErrorPage(), {
         status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
+        headers: { 'content-type': 'text/html; charset=utf-8' },
       });
     }
   },
