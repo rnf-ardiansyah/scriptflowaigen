@@ -1,71 +1,73 @@
-## Tujuan
-Kembalikan tombol **Notifikasi (bell)** dan **Avatar user** di `Topbar` dengan implementasi yang benar-benar berfungsi — bukan pajangan.
+## Audit — apa yang kurang di ScriptFlow
 
-## 1. Avatar User (menu akun)
-File baru: `src/components/app/UserMenu.tsx`
-- Ambil user dari `supabase.auth.getUser()` + subscribe `onAuthStateChange` untuk sinkronisasi.
-- Tampilkan inisial dari `profile.name` atau email; fallback "?".
-- Klik avatar → dropdown (pakai state lokal + click-outside) berisi:
-  - Header: nama + email.
-  - Link `Profile` → `/profile`.
-  - Link `Upgrade` → `/upgrade`.
-  - Tombol `Sign out` → `supabase.auth.signOut()` + `router.navigate({ to: "/login" })` + `queryClient.clear()`.
-- Aksesibel: `aria-haspopup`, `aria-expanded`, tutup dengan Esc.
+### A. Legal & kepercayaan (missing)
+- Tidak ada halaman **Privacy Policy** (`/privacy`).
+- Tidak ada halaman **Terms of Service** (`/terms`).
+- Footer landing kemungkinan link ke halaman ini tapi rute belum ada → link mati.
 
-## 2. Notifikasi (bell)
-Sumber data: tabel Supabase baru `notifications` (per-user, real).
+### B. Auth flow tidak lengkap
+- Tidak ada **Forgot Password** (`/forgot-password`).
+- Tidak ada **Reset Password** (`/reset-password`) — WAJIB kalau tombol "lupa password" mau berfungsi.
+- Di `/login` belum ada link "Lupa password?".
 
-### Migration
-```sql
-create table public.notifications (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null,
-  body text,
-  href text,
-  read_at timestamptz,
-  created_at timestamptz not null default now()
-);
-create index on public.notifications (user_id, created_at desc);
+### C. Aset publik & SEO teknis (missing)
+- Folder `public/` kosong → tidak ada `robots.txt`, `sitemap.xml`, `favicon.ico`, `site.webmanifest`.
+- Belum ada favicon custom untuk ScriptFlow.
 
-grant select, insert, update, delete on public.notifications to authenticated;
-grant all on public.notifications to service_role;
+### D. Profil user (thin)
+- Tidak bisa **ganti password** dari halaman Profile.
+- Tidak bisa **hapus akun**.
+- Belum ada indikator "Member since" / tanggal bergabung.
 
-alter table public.notifications enable row level security;
+### E. Landing — social proof tipis
+- Tidak ada testimonial / logo-strip / angka statistik singkat ("500+ kreator", "10.000 skrip dibuat"). Cukup 1 blok kecil.
 
-create policy "own_select" on public.notifications for select
-  to authenticated using (auth.uid() = user_id);
-create policy "own_update" on public.notifications for update
-  to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "own_delete" on public.notifications for delete
-  to authenticated using (auth.uid() = user_id);
-create policy "own_insert" on public.notifications for insert
-  to authenticated with check (auth.uid() = user_id);
-```
+### F. Editor / Library — quality of life
+- Library sudah ada search (OK).
+- Editor belum punya tombol **Copy full script** dan **Download `.txt`** — sering dibutuhkan kreator.
 
-Seed: sisipkan 1 notifikasi welcome saat onboarding selesai (dari server function yang sudah ada, atau trigger sederhana `on insert profile`). Detail seeding masuk di step implementasi trigger.
+---
 
-### Komponen
-File baru: `src/components/app/NotificationsBell.tsx`
-- `useQuery(["notifications"])` → ambil 20 notifikasi terbaru.
-- Tampilkan badge angka unread (`read_at is null`) di pojok bell.
-- Klik bell → panel dropdown:
-  - List item: title, body, waktu relatif, indikator dot unread.
-  - Item yang punya `href` → `<Link>` ke route tsb; klik menandai `read_at = now()`.
-  - Tombol "Tandai semua sudah dibaca" → update semua unread milik user.
-  - Empty state: "Belum ada notifikasi".
-- Realtime: subscribe channel `notifications:user_id=eq.<uid>` → invalidate query saat ada `INSERT`/`UPDATE`.
-- Semua aksi via `supabase` client (RLS aktif).
+## Rencana penambahan (SIMPEL, tidak ribet)
 
-## 3. Integrasi Topbar
-File: `src/components/app/Topbar.tsx`
-- Tambah kembali di sisi kanan: `<ThemeToggle />`, `<NotificationsBell />`, `<UserMenu />`.
-- Hapus lagi elemen palsu jika muncul.
+Hanya hal yang benar-benar berguna dan cepat dikerjakan. Tidak menambah dependency baru.
 
-## Catatan teknis
-- Semua data client-side pakai `supabase` browser client + RLS — tidak perlu server function baru.
-- Waktu relatif pakai util kecil `formatRelative` lokal (tanpa dependency baru).
-- Tidak mengubah komponen `landing/Navbar.tsx`.
+### 1. Auth: Forgot & Reset Password
+- Route baru `src/routes/forgot-password.tsx`: form email → `supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/reset-password' })`.
+- Route baru `src/routes/reset-password.tsx` (public): form password baru → `supabase.auth.updateUser({ password })`, cek hash `type=recovery`.
+- Tambah link "Lupa password?" di `src/routes/login.tsx`.
 
-## Hasil
-Bell menampilkan notifikasi asli per-user dengan unread badge, mark-as-read, realtime. Avatar membuka menu akun dengan navigasi profil/upgrade dan sign out yang berfungsi.
+### 2. Halaman Legal (statik, ringkas, Bahasa Indonesia)
+- `src/routes/privacy.tsx` — Kebijakan Privasi ringkas (data yang dikumpulkan, cookie, kontak).
+- `src/routes/terms.tsx` — Ketentuan Layanan ringkas (akun, konten user, pembayaran, penghentian).
+- Pakai layout landing (Navbar + Footer) supaya konsisten.
+- Update link Footer landing agar mengarah ke route ini.
+
+### 3. Aset publik & SEO teknis
+- Buat `public/robots.txt` (`User-agent: *` + `Sitemap:` ke published URL).
+- Buat `public/sitemap.xml` sederhana (list rute publik: /, /login, /register, /privacy, /terms).
+- Generate 1 favicon PNG ScriptFlow (imagegen) + `public/favicon.ico` + `<link rel="icon">` di `__root.tsx`.
+
+### 4. Profile page — akun kontrol
+File: `src/routes/_authenticated/profile.tsx`
+- Card "Ganti password": input password baru + confirm → `supabase.auth.updateUser({ password })`.
+- Card "Hapus akun": tombol dengan konfirmasi 2-langkah → sign out + toast "Hubungi support untuk penghapusan permanen" (versi ringkas; hard delete butuh service role, skip).
+- Tampilkan `Member since` dari `profile.created_at`.
+
+### 5. Landing — mini social proof strip
+File: baru `src/components/landing/SocialProof.tsx`, dipasang di `src/routes/index.tsx` setelah `Hero`.
+- 3 angka statis: "500+ kreator", "10K+ skrip dibuat", "4.8/5 rating".
+- Tidak ada foto/testimonial palsu — hanya angka + label singkat + subtle glow. Bisa diganti nanti kalau ada data real.
+
+### 6. Editor — tombol Copy & Download
+File: `src/routes/_authenticated/editor.$scriptId.tsx`
+- Tambah 2 tombol kecil di header editor:
+  - **Copy** → `navigator.clipboard.writeText(fullScript)` + toast.
+  - **Download .txt** → buat Blob, trigger download `<script-title>.txt`.
+
+---
+
+## Yang SENGAJA dilewati (biar tidak ribet)
+- Testimonial + foto asli, integrasi analitik, cookie banner GDPR, ubah bahasa, PWA install prompt, delete-account hard delete, billing history, keyboard shortcuts panel, changelog page, blog.
+
+Kalau approve, aku kerjakan 6 poin di atas berurutan dalam 1 turn.
