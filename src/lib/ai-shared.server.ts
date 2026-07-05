@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { createGoogleProvider } from "./ai-gateway.server";
 
 export type GenerationErrorCode =
   | "rate_limited"
@@ -71,16 +71,16 @@ export async function callGemini(prompt: string): Promise<{
   text: string;
   tokens: number | null;
 }> {
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     throw makeAiError({
       code: "ai_unavailable",
       message: "AI gateway belum dikonfigurasi.",
     });
   }
-  const gateway = createLovableAiGatewayProvider(apiKey);
+  const google = createGoogleProvider(apiKey);
   const result = await generateText({
-    model: gateway("google/gemini-3-flash-preview"),
+    model: google("gemini-3.1-flash-lite"),
     prompt,
     temperature: 0.8,
   });

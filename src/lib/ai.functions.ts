@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { generateText } from "ai";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { createGoogleProvider } from "./ai-gateway.server";
 
 const InputSchema = z.object({
   idea: z.string().trim().min(3).max(2000),
@@ -83,9 +83,9 @@ async function callModel(
   tone: string,
   strict: boolean,
 ) {
-  const gateway = createLovableAiGatewayProvider(apiKey);
+  const google = createGoogleProvider(apiKey);
   const result = await generateText({
-    model: gateway("google/gemini-3-flash-preview"),
+    model: google("gemini-3.1-flash-lite"),
     prompt: buildPrompt(idea, niche, tone, strict),
     temperature: 0.8,
   });
@@ -189,7 +189,7 @@ export const generateScript = createServerFn({ method: "POST" })
       });
     }
 
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.GOOGLE_API_KEY;
     if (!apiKey) {
       throw makeError({ code: "ai_unavailable", message: "AI gateway belum dikonfigurasi." });
     }
