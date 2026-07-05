@@ -445,9 +445,9 @@ function GeneratorPage() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button asChild>
+              <Button asChild variant="gold">
                 <Link to="/upgrade">
-                  <Crown className="h-4 w-4" /> Upgrade ke Premium
+                  <Crown className="animate-crown-pulse h-4 w-4" /> Upgrade ke Premium
                 </Link>
               </Button>
             </div>

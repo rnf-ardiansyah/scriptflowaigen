@@ -99,13 +99,16 @@
   * {
     border-color: var(--color-border);
   }
-  html, body {
+
+  html,
+  body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+
   ::selection {
     background: color-mix(in oklab, var(--electric) 40%, transparent);
     color: var(--foreground);
@@ -153,23 +156,134 @@
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 @keyframes float-y {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
+
 @keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
+
 @keyframes blink-caret {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
-.animate-fade-up { animation: fade-up 0.7s ease-out both; }
-.animate-float { animation: float-y 6s ease-in-out infinite; }
-.animate-caret { animation: blink-caret 1s steps(1) infinite; }
+@keyframes crown-pulse {
 
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0px currentColor);
+    transform: scale(1);
+  }
+
+  50% {
+    filter: drop-shadow(0 0 5px currentColor);
+    transform: scale(1.12);
+  }
+}
+
+@keyframes gold-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0px 0px color-mix(in oklab, oklch(0.8 0.16 85) 0%, transparent);
+  }
+
+  50% {
+    box-shadow: 0 0 16px 1px color-mix(in oklab, oklch(0.8 0.16 85) 45%, transparent);
+  }
+}
+
+@keyframes ring-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+
+  70%,
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out both;
+}
+
+.animate-float {
+  animation: float-y 6s ease-in-out infinite;
+}
+
+.animate-caret {
+  animation: blink-caret 1s steps(1) infinite;
+}
+
+/* Free state — cincin emas yang berdenyut keluar di sekitar icon crown. */
+.animate-ring-pulse {
+  animation: ring-pulse 1.8s ease-out infinite;
+}
+
+.animate-crown-pulse {
+  animation: crown-pulse 2.2s ease-in-out infinite;
+}
+
+.animate-gold-glow {
+  animation: gold-glow 2.2s ease-in-out infinite;
+}
+
+/* Premium state — kilau emas yang nyapu terus-menerus di seluruh box + teks. */
+@utility text-shimmer-gold {
+  background: linear-gradient(110deg,
+      oklch(0.72 0.15 85) 40%,
+      oklch(0.93 0.09 95) 50%,
+      oklch(0.72 0.15 85) 60%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 2.8s linear infinite;
+}
+
+@utility animate-shine-sweep {
+  background: linear-gradient(100deg,
+      transparent 35%,
+      oklch(0.95 0.05 95 / 45%) 50%,
+      transparent 65%);
+  background-size: 260% 100%;
+  animation: shimmer 2.6s ease-in-out infinite;
+}

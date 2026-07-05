@@ -184,7 +184,14 @@ export function SidebarContent({
         <div className="rounded-xl border border-border bg-surface p-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">Plan</span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-elevated px-2 py-0.5 text-[11px] font-semibold text-foreground">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                plan === "premium"
+                  ? "border-amber-400/40 bg-amber-400/10 text-amber-400"
+                  : "border-border bg-surface-elevated text-foreground",
+              )}
+            >
               {plan === "premium" ? "Premium" : "Free"}
             </span>
           </div>
@@ -203,16 +210,18 @@ export function SidebarContent({
             </div>
           </div>
           {plan === "premium" ? (
-            <div className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-electric/20 bg-electric/5 px-2 py-1.5 text-[11px] font-semibold text-electric">
-              <Crown className="h-3.5 w-3.5" /> Premium aktif
+            <div className="animate-gold-glow relative mt-3 flex items-center justify-center gap-1.5 overflow-hidden rounded-lg border border-amber-400/30 bg-gradient-to-r from-amber-400/10 via-amber-300/5 to-amber-400/10 px-2 py-1.5 text-[11px] font-semibold">
+              <span className="animate-shine-sweep pointer-events-none absolute inset-0" />
+              <Crown className="relative h-3.5 w-3.5 text-amber-400" />
+              <span className="text-shimmer-gold relative">Premium aktif</span>
             </div>
           ) : (
             <Link
               to="/upgrade"
               onClick={onNavigate}
-              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-electric/40 px-2 py-1.5 text-[11px] font-semibold text-electric hover:bg-electric/10"
+              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-amber-400/40 px-2 py-1.5 text-[11px] font-semibold text-amber-400 hover:bg-amber-400/10"
             >
-              <Crown className="h-3.5 w-3.5" /> Upgrade
+              <Crown className="animate-crown-pulse h-3.5 w-3.5" /> Upgrade
             </Link>
           )}
         </div>

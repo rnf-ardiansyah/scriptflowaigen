@@ -17,6 +17,8 @@ const buttonVariants = cva(
           "border border-electric/40 text-electric hover:bg-electric/10",
         destructive:
           "bg-destructive text-destructive-foreground hover:opacity-90",
+        gold:
+          "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-[0_0_20px_-6px_rgba(251,191,36,0.7)] hover:scale-[1.02] active:scale-[0.99]",
       },
       size: {
         sm: "h-9 px-3 text-xs",
@@ -30,7 +32,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
