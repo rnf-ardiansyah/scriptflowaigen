@@ -1,3 +1,4 @@
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/app/Select";
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
@@ -309,18 +310,19 @@ function LibraryPage() {
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
-                <select
-                  value={nicheFilter}
-                  onChange={(e) => setNicheFilter(e.target.value)}
-                  className="h-10 rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/40"
-                >
-                  <option value="all">Semua niche</option>
-                  {NICHES.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
+                <Select value={nicheFilter} onValueChange={setNicheFilter}>
+                  <SelectTrigger className="h-10 w-auto min-w-[150px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua niche</SelectItem>
+                    {NICHES.map((n) => (
+                      <SelectItem key={n} value={n}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button
                   variant={favoritesOnly ? "primary" : "secondary"}
                   onClick={() => setFavoritesOnly((v) => !v)}

@@ -18,6 +18,7 @@ import { AppLayout } from "@/components/app/AppLayout";
 import { Card } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/app/Select";
 import {
   Dialog,
   DialogContent,
@@ -217,19 +218,22 @@ function GeneratorPage() {
               <label className="text-sm font-medium" htmlFor="duration">
                 Durasi target
               </label>
-              <select
-                id="duration"
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value) as Duration)}
+              <Select
+                value={String(duration)}
+                onValueChange={(v) => setDuration(Number(v) as Duration)}
                 disabled={phase === "generating"}
-                className="h-11 w-full rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 disabled:opacity-50"
               >
-                {DURATIONS.map((d) => (
-                  <option key={d} value={d}>
-                    {d} detik
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATIONS.map((d) => (
+                    <SelectItem key={d} value={String(d)}>
+                      {d} detik
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -244,19 +248,22 @@ function GeneratorPage() {
                   <HelpCircle className="h-3.5 w-3.5" /> Apa bedanya?
                 </button>
               </div>
-              <select
-                id="style"
+              <Select
                 value={style}
-                onChange={(e) => setStyle(e.target.value as Style)}
+                onValueChange={(v) => setStyle(v as Style)}
                 disabled={phase === "generating"}
-                className="h-11 w-full rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 disabled:opacity-50"
               >
-                {STYLES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STYLES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <div className="rounded-lg border border-border/60 bg-electric/5 px-3 py-2.5 text-xs">
                 <p className="text-foreground">{STYLE_INFO[style].description}</p>
                 <p className="mt-1 italic text-muted-foreground">{STYLE_INFO[style].example}</p>
@@ -277,19 +284,18 @@ function GeneratorPage() {
                 <HelpCircle className="h-3.5 w-3.5" /> Apa itu niche?
               </button>
             </div>
-            <select
-              id="niche"
-              value={niche}
-              onChange={(e) => setNiche(e.target.value)}
-              disabled={phase === "generating"}
-              className="h-11 w-full rounded-xl border border-border bg-background/60 px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 disabled:opacity-50"
-            >
-              {NICHES.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
+            <Select value={niche} onValueChange={setNiche} disabled={phase === "generating"}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {NICHES.map((n) => (
+                  <SelectItem key={n} value={n}>
+                    {n}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <p className="text-xs text-muted-foreground">{NICHE_DESCRIPTION}</p>
           </div>
 
