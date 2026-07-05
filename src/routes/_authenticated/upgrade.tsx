@@ -1,9 +1,27 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
-import { Check, Sparkles, ArrowLeft, X } from "lucide-react";
+import { Input } from "@/components/app/Input";
+import { Check, Sparkles, ArrowLeft, X, CalendarCheck } from "lucide-react";
+import { createUpgradeInvoice } from "@/lib/payment.functions";
+import { getQuotaSummaryFn, quotaQuery } from "@/lib/quota.functions";
+import { toast } from "sonner";
+
+function formatExpiryDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
 
 export const Route = createFileRoute("/_authenticated/upgrade")({
   head: () => ({
@@ -38,6 +56,32 @@ const PREMIUM_FEATURES = [
 ];
 
 function UpgradePage() {
+  const [mobile, setMobile] = useState("");
+  const [loading, setLoading] = useState(false);
+  const upgrade = useServerFn(createUpgradeInvoice);
+
+  const getQuota = useServerFn(getQuotaSummaryFn);
+  const { data: quota } = useQuery(quotaQuery(() => getQuota()));
+  const isPremium = quota?.plan === "premium";
+  const expiryLabel = formatExpiryDate(quota?.planExpiresAt ?? null);
+
+  async function handleUpgrade() {
+    if (!mobile.trim()) {
+      toast.error("Isi nomor HP kamu dulu ya.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await upgrade({ data: { mobile: mobile.trim() } });
+      window.location.href = res.paymentUrl;
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Gagal memulai pembayaran.",
+      );
+      setLoading(false);
+    }
+  }
+
   return (
     <AppLayout>
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -75,7 +119,7 @@ function UpgradePage() {
               ))}
             </ul>
             <Button variant="secondary" disabled className="mt-7 w-full" size="lg">
-              Kamu sedang di plan ini
+              {isPremium ? "Downgrade otomatis kalau premium habis" : "Kamu sedang di plan ini"}
             </Button>
           </Card>
 
@@ -93,7 +137,7 @@ function UpgradePage() {
               </CardDescription>
             </CardHeader>
             <div className="flex items-end gap-1">
-              <span className="text-5xl font-bold tracking-tight">Rp29.000</span>
+              <span className="text-5xl font-bold tracking-tight">Rp20.000</span>
               <span className="mb-1.5 text-sm text-muted-foreground">/ bulan</span>
             </div>
             <ul className="mt-6 space-y-3">
@@ -101,20 +145,52 @@ function UpgradePage() {
                 <FeatureRow key={f.label} {...f} />
               ))}
             </ul>
-            <Button
-              className="mt-7 w-full"
-              size="lg"
-              onClick={() =>
-                alert(
-                  "Pembayaran belum aktif di versi ini. Payment gateway akan menyusul ✨",
-                )
-              }
-            >
-              <Sparkles className="h-4 w-4" /> Upgrade ke Premium
-            </Button>
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              Bisa cancel kapan saja.
-            </p>
+
+            {isPremium ? (
+              <div className="mt-7 space-y-3">
+                <div className="flex items-center gap-2 rounded-lg border border-electric/30 bg-electric/10 px-3 py-2.5 text-sm text-electric">
+                  <CalendarCheck className="h-4 w-4 shrink-0" />
+                  <span>
+                    {expiryLabel
+                      ? `Aktif sampai ${expiryLabel}`
+                      : "Plan premium kamu sedang aktif"}
+                  </span>
+                </div>
+                <Button variant="secondary" disabled className="w-full" size="lg">
+                  Plan aktif kamu
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="mt-7 space-y-2">
+                  <label htmlFor="mobile" className="text-xs font-medium text-muted-foreground">
+                    Nomor HP (buat konfirmasi pembayaran)
+                  </label>
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="08123456789"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+
+                <Button
+                  className="mt-3 w-full"
+                  size="lg"
+                  onClick={handleUpgrade}
+                  disabled={loading}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {loading ? "Memproses..." : "Upgrade ke Premium"}
+                </Button>
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  Bisa cancel kapan saja.
+                </p>
+              </>
+            )}
           </Card>
         </div>
       </div>

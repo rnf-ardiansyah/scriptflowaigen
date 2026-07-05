@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       folders: {
@@ -92,6 +117,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_email: string
+          id: string
+          mayar_invoice_id: string
+          mayar_transaction_id: string | null
+          plan: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_email: string
+          id?: string
+          mayar_invoice_id: string
+          mayar_transaction_id?: string | null
+          plan?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_email?: string
+          id?: string
+          mayar_invoice_id?: string
+          mayar_transaction_id?: string | null
+          plan?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -99,6 +163,7 @@ export type Database = {
           goal: string | null
           name: string | null
           plan: string
+          plan_expires_at: string | null
           preferred_niche: string | null
           user_id: string
         }
@@ -108,6 +173,7 @@ export type Database = {
           goal?: string | null
           name?: string | null
           plan?: string
+          plan_expires_at?: string | null
           preferred_niche?: string | null
           user_id: string
         }
@@ -117,6 +183,7 @@ export type Database = {
           goal?: string | null
           name?: string | null
           plan?: string
+          plan_expires_at?: string | null
           preferred_niche?: string | null
           user_id?: string
         }
@@ -321,6 +388,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

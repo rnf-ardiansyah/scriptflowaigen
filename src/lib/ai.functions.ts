@@ -1,3 +1,4 @@
+import { resolveEffectivePlan } from "./plan";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
@@ -174,10 +175,10 @@ export const generateScript = createServerFn({ method: "POST" })
     // 2. Plan
     const { data: profile } = await supabase
       .from("profiles")
-      .select("plan")
+      .select("plan, plan_expires_at")
       .eq("user_id", userId)
       .maybeSingle();
-    const plan = profile?.plan === "premium" ? "premium" : "free";
+    const plan = resolveEffectivePlan(profile);
     const limit = plan === "premium" ? 100 : 5;
 
     // 2b. Script library cap for free users (defense in depth — DB trigger also enforces).

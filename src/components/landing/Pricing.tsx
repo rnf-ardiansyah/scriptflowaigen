@@ -46,7 +46,7 @@ export function Pricing() {
           />
           <PlanCard
             name="Premium"
-            price="Rp29.000"
+            price="Rp20.000"
             period="/ bulan"
             description="Buat kreator yang nge-publish tiap minggu."
             cta="Upgrade ke Premium"
@@ -85,11 +85,10 @@ function PlanCard({
 }) {
   return (
     <div
-      className={`relative rounded-2xl border p-7 ${
-        highlight
+      className={`relative rounded-2xl border p-7 ${highlight
           ? "border-electric/40 bg-gradient-to-b from-electric/10 to-surface shadow-glow"
           : "border-border bg-surface"
-      }`}
+        }`}
     >
       {highlight && (
         <span className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-electric px-3 py-1 text-[11px] font-semibold text-electric-foreground shadow-glow">
@@ -104,11 +103,10 @@ function PlanCard({
       </div>
       <Link
         to={ctaTo}
-        className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-          highlight
+        className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-medium transition-all ${highlight
             ? "bg-electric text-electric-foreground shadow-glow hover:scale-[1.01]"
             : "border border-border bg-background text-foreground hover:bg-surface-elevated"
-        }`}
+          }`}
       >
         {cta}
       </Link>

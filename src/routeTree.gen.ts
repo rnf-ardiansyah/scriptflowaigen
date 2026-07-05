@@ -26,6 +26,7 @@ import { Route as AuthenticatedNewScriptRouteImport } from './routes/_authentica
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedGeneratorRouteImport } from './routes/_authenticated/generator'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as ApiWebhooksMayarRouteImport } from './routes/api/webhooks/mayar'
 import { Route as AuthenticatedTeleprompterScriptIdRouteImport } from './routes/_authenticated/teleprompter_.$scriptId'
 import { Route as AuthenticatedEditorScriptIdRouteImport } from './routes/_authenticated/editor.$scriptId'
 
@@ -114,6 +115,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiWebhooksMayarRoute = ApiWebhooksMayarRouteImport.update({
+  id: '/api/webhooks/mayar',
+  path: '/api/webhooks/mayar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedTeleprompterScriptIdRoute =
   AuthenticatedTeleprompterScriptIdRouteImport.update({
     id: '/teleprompter_/$scriptId',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/upgrade': typeof AuthenticatedUpgradeRoute
   '/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
   '/teleprompter/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
+  '/api/webhooks/mayar': typeof ApiWebhooksMayarRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/upgrade': typeof AuthenticatedUpgradeRoute
   '/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
   '/teleprompter/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
+  '/api/webhooks/mayar': typeof ApiWebhooksMayarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/_authenticated/upgrade': typeof AuthenticatedUpgradeRoute
   '/_authenticated/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
   '/_authenticated/teleprompter_/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
+  '/api/webhooks/mayar': typeof ApiWebhooksMayarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/upgrade'
     | '/editor/$scriptId'
     | '/teleprompter/$scriptId'
+    | '/api/webhooks/mayar'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/upgrade'
     | '/editor/$scriptId'
     | '/teleprompter/$scriptId'
+    | '/api/webhooks/mayar'
   id:
     | '__root__'
     | '/'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/_authenticated/upgrade'
     | '/_authenticated/editor/$scriptId'
     | '/_authenticated/teleprompter_/$scriptId'
+    | '/api/webhooks/mayar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -263,6 +275,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  ApiWebhooksMayarRoute: typeof ApiWebhooksMayarRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -386,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/webhooks/mayar': {
+      id: '/api/webhooks/mayar'
+      path: '/api/webhooks/mayar'
+      fullPath: '/api/webhooks/mayar'
+      preLoaderRoute: typeof ApiWebhooksMayarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/teleprompter_/$scriptId': {
       id: '/_authenticated/teleprompter_/$scriptId'
       path: '/teleprompter/$scriptId'
@@ -443,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  ApiWebhooksMayarRoute: ApiWebhooksMayarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

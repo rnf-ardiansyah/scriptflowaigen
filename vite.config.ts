@@ -14,6 +14,12 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  server: {
+    // Izinkan akses lewat tunnel ngrok pas testing webhook lokal.
+    // ".ngrok-free.dev" & ".ngrok-free.app" nge-cover semua subdomain acak
+    // yang ngrok generate tiap kali restart (bukan cuma subdomain sekarang).
+    allowedHosts: [".ngrok-free.dev", ".ngrok-free.app"],
+  },
   environments: {
     ssr: {
       build: {
