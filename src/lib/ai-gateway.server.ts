@@ -1,10 +1,12 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
-/**
- * Direct connection to Google's Gemini API (no third-party gateway).
- * Get an API key at https://aistudio.google.com/apikey and put it in
- * GOOGLE_API_KEY in your .env file.
- */
-export function createAiProvider(apiKey: string) {
-  return createGoogleGenerativeAI({ apiKey });
+export function createLovableAiGatewayProvider(lovableApiKey: string) {
+  return createOpenAICompatible({
+    name: "lovable",
+    baseURL: "https://ai.gateway.lovable.dev/v1",
+    headers: {
+      "Lovable-API-Key": lovableApiKey,
+      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
+    },
+  });
 }
