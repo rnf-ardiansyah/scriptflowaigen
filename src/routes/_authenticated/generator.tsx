@@ -12,11 +12,19 @@ import {
   Pencil,
   AlertTriangle,
   Crown,
+  HelpCircle,
 } from "lucide-react";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
 import { Badge } from "@/components/app/Badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/app/Dialog";
 import { NICHES } from "@/lib/niches";
 import { profileQuery, computeReadingTime } from "@/lib/scripts";
 import { generateScript } from "@/lib/ai.functions";
@@ -36,6 +44,23 @@ const DURATIONS = [30, 60, 90] as const;
 type Duration = (typeof DURATIONS)[number];
 const STYLES = ["Hook style", "Story style", "Listicle"] as const;
 type Style = (typeof STYLES)[number];
+const STYLE_INFO: Record<Style, { description: string; example: string }> = {
+  "Hook style": {
+    description: "Fokus penuh di 3 detik pertama biar orang gak langsung scroll.",
+    example: 'Contoh: "Ini kesalahan yang bikin video kamu selalu sepi penonton."',
+  },
+  "Story style": {
+    description: "Alur cerita: mulai dari masalah, konflik, sampai solusinya.",
+    example: 'Contoh: "Dulu aku juga gini... sampai akhirnya nemu cara ini."',
+  },
+  Listicle: {
+    description: "Isinya berupa poin-poin atau daftar bernomor, gampang diikuti.",
+    example: 'Contoh: "5 kesalahan pemula bikin konten edukasi."',
+  },
+};
+
+const NICHE_DESCRIPTION =
+  "Niche adalah topik/bidang utama kontenmu (misal: Kecantikan, Kuliner, Edukasi). AI pakai info ini biar bahasa & contoh yang dibuat sesuai audiens kamu.";
 
 type Sections = { hook: string; retain: string; reward: string; cta: string };
 type Phase = "idle" | "generating" | "done" | "limit_reached" | "error";
@@ -70,6 +95,8 @@ function GeneratorPage() {
   const [elapsed, setElapsed] = useState(0);
   const [scriptId, setScriptId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const timerRef = useRef<number | null>(null);
   const generate = useServerFn(generateScript);
@@ -205,9 +232,18 @@ function GeneratorPage() {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="style">
-                Gaya
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium" htmlFor="style">
+                  Gaya
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setGuideOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-electric hover:underline"
+                >
+                  <HelpCircle className="h-3.5 w-3.5" /> Apa bedanya?
+                </button>
+              </div>
               <select
                 id="style"
                 value={style}
@@ -221,13 +257,26 @@ function GeneratorPage() {
                   </option>
                 ))}
               </select>
+              <div className="rounded-lg border border-border/60 bg-electric/5 px-3 py-2.5 text-xs">
+                <p className="text-foreground">{STYLE_INFO[style].description}</p>
+                <p className="mt-1 italic text-muted-foreground">{STYLE_INFO[style].example}</p>
+              </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="niche">
-              Niche
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium" htmlFor="niche">
+                Niche
+              </label>
+              <button
+                type="button"
+                onClick={() => setGuideOpen(true)}
+                className="inline-flex items-center gap-1 text-xs font-medium text-electric hover:underline"
+              >
+                <HelpCircle className="h-3.5 w-3.5" /> Apa itu niche?
+              </button>
+            </div>
             <select
               id="niche"
               value={niche}
@@ -241,6 +290,7 @@ function GeneratorPage() {
                 </option>
               ))}
             </select>
+            <p className="text-xs text-muted-foreground">{NICHE_DESCRIPTION}</p>
           </div>
 
           <div className="space-y-2">
@@ -409,7 +459,33 @@ function GeneratorPage() {
             </div>
           </Card>
         )}
-
+        <Dialog open={guideOpen} onOpenChange={setGuideOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Panduan istilah</DialogTitle>
+              <DialogDescription>
+                Biar gak bingung milih opsi, ini penjelasan singkat tiap istilah.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-2 space-y-4">
+              {STYLES.map((s) => (
+                <div key={s}>
+                  <p className="text-sm font-semibold text-foreground">{s}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {STYLE_INFO[s].description}
+                  </p>
+                  <p className="mt-0.5 text-xs italic text-muted-foreground">
+                    {STYLE_INFO[s].example}
+                  </p>
+                </div>
+              ))}
+              <div className="border-t border-border pt-3">
+                <p className="text-sm font-semibold text-foreground">Niche</p>
+                <p className="text-sm text-muted-foreground">{NICHE_DESCRIPTION}</p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
