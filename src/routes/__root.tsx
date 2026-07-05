@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
+import logoWordmark from "../assets/logo-wordmark.png";
 
 import { ThemeProvider } from "../components/theme/ThemeProvider";
 
@@ -93,8 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "ScriptFlow — Workspace AI untuk Kreator Video Pendek" },
       { property: "og:description", content: "Workspace bertenaga AI untuk kreator video pendek — generate, rapikan, dan latihan skrip dalam satu tempat." },
       { name: "twitter:description", content: "Workspace bertenaga AI untuk kreator video pendek — generate, rapikan, dan latihan skrip dalam satu tempat." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0e1bab9-988a-4adf-8556-f68f205b94af/id-preview-08977b0d--33fd0f6e-c650-4ea0-a888-7d810d2cda28.lovable.app-1782807838809.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0e1bab9-988a-4adf-8556-f68f205b94af/id-preview-08977b0d--33fd0f6e-c650-4ea0-a888-7d810d2cda28.lovable.app-1782807838809.png" },
+      { property: "og:image", content: logoWordmark },
+      { name: "twitter:image", content: logoWordmark },
     ],
     links: [
       { rel: "icon", type: "image/png", href: "/favicon.png" },

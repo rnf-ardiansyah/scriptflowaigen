@@ -5,6 +5,7 @@ import { Button } from "@/components/app/Button";
 import { Input, Label } from "@/components/app/Input";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchCurrentProfile, isProfileComplete } from "@/lib/profile-helpers";
+import { NICHES } from "@/lib/niches";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
@@ -15,19 +16,6 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   }),
   component: OnboardingPage,
 });
-
-const NICHES = [
-  "Skincare",
-  "Fashion",
-  "F&B",
-  "Edukasi",
-  "Finansial",
-  "Gaming",
-  "Lifestyle",
-  "Property",
-  "Beauty",
-  "Tech",
-] as const;
 
 const LEVELS = ["Pemula", "Menengah", "Berpengalaman"] as const;
 

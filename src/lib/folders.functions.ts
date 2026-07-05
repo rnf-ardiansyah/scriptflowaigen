@@ -45,7 +45,7 @@ export const listFoldersFn = createServerFn({ method: "GET" })
 
 export const createFolderFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ name: NameSchema }).parse(d))
+  .validator((d: unknown) => z.object({ name: NameSchema }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
@@ -59,7 +59,7 @@ export const createFolderFn = createServerFn({ method: "POST" })
 
 export const renameFolderFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), name: NameSchema }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -73,7 +73,7 @@ export const renameFolderFn = createServerFn({ method: "POST" })
 
 export const deleteFolderFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     // ON DELETE SET NULL on scripts.folder_id keeps scripts intact.
     const { error } = await context.supabase
@@ -86,7 +86,7 @@ export const deleteFolderFn = createServerFn({ method: "POST" })
 
 export const assignScriptToFolderFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         scriptId: z.string().uuid(),

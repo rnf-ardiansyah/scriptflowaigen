@@ -226,7 +226,7 @@ async function runWithRetry<T extends z.ZodTypeAny>(
 
 export const rewriteScript = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => RewriteInput.parse(d))
+  .validator((d: unknown) => RewriteInput.parse(d))
   .handler(async ({ data, context }): Promise<FourPartResult> => {
     const { supabase, userId } = context;
     const script = await loadScriptOrThrow(supabase, data.scriptId, userId);
@@ -249,7 +249,7 @@ export const rewriteScript = createServerFn({ method: "POST" })
 
 export const shortenScript = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ShortenInput.parse(d))
+  .validator((d: unknown) => ShortenInput.parse(d))
   .handler(async ({ data, context }): Promise<FourPartResult> => {
     const { supabase, userId } = context;
     const script = await loadScriptOrThrow(supabase, data.scriptId, userId);
@@ -272,7 +272,7 @@ export const shortenScript = createServerFn({ method: "POST" })
 
 export const regenerateHook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => HookInput.parse(d))
+  .validator((d: unknown) => HookInput.parse(d))
   .handler(async ({ data, context }): Promise<HookVariantsResult> => {
     const { supabase, userId } = context;
     const script = await loadScriptOrThrow(supabase, data.scriptId, userId);
