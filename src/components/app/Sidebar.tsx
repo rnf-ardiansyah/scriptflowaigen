@@ -1,4 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Sparkles,
   LayoutDashboard,
@@ -14,6 +16,8 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/landing/Logo";
 import { cn } from "@/lib/utils";
+import { listFoldersFn, foldersQuery } from "@/lib/folders.functions";
+import { getQuotaSummaryFn, quotaQuery } from "@/lib/quota.functions";
 
 const primary = [
   { to: "/generator", label: "AI Generator", icon: Sparkles },
@@ -30,8 +34,8 @@ const secondary = [
   { to: "/upgrade", label: "Upgrade", icon: Crown },
 ] as const;
 
-// Placeholder folder shortcuts — real data wired in a later step.
-const folderShortcuts: string[] = [];
+// Max folder shortcuts shown before falling back to "See all in Library".
+const MAX_FOLDER_SHORTCUTS = 6;
 
 export function SidebarContent({
   onNavigate,
@@ -43,6 +47,23 @@ export function SidebarContent({
   signingOut: boolean;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const getFolders = useServerFn(listFoldersFn);
+  const getQuota = useServerFn(getQuotaSummaryFn);
+  const { data: folders } = useQuery(foldersQuery(() => getFolders()));
+  const { data: quota } = useQuery(quotaQuery(() => getQuota()));
+
+  const plan = quota?.plan ?? "free";
+  const generationsToday = quota?.generationsToday ?? 0;
+  const generationLimit = quota?.generationLimit ?? 5;
+  const usagePct =
+    generationLimit > 0
+      ? Math.min(100, Math.round((generationsToday / generationLimit) * 100))
+      : 0;
+
+  const folderShortcuts = folders ?? [];
+  const visibleFolders = folderShortcuts.slice(0, MAX_FOLDER_SHORTCUTS);
+  const hiddenFolderCount = folderShortcuts.length - visibleFolders.length;
 
   return (
     <div className="flex h-full flex-col">
@@ -90,24 +111,46 @@ export function SidebarContent({
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/80">
             Folders
           </p>
-          {folderShortcuts.length === 0 ? (
+          {!folders ? (
+            <div className="flex flex-col gap-1.5 px-1">
+              <div className="h-7 animate-pulse rounded-lg bg-surface-elevated/70" />
+              <div className="h-7 animate-pulse rounded-lg bg-surface-elevated/50" />
+            </div>
+          ) : folderShortcuts.length === 0 ? (
             <p className="rounded-lg border border-dashed border-border/70 px-3 py-2 text-xs text-muted-foreground">
               No folders yet
             </p>
           ) : (
             <ul className="flex flex-col gap-0.5">
-              {folderShortcuts.map((f) => (
-                <li key={f}>
+              {visibleFolders.map((f) => (
+                <li key={f.id}>
                   <Link
                     to="/library"
+                    search={{ folder: f.id }}
                     onClick={onNavigate}
-                    className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+                    className="flex items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
                   >
-                    <FolderClosed className="h-4 w-4" />
-                    <span className="truncate">{f}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <FolderClosed className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{f.name}</span>
+                    </span>
+                    <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground/70">
+                      {f.script_count}
+                    </span>
                   </Link>
                 </li>
               ))}
+              {hiddenFolderCount > 0 && (
+                <li>
+                  <Link
+                    to="/library"
+                    onClick={onNavigate}
+                    className="block rounded-lg px-3 py-1.5 text-xs font-medium text-electric hover:underline"
+                  >
+                    +{hiddenFolderCount} folder{hiddenFolderCount > 1 ? "s" : ""} lagi
+                  </Link>
+                </li>
+              )}
             </ul>
           )}
         </div>
@@ -141,28 +184,36 @@ export function SidebarContent({
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">Plan</span>
             <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-elevated px-2 py-0.5 text-[11px] font-semibold text-foreground">
-              Free
+              {plan === "premium" ? "Premium" : "Free"}
             </span>
           </div>
           <div className="mt-2.5">
             <div className="flex items-center justify-between text-[11px] text-muted-foreground">
               <span>AI today</span>
-              <span className="tabular-nums text-foreground">62 / 100</span>
+              <span className="tabular-nums text-foreground">
+                {generationsToday} / {generationLimit}
+              </span>
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
               <div
-                className="h-full rounded-full bg-electric"
-                style={{ width: "62%" }}
+                className="h-full rounded-full bg-electric transition-[width]"
+                style={{ width: `${usagePct}%` }}
               />
             </div>
           </div>
-          <Link
-            to="/upgrade"
-            onClick={onNavigate}
-            className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-electric/40 px-2 py-1.5 text-[11px] font-semibold text-electric hover:bg-electric/10"
-          >
-            <Crown className="h-3.5 w-3.5" /> Upgrade
-          </Link>
+          {plan === "premium" ? (
+            <div className="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-electric/20 bg-electric/5 px-2 py-1.5 text-[11px] font-semibold text-electric">
+              <Crown className="h-3.5 w-3.5" /> Premium aktif
+            </div>
+          ) : (
+            <Link
+              to="/upgrade"
+              onClick={onNavigate}
+              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-electric/40 px-2 py-1.5 text-[11px] font-semibold text-electric hover:bg-electric/10"
+            >
+              <Crown className="h-3.5 w-3.5" /> Upgrade
+            </Link>
+          )}
         </div>
         <button
           type="button"

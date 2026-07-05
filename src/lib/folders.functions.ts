@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { queryOptions } from "@tanstack/react-query";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
@@ -83,6 +84,11 @@ export const deleteFolderFn = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+// Shared React Query options — reused by Library and the Sidebar so both
+// stay in sync off the same cache entry instead of drifting query keys.
+export const foldersQuery = (fn: () => Promise<FolderSummary[]>) =>
+  queryOptions({ queryKey: ["folders", "list"], queryFn: fn });
 
 export const assignScriptToFolderFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

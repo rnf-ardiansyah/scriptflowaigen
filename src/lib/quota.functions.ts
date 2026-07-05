@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { queryOptions } from "@tanstack/react-query";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type QuotaSummary = {
@@ -47,3 +48,8 @@ export const getQuotaSummaryFn = createServerFn({ method: "GET" })
       scriptLimit,
     };
   });
+
+// Shared React Query options — reused by Dashboard and the Sidebar so both
+// stay in sync off the same cache entry instead of drifting query keys.
+export const quotaQuery = (fn: () => Promise<QuotaSummary>) =>
+  queryOptions({ queryKey: ["quota", "summary"], queryFn: fn });

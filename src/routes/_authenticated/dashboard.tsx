@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { queryOptions } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
@@ -12,10 +11,7 @@ import {
   scriptsCountsQuery,
   scriptsRecentQuery,
 } from "@/lib/scripts";
-import { getQuotaSummaryFn, type QuotaSummary } from "@/lib/quota.functions";
-
-const quotaQuery = (fn: () => Promise<QuotaSummary>) =>
-  queryOptions({ queryKey: ["quota", "summary"], queryFn: fn });
+import { getQuotaSummaryFn, quotaQuery, type QuotaSummary } from "@/lib/quota.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({

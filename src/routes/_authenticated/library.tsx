@@ -1,10 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  useSuspenseQuery,
-  useQueryClient,
-  queryOptions,
-} from "@tanstack/react-query";
+import { createFileRoute, Link, } from "@tanstack/react-router";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card } from "@/components/app/Card";
@@ -48,11 +44,9 @@ import {
   createFolderFn,
   deleteFolderFn,
   assignScriptToFolderFn,
+  foldersQuery,
   type FolderSummary,
 } from "@/lib/folders.functions";
-
-const foldersQuery = (fn: () => Promise<FolderSummary[]>) =>
-  queryOptions({ queryKey: ["folders", "list"], queryFn: fn });
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({
@@ -60,6 +54,9 @@ export const Route = createFileRoute("/_authenticated/library")({
       { title: "Library — ScriptFlow" },
       { name: "description", content: "All your saved short-video scripts." },
     ],
+  }),
+  validateSearch: (search: Record<string, unknown>): { folder?: string } => ({
+    folder: typeof search.folder === "string" ? search.folder : undefined,
   }),
   loader: async ({ context }) => {
     const getFolders = () => listFoldersFn();
@@ -76,6 +73,8 @@ type FolderFilter = "all" | "uncategorized" | string;
 
 function LibraryPage() {
   const qc = useQueryClient();
+  const navigate = Route.useNavigate();
+  const { folder } = Route.useSearch();
   const listFolders = useServerFn(listFoldersFn);
   const createFolder = useServerFn(createFolderFn);
   const deleteFolder = useServerFn(deleteFolderFn);
@@ -87,7 +86,18 @@ function LibraryPage() {
   const [search, setSearch] = useState("");
   const [nicheFilter, setNicheFilter] = useState<string>("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [folderFilter, setFolderFilter] = useState<FolderFilter>("all");
+  // Folder filter lives in the URL (?folder=) so Sidebar links can deep-link
+  // straight into a filtered view, and back/forward + refresh keep working.
+  const folderFilter: FolderFilter = folder ?? "all";
+  function setFolderFilter(next: FolderFilter) {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        folder: next === "all" ? undefined : next,
+      }),
+      replace: true,
+    });
+  }
   const [pendingDelete, setPendingDelete] = useState<ScriptRow | null>(null);
   const [pendingFolderDelete, setPendingFolderDelete] =
     useState<FolderSummary | null>(null);
