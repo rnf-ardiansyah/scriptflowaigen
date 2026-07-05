@@ -100,6 +100,7 @@ function GeneratorPage() {
   const [guideOpen, setGuideOpen] = useState(false);
 
   const timerRef = useRef<number | null>(null);
+  const limitCardRef = useRef<HTMLDivElement | null>(null);
   const generate = useServerFn(generateScript);
 
   useEffect(() => {
@@ -177,12 +178,20 @@ function GeneratorPage() {
       ) {
         setPhase("limit_reached");
         setErrorMessage(classified.message);
+        setTimeout(() => {
+          limitCardRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 50);
       } else {
         setPhase("error");
         setErrorMessage(classified.message);
       }
     }
   }
+
+  const isLocked = phase === "generating" || phase === "limit_reached";
 
   const totalReadSec = result ? computeReadingTime(result) : 0;
 
@@ -221,7 +230,7 @@ function GeneratorPage() {
               <Select
                 value={String(duration)}
                 onValueChange={(v) => setDuration(Number(v) as Duration)}
-                disabled={phase === "generating"}
+                disabled={isLocked}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -251,7 +260,7 @@ function GeneratorPage() {
               <Select
                 value={style}
                 onValueChange={(v) => setStyle(v as Style)}
-                disabled={phase === "generating"}
+                disabled={isLocked}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -284,7 +293,7 @@ function GeneratorPage() {
                 <HelpCircle className="h-3.5 w-3.5" /> Apa itu niche?
               </button>
             </div>
-            <Select value={niche} onValueChange={setNiche} disabled={phase === "generating"}>
+            <Select value={niche} onValueChange={setNiche} disabled={isLocked}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -309,7 +318,7 @@ function GeneratorPage() {
               onChange={(e) => setIdea(e.target.value)}
               rows={4}
               maxLength={2000}
-              disabled={phase === "generating"}
+              disabled={isLocked}
               placeholder="5 kesalahan pemula bikin konten TikTok"
               className="w-full resize-none rounded-xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 disabled:opacity-50"
             />
@@ -322,11 +331,15 @@ function GeneratorPage() {
             size="lg"
             className="w-full"
             onClick={handleGenerate}
-            disabled={phase === "generating"}
+            disabled={isLocked}
           >
             {phase === "generating" ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" /> Generating…
+              </>
+            ) : phase === "limit_reached" ? (
+              <>
+                <Crown className="h-4 w-4" /> Kuota harian habis
               </>
             ) : (
               <>
@@ -413,18 +426,21 @@ function GeneratorPage() {
         )}
 
         {phase === "limit_reached" && (
-          <Card className="mt-6 space-y-4 border-amber-500/30 bg-amber-500/5">
+          <Card
+            ref={limitCardRef}
+            className="mt-6 space-y-4 border-amber-500/30 bg-amber-500/5"
+          >
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-500">
                 <Crown className="h-5 w-5" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-semibold">Limit harian tercapai</h3>
+                <h3 className="text-base font-semibold">Kuota harian habis</h3>
                 <p className="text-sm text-muted-foreground">
                   {errorMessage ||
                     "Kamu sudah mencapai batas generate hari ini."}{" "}
-                  Upgrade ke Premium untuk lanjut bikin script tanpa batas harian
-                  yang ketat.
+                  Form generate dikunci sampai kuota di-reset otomatis besok, atau
+                  upgrade ke Premium untuk lanjut sekarang tanpa nunggu.
                 </p>
               </div>
             </div>
@@ -433,9 +449,6 @@ function GeneratorPage() {
                 <Link to="/upgrade">
                   <Crown className="h-4 w-4" /> Upgrade ke Premium
                 </Link>
-              </Button>
-              <Button variant="ghost" onClick={reset}>
-                Tutup
               </Button>
             </div>
           </Card>

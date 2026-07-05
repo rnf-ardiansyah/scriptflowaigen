@@ -51,6 +51,31 @@ function makeError(err: GenerateScriptError): Error {
   return e;
 }
 
+const MILESTONES = [5, 10, 20, 50, 100] as const;
+
+// Best-effort: kalau insert notifikasi gagal, jangan sampai bikin generateScript
+// ikut gagal. "notifications" belum ada di generated Supabase types (dibuat
+// manual di luar migration), makanya pakai cast "as never" — pola yang sama
+// dipakai di NotificationsBell.tsx.
+async function notify(
+  supabase: typeof createGoogleProvider extends never ? never : any,
+  userId: string,
+  title: string,
+  body?: string,
+  href?: string,
+) {
+  try {
+    await supabase.from("notifications" as never).insert({
+      user_id: userId,
+      title,
+      body: body ?? null,
+      href: href ?? null,
+    } as never);
+  } catch (err) {
+    console.error("notify insert failed", err);
+  }
+}
+
 function buildPrompt(idea: string, niche: string, tone: string, strict: boolean) {
   const base = `Kamu adalah script writer profesional untuk video pendek (TikTok/Reels/Shorts) berbahasa Indonesia.
 
@@ -237,6 +262,17 @@ export const generateScript = createServerFn({ method: "POST" })
       tokens,
     });
 
+    const remaining = limit - ((count ?? 0) + 1);
+    if (remaining === 1) {
+      await notify(
+        supabase,
+        userId,
+        "Tinggal 1 generate lagi hari ini",
+        `Kuota harian kamu (${plan}) hampir habis — ${limit - 1}/${limit} sudah dipakai.`,
+        "/dashboard",
+      );
+    }
+
     // 8-9. Persist script
     const full_script = buildFullScript(parsed);
     const reading_time = computeReadingTime(full_script);
@@ -276,6 +312,21 @@ export const generateScript = createServerFn({ method: "POST" })
         code: "ai_unavailable",
         message: "Gagal menyimpan script: " + (msg || "unknown"),
       });
+    }
+
+    const { count: totalScripts } = await supabase
+      .from("scripts")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    if (totalScripts != null && (MILESTONES as readonly number[]).includes(totalScripts)) {
+      await notify(
+        supabase,
+        userId,
+        `Selamat! Kamu sudah bikin ${totalScripts} script 🎉`,
+        "Terus konsisten bikin konten, progresmu makin keliatan.",
+        "/library",
+      );
     }
 
     return {
