@@ -5,9 +5,7 @@ import {
   Sparkles,
   LayoutDashboard,
   Library,
-  Star,
   FolderClosed,
-  Clock,
   MonitorPlay,
   Plus,
   LogOut,
@@ -19,14 +17,17 @@ import { cn } from "@/lib/utils";
 import { listFoldersFn, foldersQuery } from "@/lib/folders.functions";
 import { getQuotaSummaryFn, quotaQuery } from "@/lib/quota.functions";
 
+// Consolidated: All Scripts / Favorites / Folders / Recent used to be 4
+// separate nav items that all pointed to the same "/library" route with no
+// filter applied — functionally identical, just confusing. Library page
+// already has search + niche filter + Favorit toggle + folder tabs built
+// in, so one nav entry is enough. Teleprompter now has its own picker page
+// instead of aliasing to Library.
 const primary = [
   { to: "/generator", label: "AI Generator", icon: Sparkles },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/library", label: "All Scripts", icon: Library },
-  { to: "/library", label: "Favorites", icon: Star },
-  { to: "/library", label: "Folders", icon: FolderClosed },
-  { to: "/library", label: "Recent", icon: Clock },
-  { to: "/library", label: "Teleprompter", icon: MonitorPlay },
+  { to: "/library", label: "Library", icon: Library },
+  { to: "/teleprompter", label: "Teleprompter", icon: MonitorPlay },
 ] as const;
 
 const secondary = [

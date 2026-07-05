@@ -19,13 +19,14 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUpgradeRouteImport } from './routes/_authenticated/upgrade'
+import { Route as AuthenticatedTeleprompterRouteImport } from './routes/_authenticated/teleprompter'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNewScriptRouteImport } from './routes/_authenticated/new-script'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedGeneratorRouteImport } from './routes/_authenticated/generator'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedTeleprompterScriptIdRouteImport } from './routes/_authenticated/teleprompter.$scriptId'
+import { Route as AuthenticatedTeleprompterScriptIdRouteImport } from './routes/_authenticated/teleprompter_.$scriptId'
 import { Route as AuthenticatedEditorScriptIdRouteImport } from './routes/_authenticated/editor.$scriptId'
 
 const TermsRoute = TermsRouteImport.update({
@@ -77,6 +78,12 @@ const AuthenticatedUpgradeRoute = AuthenticatedUpgradeRouteImport.update({
   path: '/upgrade',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTeleprompterRoute =
+  AuthenticatedTeleprompterRouteImport.update({
+    id: '/teleprompter',
+    path: '/teleprompter',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -109,7 +116,7 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 } as any)
 const AuthenticatedTeleprompterScriptIdRoute =
   AuthenticatedTeleprompterScriptIdRouteImport.update({
-    id: '/teleprompter/$scriptId',
+    id: '/teleprompter_/$scriptId',
     path: '/teleprompter/$scriptId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/new-script': typeof AuthenticatedNewScriptRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/teleprompter': typeof AuthenticatedTeleprompterRoute
   '/upgrade': typeof AuthenticatedUpgradeRoute
   '/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
   '/teleprompter/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
@@ -154,6 +162,7 @@ export interface FileRoutesByTo {
   '/new-script': typeof AuthenticatedNewScriptRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/teleprompter': typeof AuthenticatedTeleprompterRoute
   '/upgrade': typeof AuthenticatedUpgradeRoute
   '/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
   '/teleprompter/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
@@ -175,9 +184,10 @@ export interface FileRoutesById {
   '/_authenticated/new-script': typeof AuthenticatedNewScriptRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/teleprompter': typeof AuthenticatedTeleprompterRoute
   '/_authenticated/upgrade': typeof AuthenticatedUpgradeRoute
   '/_authenticated/editor/$scriptId': typeof AuthenticatedEditorScriptIdRoute
-  '/_authenticated/teleprompter/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
+  '/_authenticated/teleprompter_/$scriptId': typeof AuthenticatedTeleprompterScriptIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/new-script'
     | '/onboarding'
     | '/profile'
+    | '/teleprompter'
     | '/upgrade'
     | '/editor/$scriptId'
     | '/teleprompter/$scriptId'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/new-script'
     | '/onboarding'
     | '/profile'
+    | '/teleprompter'
     | '/upgrade'
     | '/editor/$scriptId'
     | '/teleprompter/$scriptId'
@@ -235,9 +247,10 @@ export interface FileRouteTypes {
     | '/_authenticated/new-script'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
+    | '/_authenticated/teleprompter'
     | '/_authenticated/upgrade'
     | '/_authenticated/editor/$scriptId'
-    | '/_authenticated/teleprompter/$scriptId'
+    | '/_authenticated/teleprompter_/$scriptId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUpgradeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/teleprompter': {
+      id: '/_authenticated/teleprompter'
+      path: '/teleprompter'
+      fullPath: '/teleprompter'
+      preLoaderRoute: typeof AuthenticatedTeleprompterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -366,8 +386,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/teleprompter/$scriptId': {
-      id: '/_authenticated/teleprompter/$scriptId'
+    '/_authenticated/teleprompter_/$scriptId': {
+      id: '/_authenticated/teleprompter_/$scriptId'
       path: '/teleprompter/$scriptId'
       fullPath: '/teleprompter/$scriptId'
       preLoaderRoute: typeof AuthenticatedTeleprompterScriptIdRouteImport
@@ -390,6 +410,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNewScriptRoute: typeof AuthenticatedNewScriptRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedTeleprompterRoute: typeof AuthenticatedTeleprompterRoute
   AuthenticatedUpgradeRoute: typeof AuthenticatedUpgradeRoute
   AuthenticatedEditorScriptIdRoute: typeof AuthenticatedEditorScriptIdRoute
   AuthenticatedTeleprompterScriptIdRoute: typeof AuthenticatedTeleprompterScriptIdRoute
@@ -402,6 +423,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNewScriptRoute: AuthenticatedNewScriptRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedTeleprompterRoute: AuthenticatedTeleprompterRoute,
   AuthenticatedUpgradeRoute: AuthenticatedUpgradeRoute,
   AuthenticatedEditorScriptIdRoute: AuthenticatedEditorScriptIdRoute,
   AuthenticatedTeleprompterScriptIdRoute:

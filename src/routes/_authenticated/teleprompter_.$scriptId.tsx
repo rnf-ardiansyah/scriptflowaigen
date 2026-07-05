@@ -14,7 +14,7 @@ import {
 import { scriptDetailQuery, buildFullScript } from "@/lib/scripts";
 import { Button } from "@/components/app/Button";
 
-export const Route = createFileRoute("/_authenticated/teleprompter/$scriptId")({
+export const Route = createFileRoute("/_authenticated/teleprompter_/$scriptId")({
   head: () => ({
     meta: [
       { title: "Teleprompter · ScriptFlow" },

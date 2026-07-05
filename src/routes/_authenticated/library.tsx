@@ -28,6 +28,7 @@ import {
   Inbox,
   FolderInput,
   MoreHorizontal,
+  MonitorPlay,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -438,6 +439,11 @@ function LibraryPage() {
                             params={{ scriptId: s.id }}
                           >
                             <Pencil className="h-3.5 w-3.5" /> Edit
+                          </Link>
+                        </Button>
+                        <Button asChild size="sm" variant="ghost" aria-label="Buka di Teleprompter" title="Buka di Teleprompter">
+                          <Link to="/teleprompter/$scriptId" params={{ scriptId: s.id }}>
+                            <MonitorPlay className="h-3.5 w-3.5" />
                           </Link>
                         </Button>
                         <Button
