@@ -1,18 +1,18 @@
-import iconAsset from "@/assets/logo-icon.png.asset.json";
-import wordmarkAsset from "@/assets/logo-wordmark.png.asset.json";
+import logoIcon from "@/assets/logo-icon.png";
+import logoWordmark from "@/assets/logo-wordmark.png";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <img
-        src={iconAsset.url}
+        src={logoIcon}
         alt=""
         aria-hidden="true"
-        className="h-8 w-auto select-none"
+        className="h-9 w-auto select-none"
         draggable={false}
       />
       <img
-        src={wordmarkAsset.url}
+        src={logoWordmark}
         alt="ScriptFlow"
         className="h-5 w-auto select-none sm:h-6"
         draggable={false}
