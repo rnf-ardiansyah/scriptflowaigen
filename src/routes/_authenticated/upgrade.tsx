@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/app/Card";
 import { Button } from "@/components/app/Button";
@@ -64,6 +64,25 @@ function UpgradePage() {
   const { data: quota } = useQuery(quotaQuery(() => getQuota()));
   const isPremium = quota?.plan === "premium";
   const expiryLabel = formatExpiryDate(quota?.planExpiresAt ?? null);
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("status") !== "success") return;
+
+    toast.success("Pembayaran berhasil! Selamat datang di ScriptFlow Premium 🎉");
+    // Webhook Mayar biasanya sudah selesai proses sebelum redirect ini
+    // sampai ke browser user, jadi refetch quota supaya UI langsung
+    // menampilkan status Premium tanpa perlu manual reload.
+    queryClient.invalidateQueries({ queryKey: ["quota", "summary"] });
+
+    // Bersihkan query param dari URL, supaya toast tidak muncul lagi
+    // kalau user refresh halaman ini nanti.
+    params.delete("status");
+    const cleanUrl = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+    window.history.replaceState({}, "", cleanUrl);
+  }, [queryClient]);
 
   async function handleUpgrade() {
     if (!mobile.trim()) {
