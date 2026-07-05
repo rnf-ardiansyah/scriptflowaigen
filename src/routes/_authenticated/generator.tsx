@@ -46,10 +46,10 @@ function classifyError(err: unknown): {
 } {
   const raw = err instanceof Error ? err.message : String(err ?? "");
 
-  if (code === "rate_limited" || /kuota harian/i.test(raw)) {
+  if (/rate_limited/i.test(raw) || /kuota harian/i.test(raw)) {
     return { kind: "rate_limited", message: raw };
   }
-  if (code === "script_limit_reached" || /batas 20 script/i.test(raw)) {
+  if (/script_limit_reached/i.test(raw) || /batas 20 script/i.test(raw)) {
     return { kind: "script_limit_reached", message: raw };
   }
   return { kind: "other", message: raw || "Terjadi kesalahan tak terduga." };

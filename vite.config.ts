@@ -1,5 +1,9 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { tanstackStart } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
-  // Your Vite configuration here
+  plugins: [tanstackStart(), react(), tailwindcss(), tsconfigPaths()],
 });
