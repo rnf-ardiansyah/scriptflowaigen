@@ -45,7 +45,7 @@ function classifyError(err: unknown): {
   message: string;
 } {
   const raw = err instanceof Error ? err.message : String(err ?? "");
-  const code = (err as { lovable?: { code?: string } } | null)?.lovable?.code;
+
   if (code === "rate_limited" || /kuota harian/i.test(raw)) {
     return { kind: "rate_limited", message: raw };
   }

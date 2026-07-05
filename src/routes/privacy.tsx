@@ -11,9 +11,9 @@ export const Route = createFileRoute("/privacy")({
           "Kebijakan privasi ScriptFlow: data apa yang kami kumpulkan, bagaimana kami menyimpannya, dan hak kamu.",
       },
       { property: "og:title", content: "Kebijakan Privasi — ScriptFlow" },
-      { property: "og:url", content: "https://scriptflowaigen.lovable.app/privacy" },
+      { property: "og:url", content: "https://scriptflow.app/privacy" },
     ],
-    links: [{ rel: "canonical", href: "https://scriptflowaigen.lovable.app/privacy" }],
+    links: [{ rel: "canonical", href: "https://scriptflow.app/privacy" }],
   }),
   component: PrivacyPage,
 });

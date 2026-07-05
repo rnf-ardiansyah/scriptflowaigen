@@ -11,9 +11,9 @@ export const Route = createFileRoute("/terms")({
           "Ketentuan layanan ScriptFlow: aturan penggunaan akun, konten, pembayaran, dan pemutusan layanan.",
       },
       { property: "og:title", content: "Ketentuan Layanan — ScriptFlow" },
-      { property: "og:url", content: "https://scriptflowaigen.lovable.app/terms" },
+      { property: "og:url", content: "https://scriptflow.app/terms" },
     ],
-    links: [{ rel: "canonical", href: "https://scriptflowaigen.lovable.app/terms" }],
+    links: [{ rel: "canonical", href: "https://scriptflow.app/terms" }],
   }),
   component: TermsPage,
 });

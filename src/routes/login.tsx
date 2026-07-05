@@ -5,7 +5,6 @@ import { Button } from "@/components/app/Button";
 import { Input, Label } from "@/components/app/Input";
 import { GoogleIcon } from "@/components/app/GoogleIcon";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { routeAfterAuth } from "@/lib/profile-helpers";
 import { mapAuthError } from "@/lib/auth-errors";
 
@@ -44,15 +43,21 @@ function LoginPage() {
   async function handleGoogle() {
     setError(null);
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
     });
-    if (result.error) {
-      setError(mapAuthError(result.error.message ?? "Google sign-in failed"));
+    if (error) {
+      setError(mapAuthError(error.message ?? "Google sign-in failed"));
       setGoogleLoading(false);
       return;
     }
-    if (result.redirected) return;
+    if (data.url) {
+      window.location.href = data.url;
+      return;
+    }
     const dest = await routeAfterAuth();
     navigate({ to: dest, replace: true });
   }

@@ -27,10 +27,10 @@ export const Route = createFileRoute("/")({
         content:
           "Workspace AI untuk kreator TikTok, Reels, dan Shorts. Ide → Skrip → Edit → Latihan.",
       },
-      { property: "og:url", content: "https://scriptflowaigen.lovable.app/" },
+      { property: "og:url", content: "https://scriptflow.app/" },
       { property: "og:type", content: "website" },
     ],
-    links: [{ rel: "canonical", href: "https://scriptflowaigen.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://scriptflow.app/" }],
     scripts: [
       {
         type: "application/ld+json",
